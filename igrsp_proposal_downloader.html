@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser PDF Downloader Helper</title>
+    <style>
+        /* ... (keep all existing CSS styles) ... */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input, button, select {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-right: 10px; /* Add some space between buttons */
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #stopBtn { /* Style for the stop button */
+             background-color: #f44336; /* Red */
+        }
+         #stopBtn:hover {
+             background-color: #d32f2f; /* Darker Red */
+         }
+         #stopBtn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #dff2bf;
+            color: #4F8A10;
+        }
+        .error {
+            background-color: #ffbaba;
+            color: #D8000C;
+        }
+        .info {
+            background-color: #bde5f8;
+            color: #00529B;
+        }
+        .warning {
+            background-color: #feefb3;
+            color: #9F6000;
+        }
+        #progressContainer {
+            margin-top: 20px;
+            display: none;
+        }
+        progress {
+            width: 100%;
+            height: 20px;
+        }
+        #logContainer {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #f8f8f8;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            display: none;
+        }
+        .url-example {
+            font-family: monospace;
+            background-color: #eee;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .hint {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+         .important-note {
+             font-size: 0.9em;
+             color: #D8000C;
+             font-weight: bold;
+             margin-top: 5px;
+         }
+        .tips {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fffde7;
+            border-left: 4px solid #ffd600;
+            border-radius: 4px;
+        }
+        .accordion {
+            background-color: #f1f1f1;
+            color: #444;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            outline: none;
+            transition: 0.4s;
+            margin-top: 10px;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+        .active, .accordion:hover {
+            background-color: #ddd;
+        }
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            border-radius: 0 0 4px 4px;
+        }
+        .methods-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .method-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .method-option input[type="radio"] {
+            margin: 0;
+        }
+        #options-container {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .print-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .button-container { /* Container for Start/Stop buttons */
+             display: flex;
+             gap: 10px;
+             align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Browser PDF Downloader Helper</h1>
+        <p>Enter a website URL with a number at the end and specify the range (down to 0) to open pages and initiate the print/save process.</p>
+        <p class="important-note">Note: Due to browser security, this tool can only *open* pages and *trigger* the print dialog. You will still need to manually click "Save as PDF" and "Save" in each opened tab.</p>
+
+        <form id="downloadForm">
+            <div>
+                <label for="url">URL with Number:</label>
+                <input type="url" id="url" required
+                       placeholder="https://example.com/page-13"
+                       value="https://igrasp.isro.gov.in/igrasp/res-sac-2024-020-advanced-persistent-threats-breach-and-botnet-detection-system-using-network-39">
+                <div class="hint">Enter the complete URL including the number at the end.<br>
+                Example: <span class="url-example">https://igrasp.isro.gov.in/igrasp/res-sac-2024-020-...-39</span></div>
+            </div>
+
+            <div>
+                <label for="startNum">Start Number:</label>
+                <input type="number" id="startNum" required min="0" value="39"> <!-- Allow min 0 -->
+                <div class="hint">The highest number in the range (e.g., 39)</div>
+            </div>
+
+            <div>
+                <label for="endNum">End Number:</label>
+                <input type="number" id="endNum" required min="0" value="0"> <!-- Allow min 0 and default to 0 -->
+                <div class="hint">The lowest number in the range (e.g., 0)</div>
+            </div>
+
+            <div>
+                <label>Processing Method:</label>
+                <div class="methods-container">
+                    <div class="method-option">
+                        <input type="radio" id="method-open-tabs" name="method" value="open-tabs" checked>
+                        <label for="method-open-tabs">Open Pages in New Tabs (Manual Print)</label>
+                        <div class="hint">Simplest: Opens each page. You press Ctrl+P/Cmd+P and save manually.</div>
+                    </div>
+                    <div class="method-option">
+                        <input type="radio" id="method-simulate-print" name="method" value="simulate-print">
+                        <label for="method-simulate-print">Open & Try to Trigger Print Dialog</label>
+                         <div class="hint">Opens each page and attempts to automatically open the browser's Print Dialog. You still need to click "Save".</div>
+                         <div class="important-note">Requires pop-ups to be allowed! May not work perfectly on all sites.</div>
+                    </div>
+                    <div class="method-option">
+                        <input type="radio" id="method-direct-download" name="method" value="direct-download">
+                        <label for="method-direct-download">Attempt Direct PDF Download (Rarely Works)</label>
+                        <div class="hint">Tries adding "?format=pdf". Only works if the site explicitly supports this.</div>
+                        <div class="important-note">Unlikely to work for pages like the example.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="options-container">
+                <div class="print-options">
+                    <div>
+                        <label for="delay">Delay between pages (seconds):</label>
+                        <input type="number" id="delay" min="1" max="30" value="5">
+                        <div class="hint">Longer delay (e.g., 5-10s) helps avoid overwhelming the browser/website and allows pages to load.</div>
+                    </div>
+
+                    <div id="simulate-print-options" style="display: none;">
+                        <label for="print-button-selector">Print Button Selector (for 'Trigger Print' method):</label>
+                        <input type="text" id="print-button-selector" placeholder="e.g., .print-link a, #print-btn" value=".print-link a">
+                        <div class="hint">Optional: CSS selector for the print button (comma-separated for multiple). If found, the tool tries to click it before falling back to the general print dialog.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Button Container -->
+            <div class="button-container">
+                 <button type="submit" id="processBtn">Start Processing Pages</button>
+                 <button type="button" id="stopBtn" style="display: none;">Stop Processing</button> <!-- Added Stop Button -->
+            </div>
+        </form>
+
+        <div id="status"></div>
+
+        <div id="progressContainer">
+            <p>Processing Progress:</p>
+            <progress id="progressBar" value="0" max="100"></progress>
+            <p id="progressText">0%</p>
+        </div>
+
+        <div id="logContainer"></div>
+
+        <button class="accordion">Instructions and Tips (Click to Expand)</button>
+        <div class="panel">
+            <div class="tips">
+                 <h3>Important Information & Limitations:</h3>
+                 <ul>
+                     <li><strong>Stop Button:</strong> You can stop the process after the current page finishes opening/processing.</li>
+                     <li><strong>Range Includes 0:</strong> You can now set the End Number to 0.</li>
+                     <li><strong>Browser Security:</strong> Modern browsers heavily restrict what one tab (this tool) can do to another tab (the opened pages) for security. This prevents full automation of PDF saving.</li>
+                     <li><strong>Manual Saving Required:</strong> You will always need to interact with the browser's "Print" dialog (select "Save as PDF" if needed) and click the final "Save" button for each page.</li>
+                     <li><strong>Allow Pop-ups:</strong> Crucial! You MUST allow pop-ups from the site running this tool (or allow all pop-ups temporarily) for the 'Open Tabs' and 'Trigger Print' methods to work.</li>
+                     <li><strong>Method Choice:</strong>
+                         <ul>
+                             <li><strong>Open Pages (Recommended):</strong> Most reliable. Opens tabs, you take over.</li>
+                             <li><strong>Trigger Print Dialog:</strong> Tries to save you one click (Ctrl+P) by automatically opening the print dialog after the page loads. Still requires manual saving. *May fail* if the page script conflicts or loads slowly.</li>
+                             <li><strong>Direct Download:</strong> A long shot. Only works if the target URL structure directly supports PDF generation via a query parameter like `?format=pdf`.</li>
+                         </ul>
+                     </li>
+                     <li><strong>Delay:</strong> Use a sufficient delay (5+ seconds) to allow pages to load fully before the next one opens or the print script attempts to run.</li>
+                     <li><strong>Print Button Selector:</strong> Helps the 'Trigger Print' method find a *specific* button. If it fails to click (due to security), it will fall back to the general `window.print()` command anyway.</li>
+                 </ul>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Constants ---
+        const SCRIPT_EXECUTION_DELAY = 2500; // Milliseconds to wait after tab opens before trying to run script
+        const PRINT_SCRIPT_INTERNAL_DELAY = 1500; // Milliseconds inside the print script to wait for page elements
+
+        // --- DOM Elements ---
+        const downloadForm = document.getElementById('downloadForm');
+        const urlInput = document.getElementById('url');
+        const startNumInput = document.getElementById('startNum');
+        const endNumInput = document.getElementById('endNum');
+        const delayInput = document.getElementById('delay');
+        const methodRadios = document.querySelectorAll('input[name="method"]');
+        const printButtonSelectorInput = document.getElementById('print-button-selector');
+        const processBtn = document.getElementById('processBtn');
+        const stopBtn = document.getElementById('stopBtn'); // Added Stop Button element
+        const statusElement = document.getElementById('status');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const logContainer = document.getElementById('logContainer');
+        const accordion = document.querySelector(".accordion");
+        const simulatePrintOptionsDiv = document.getElementById('simulate-print-options');
+
+        // --- State Variables ---
+        let isProcessing = false; // Track if processing is active
+        let stopRequested = false; // Flag to signal stopping
+
+        // --- Functions --- (Keep existing showStatus, addLogMessage, updateProgress, getSelectedMethod, toggleSimulatePrintOptions, openInNewTab, simulatePrintClick, tryDirectDownload functions as they were in the previous version)
+
+        function showStatus(message, type = 'info') {
+            statusElement.textContent = message;
+            statusElement.className = type; // Apply class for styling
+            statusElement.style.display = 'block';
+        }
+
+        function addLogMessage(message) {
+            if (logContainer.style.display !== 'block') {
+                logContainer.style.display = 'block';
+            }
+            const logEntry = document.createElement('div');
+            const timestamp = new Date().toLocaleTimeString();
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(logEntry);
+            // Auto-scroll to bottom
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function updateProgress(current, total) {
+             if (progressContainer.style.display !== 'block') {
+                progressContainer.style.display = 'block';
+             }
+            const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
+            progressBar.value = percentage;
+            progressText.textContent = `${percentage}% (${current}/${total})`;
+        }
+
+        function getSelectedMethod() {
+            for (const radio of methodRadios) {
+                if (radio.checked) {
+                    return radio.value;
+                }
+            }
+            return 'open-tabs'; // Default
+        }
+
+        function toggleSimulatePrintOptions() {
+             const selectedMethod = getSelectedMethod();
+             simulatePrintOptionsDiv.style.display = (selectedMethod === 'simulate-print') ? 'block' : 'none';
+        }
+
+        function openInNewTab(url, pageNum) {
+            addLogMessage(`Attempting to open page ${pageNum}: ${url}`);
+            // Use try-catch as window.open can be blocked
+            try {
+                const newTab = window.open(url, '_blank');
+                if (newTab) {
+                    addLogMessage(`Successfully opened page ${pageNum} in a new tab.`);
+                } else {
+                    // This usually indicates a pop-up blocker is active
+                    addLogMessage(`Failed to open page ${pageNum}. Pop-up blocker might be active. Please allow pop-ups for this site.`);
+                    showStatus('Pop-up blocked! Please allow pop-ups for this site and try again.', 'error');
+                    return false;
+                }
+            } catch (e) {
+                 addLogMessage(`Error opening page ${pageNum}: ${e.message}. Pop-up blocker likely active.`);
+                 showStatus('Error opening tab. Please check pop-up blocker settings.', 'error');
+                 return false; // Stop the process on error
+            }
+            return true; // Success
+        }
+
+        function simulatePrintClick(url, pageNum, customSelector) {
+             addLogMessage(`Attempting to open page ${pageNum} for print simulation: ${url}`);
+            // 1. Define the script to run in the new tab
+            let printScript = `
+                (function() {
+                    console.log('[Print Script] Activated for page ${pageNum}');
+                    // Wait a bit for page elements to render after load event
+                    setTimeout(() => {
+                         console.log('[Print Script] Inner timeout reached, attempting print.');
+                         const selectorsToTry = [
+                            '${customSelector || ''}'.split(',').map(s => s.trim()).filter(s => s),
+                            '.print-link a',
+                            'button.print', 'a.print',
+                            '.print-button', '#print-button',
+                            '.print', '#print',
+                            '[aria-label*="Print" i]', '[title*="Print" i]',
+                            'button:contains("Print")', 'a:contains("Print")',
+                            '.fa-print',
+                            'input[type="button"][value*="Print" i]',
+                            'input[type="submit"][value*="Print" i]'
+                        ].flat();
+
+                        let printButton = null;
+                        let foundSelector = '';
+                        const uniqueSelectors = [...new Set(selectorsToTry)].filter(s => s);
+                        console.log('[Print Script] Trying selectors:', uniqueSelectors);
+
+                        for (const selector of uniqueSelectors) {
+                            try {
+                                const elements = document.querySelectorAll(selector);
+                                for (const el of elements) {
+                                    if (el && el.offsetParent !== null && !el.disabled) {
+                                        printButton = el;
+                                        foundSelector = selector;
+                                        console.log('[Print Script] Found potential print button with selector:', foundSelector, el);
+                                        break;
+                                    }
+                                }
+                            } catch (err) {
+                               console.warn('[Print Script] Error trying selector "' + selector + '":', err.message);
+                            }
+                            if (printButton) break;
+                        }
+
+                        if (printButton) {
+                            console.log('[Print Script] Attempting to click button found with selector:', foundSelector);
+                            try {
+                                printButton.click();
+                                console.log('[Print Script] Click successful.');
+                                // Fallback print call after a short delay, as click might be blocked from triggering print
+                                setTimeout(() => {
+                                     console.log('[Print Script] Calling window.print() as fallback/confirmation after click.');
+                                     window.print();
+                                 }, 500);
+                            } catch (clickError) {
+                                console.error('[Print Script] Error clicking the button:', clickError);
+                                console.log('[Print Script] Falling back to window.print().');
+                                window.print();
+                            }
+                        } else {
+                            console.warn('[Print Script] No specific print button found or clickable. Falling back to standard browser print dialog (window.print()).');
+                            window.print();
+                        }
+                    }, ${PRINT_SCRIPT_INTERNAL_DELAY}); // Wait inside the script too
+                })();
+            `;
+
+             // 2. Open the new tab
+            try {
+                const newTab = window.open(url, '_blank');
+                if (newTab) {
+                    addLogMessage(`Successfully opened page ${pageNum}. Waiting ${SCRIPT_EXECUTION_DELAY / 1000}s before attempting print trigger.`);
+
+                    // 3. Wait then try to execute script (often blocked by cross-origin security)
+                    setTimeout(() => {
+                        try {
+                            if (newTab.closed) {
+                                addLogMessage(`Tab for page ${pageNum} was closed before print script could run.`);
+                                return;
+                            }
+                            newTab.eval(printScript);
+                            addLogMessage(`Attempted to execute print script in tab for page ${pageNum}. Check that tab's console for details.`);
+                        } catch (e) {
+                            addLogMessage(`Error executing script in tab for page ${pageNum}: ${e.message}. This is often due to browser security restrictions (cross-origin). The print dialog might not open automatically.`);
+                            showStatus(`Security prevented auto-triggering print for page ${pageNum}. Manual print needed.`, 'warning');
+                        }
+                    }, SCRIPT_EXECUTION_DELAY);
+
+                } else {
+                     addLogMessage(`Failed to open page ${pageNum}. Pop-up blocker might be active. Please allow pop-ups.`);
+                     showStatus('Pop-up blocked! Please allow pop-ups for this site and try again.', 'error');
+                     return false;
+                }
+            } catch (e) {
+                addLogMessage(`Error opening page ${pageNum}: ${e.message}. Pop-up blocker likely active.`);
+                showStatus('Error opening tab. Please check pop-up blocker settings.', 'error');
+                return false;
+            }
+             return true;
+        }
+
+        function tryDirectDownload(url, pageNum) {
+             addLogMessage(`Attempting direct download for page ${pageNum} (heuristic: adding ?format=pdf)`);
+            const downloadUrl = url.includes('?') ? `${url}&format=pdf` : `${url}?format=pdf`;
+            try {
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `page_${pageNum}.pdf`;
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                addLogMessage(`Initiated direct download attempt for: ${downloadUrl}`);
+                setTimeout(() => {
+                    if (document.body.contains(a)) {
+                        document.body.removeChild(a);
+                    }
+                }, 500);
+            } catch (e) {
+                 addLogMessage(`Error attempting direct download for page ${pageNum}: ${e.message}`);
+                 showStatus(`Direct download attempt failed for page ${pageNum}.`, 'warning');
+            }
+            return true;
+        }
+
+
+        // --- Main Processing Function (Modified) ---
+        async function processPages() {
+            if (isProcessing) { // Prevent starting multiple times
+                 showStatus('Processing is already running. Click Stop first.', 'warning');
+                 return;
+            }
+
+            // --- Get Values ---
+            const url = urlInput.value.trim();
+            const startNum = parseInt(startNumInput.value);
+            const endNum = parseInt(endNumInput.value); // Now allows 0
+            const delay = parseInt(delayInput.value) * 1000; // ms
+            const method = getSelectedMethod();
+            const printButtonSelector = printButtonSelectorInput.value.trim();
+
+            // --- Validation (Allow 0 for endNum) ---
+            if (!url || !url.includes('http')) {
+                showStatus('Please enter a valid URL.', 'error');
+                return;
+            }
+             // Use isNaN and check if numbers are non-negative
+             if (isNaN(startNum) || isNaN(endNum) || isNaN(delay) || startNum < 0 || endNum < 0) {
+                 showStatus('Please enter valid non-negative numbers for Start, End, and Delay.', 'error');
+                 return;
+             }
+            if (startNum < endNum) {
+                showStatus('Start number must be greater than or equal to End number.', 'error'); // Adjusted message slightly
+                return;
+            }
+             if (delay < 1000) {
+                 showStatus('Please use a delay of at least 1 second.', 'warning');
+             }
+
+             // --- Find Base URL ---
+            const urlMatch = url.match(/^(.*?-)(\d+)$/);
+            if (!urlMatch) {
+                showStatus('URL format error. Expected URL ending in "-NUMBER" (e.g., "page-123").', 'error');
+                addLogMessage(`URL parsing failed for: ${url}`);
+                return;
+            }
+            const baseUrl = urlMatch[1];
+            const detectedNum = parseInt(urlMatch[2]);
+
+             // --- Prepare for Processing ---
+             isProcessing = true;
+             stopRequested = false; // Reset stop flag
+             logContainer.innerHTML = '';
+             addLogMessage('Starting processing...');
+             addLogMessage(`Range: ${startNum} down to ${endNum}`);
+             addLogMessage(`Method: ${method}`);
+             addLogMessage(`Delay: ${delay / 1000} seconds`);
+             if (method === 'simulate-print' && printButtonSelector) {
+                 addLogMessage(`Print Selector: ${printButtonSelector}`);
+             }
+
+            showStatus('Processing started. Remember to allow pop-ups! Click Stop to interrupt.', 'info');
+            processBtn.disabled = true;
+            stopBtn.style.display = 'inline-block'; // Show stop button
+            stopBtn.disabled = false; // Enable stop button
+            progressContainer.style.display = 'block';
+
+            let completed = 0;
+            const total = startNum - endNum + 1;
+            updateProgress(completed, total);
+
+             // --- Processing Loop ---
+            for (let currentNum = startNum; currentNum >= endNum; currentNum--) {
+                 // *** Check if Stop was requested ***
+                 if (stopRequested) {
+                     addLogMessage(`Processing stopped by user request before handling page ${currentNum}.`);
+                     break; // Exit the loop
+                 }
+
+                const currentUrl = `${baseUrl}${currentNum}`;
+                let success = false;
+
+                addLogMessage(`--- Processing Page ${currentNum} ---`);
+
+                 switch(method) {
+                    case 'open-tabs':
+                        success = openInNewTab(currentUrl, currentNum);
+                        break;
+                    case 'simulate-print':
+                        success = simulatePrintClick(currentUrl, currentNum, printButtonSelector);
+                        break;
+                    case 'direct-download':
+                        success = tryDirectDownload(currentUrl, currentNum);
+                        break;
+                }
+
+                 completed++;
+                 updateProgress(completed, total);
+
+                 if (!success && (method === 'open-tabs' || method === 'simulate-print')) {
+                     showStatus(`Processing stopped: Failed to open tab for page ${currentNum}. Please check pop-up blocker.`, 'error');
+                     addLogMessage(`*** Processing halted due to tab opening failure for page ${currentNum} ***`);
+                     stopRequested = true; // Mark as stopped to prevent completion message
+                     break; // Exit loop
+                 }
+
+                // Wait, unless it's the last iteration or stop requested
+                if (currentNum > endNum && !stopRequested) {
+                     addLogMessage(`Waiting ${delay / 1000} seconds...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                 }
+            }
+
+             // --- Cleanup and Final Status ---
+             isProcessing = false;
+             processBtn.disabled = false;
+             stopBtn.style.display = 'none';
+             stopBtn.disabled = false; // Re-enable for next potential run
+
+             if (stopRequested && !statusElement.classList.contains('error')) {
+                 // If stopped by user button OR tab opening error
+                 addLogMessage('--- Processing Halted ---');
+                 showStatus('Processing stopped.', 'warning');
+             } else if (completed === total) {
+                  // Only show success if all pages were processed without stopping
+                 addLogMessage('--- Processing Finished ---');
+                 showStatus('Processing complete! Check the opened tabs or download attempts.', 'success');
+             }
+             // If it ended prematurely due to an error, the error status should already be set.
+        }
+
+        // --- Event Listeners ---
+        accordion.addEventListener("click", function() {
+            this.classList.toggle("active");
+            const panel = this.nextElementSibling;
+            panel.style.maxHeight = panel.style.maxHeight ? null : panel.scrollHeight + "px";
+        });
+
+        downloadForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            processPages();
+        });
+
+        // *** Added Stop Button Listener ***
+         stopBtn.addEventListener('click', () => {
+             if (isProcessing) {
+                 addLogMessage('--- Stop requested by user ---');
+                 stopRequested = true;
+                 stopBtn.disabled = true; // Prevent multiple clicks while stopping
+                 showStatus('Stop requested. Finishing current page/delay and stopping...', 'warning');
+             }
+         });
+
+         methodRadios.forEach(radio => {
+            radio.addEventListener('change', toggleSimulatePrintOptions);
+         });
+
+         // Initial setup
+         toggleSimulatePrintOptions();
+         addLogMessage("PDF Downloader Helper initialized. Allow Pop-ups. Fill form and click 'Start'.");
+
+    </script>
+</body>
+</html>

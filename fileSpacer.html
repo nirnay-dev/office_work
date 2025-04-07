@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filename Space Remover</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        #dropZone {
+            border: 2px dashed #ccc;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        #dropZone.dragover {
+            border-color: #333;
+            background-color: #f0f0f0;
+        }
+        #output {
+            margin-top: 20px;
+            border: 1px solid #eee;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+         li.skipped {
+            color: gray;
+        }
+        li.downloaded {
+             color: green;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Filename Space Remover</h1>
+    <p>
+        This tool helps you rename files by replacing spaces with underscores ('_').
+        <br>
+        <strong>Important:</strong> This tool cannot modify your original files directly. It will prompt you to <strong>download NEW copies</strong> of the files with the updated names. You will need to manage the downloaded files and delete the originals yourself.
+    </p>
+
+    <div id="dropZone">
+        <p>Drag & Drop files here, or click to select files.</p>
+        <input type="file" id="fileInput" multiple style="display: none;">
+    </div>
+
+    <div id="output">
+        <p>Results will appear here...</p>
+        <ul id="resultsList"></ul>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const resultsList = document.getElementById('resultsList');
+        const outputDiv = document.getElementById('output');
+
+        // --- Event Listeners ---
+
+        // Allow clicking the drop zone to open file selector
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Handle file selection via input click
+        fileInput.addEventListener('change', (event) => {
+            handleFiles(event.target.files);
+        });
+
+        // Drag and Drop handling
+        dropZone.addEventListener('dragover', (event) => {
+            event.preventDefault(); // Prevent default browser behavior (opening file)
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (event) => {
+            event.preventDefault(); // Prevent default browser behavior
+            dropZone.classList.remove('dragover');
+            const files = event.dataTransfer.files; // Get files from the drop event
+            if (files.length) {
+                handleFiles(files);
+            }
+        });
+
+        // --- File Processing Logic ---
+
+        function handleFiles(files) {
+            resultsList.innerHTML = ''; // Clear previous results
+            outputDiv.querySelector('p').style.display = 'none'; // Hide initial message
+
+            if (!files || files.length === 0) {
+                resultsList.innerHTML = '<li>No files selected.</li>';
+                return;
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                processFile(files[i]);
+            }
+        }
+
+        function processFile(file) {
+            const originalName = file.name;
+            const listItem = document.createElement('li');
+
+            // Check if the name contains spaces
+            if (originalName.includes(' ')) {
+                // Create the new name using a global replace regex
+                const newName = originalName.replace(/ /g, '_');
+
+                listItem.textContent = `Processing: '${originalName}' -> Will download as '${newName}'`;
+                listItem.classList.add('downloaded');
+                resultsList.appendChild(listItem);
+
+                // --- Trigger Download ---
+                // Create a new File object based on the original, but with the new name
+                // This doesn't duplicate the data in memory unnecessarily for this purpose.
+                 const newFile = new File([file], newName, { type: file.type, lastModified: file.lastModified });
+
+                // Create a temporary link element
+                const link = document.createElement('a');
+                link.style.display = 'none'; // Hide the link
+
+                // Create an Object URL for the new file object
+                const url = URL.createObjectURL(newFile);
+                link.href = url;
+                link.download = newName; // Set the download attribute to the new filename
+
+                // Append link to body, click it, then remove it
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Revoke the Object URL to free up memory
+                URL.revokeObjectURL(url);
+                // --- End Trigger Download ---
+
+            } else {
+                listItem.textContent = `Skipped: '${originalName}' (no spaces found)`;
+                listItem.classList.add('skipped');
+                resultsList.appendChild(listItem);
+            }
+        }
+
+    </script>
+
+</body>
+</html>
