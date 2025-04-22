@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Reminder</title>
+    <style>
+        /* Embedded CSS for offline use */
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f0f9ff; /* Light blue background */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem; /* p-4 */
+        }
+        .container {
+            max-width: 500px;
+            background-color: #fff; /* bg-white */
+            padding: 2rem; /* p-8 */
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+            text-align: center;
+        }
+        h1 {
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700; /* font-bold */
+            margin-bottom: 1.5rem; /* mb-6 */
+            color: #1d4ed8; /* text-blue-700 */
+        }
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+        .mb-4 {
+             margin-bottom: 1rem;
+        }
+         .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+        .block {
+            display: block;
+        }
+        .text-gray-700 {
+            color: #374151;
+        }
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        .font-semibold {
+            font-weight: 600;
+        }
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+        input[type="number"] {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+            appearance: none;
+            border: 1px solid #d1d5db; /* border */
+            border-radius: 0.5rem; /* rounded-lg */
+            width: 100%; /* w-full */
+            padding-top: 0.75rem; /* py-3 */
+            padding-bottom: 0.75rem; /* py-3 */
+            padding-left: 1rem; /* px-4 */
+            padding-right: 1rem; /* px-4 */
+            color: #374151; /* text-gray-700 */
+            line-height: 1.5; /* leading-tight */
+            outline: 2px solid transparent; /* focus:outline-none */
+            outline-offset: 2px;
+        }
+         input[type="number"]:focus {
+            border-color: #3b82f6; /* focus:ring-blue-500 */
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 */
+        }
+        .countdown {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1e40af; /* Darker blue for countdown */
+            margin-top: 1rem;
+        }
+        .reminder-message {
+            min-height: 60px; /* Ensure space even when empty */
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 500; /* font-medium */
+            margin-bottom: 1.5rem; /* mb-6 */
+        }
+        .text-green-600 {
+            color: #22c55e;
+        }
+         .text-red-600 {
+            color: #dc2626;
+        }
+        .flex {
+            display: flex;
+        }
+        .justify-center {
+            justify-content: center;
+        }
+        .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+            margin-right: calc(1rem * var(--tw-space-x-reverse));
+            margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse)));
+            --tw-space-x-reverse: 0;
+        }
+
+        button {
+            font-weight: 700; /* font-bold */
+            padding-top: 0.75rem; /* py-3 */
+            padding-bottom: 0.75rem; /* py-3 */
+            padding-left: 1.5rem; /* px-6 */
+            padding-right: 1.5rem; /* px-6 */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            outline: 2px solid transparent; /* focus:outline-none */
+            outline-offset: 2px;
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms; /* transition duration-300 */
+            ease-in-out: cubic-bezier(0.4, 0, 0.2, 1); /* ease-in-out */
+        }
+
+        #startButton {
+            background-color: #2563eb; /* bg-blue-600 */
+            color: #fff; /* text-white */
+        }
+        #startButton:hover {
+            background-color: #1d4ed8; /* hover:bg-blue-700 */
+        }
+         #startButton:focus {
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 */
+        }
+
+        #stopButton {
+            background-color: #ef4444; /* bg-red-500 */
+            color: #fff; /* text-white */
+        }
+        #stopButton:hover {
+            background-color: #dc2626; /* hover:bg-red-600 */
+        }
+         #stopButton:focus {
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5); /* focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 */
+        }
+
+        #toggleVoiceButton {
+            background-color: #d1d5db; /* bg-gray-300 */
+            color: #1f2937; /* text-gray-800 */
+             padding-top: 0.5rem; /* py-2 */
+            padding-bottom: 0.5rem; /* py-2 */
+            padding-left: 1rem; /* px-4 */
+            padding-right: 1rem; /* px-4 */
+        }
+         #toggleVoiceButton:hover {
+             background-color: #9ca3af; /* hover:bg-gray-400 */
+         }
+          #toggleVoiceButton:focus {
+             box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.5); /* focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 */
+          }
+
+        button:disabled {
+            opacity: 0.5; /* opacity-50 */
+            cursor: not-allowed;
+        }
+
+        .bg-yellow-200 {
+            background-color: #fef08a;
+        }
+         .bg-f0f9ff {
+             background-color: #f0f9ff;
+         }
+         .bg-gray-500 {
+             background-color: #6b7280;
+         }
+
+
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="container bg-white p-8 rounded-xl shadow-lg text-center">
+        <h1 class="text-3xl font-bold mb-6 text-blue-700">?? Drink Water Reminder ??</h1>
+
+        <div class="mb-6">
+            <label for="interval" class="block text-gray-700 text-sm font-semibold mb-2">
+                Set Reminder Interval (minutes):
+            </label>
+            <input type="number" id="interval" value="60" min="1"
+                   class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div id="countdown" class="countdown mb-4">
+            </div>
+
+        <div id="reminderMessage" class="reminder-message text-lg font-medium text-green-600 mb-6">
+            </div>
+
+        <div class="flex justify-center space-x-4 mb-6">
+            <button id="startButton"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 ease-in-out">
+                Start Reminder
+            </button>
+            <button id="stopButton"
+                    class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-300 ease-in-out">
+                Stop Reminder
+            </button>
+        </div>
+
+         <div class="flex justify-center">
+            <button id="toggleVoiceButton"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition duration-300 ease-in-out">
+                Voice Alert: ON
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // Get references to HTML elements
+        const intervalInput = document.getElementById('interval');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const reminderMessageDiv = document.getElementById('reminderMessage');
+        const countdownDiv = document.getElementById('countdown'); // Get countdown element
+        const toggleVoiceButton = document.getElementById('toggleVoiceButton'); // Get voice toggle button
+
+        let reminderTimer = null; // Variable to hold the reminder timer ID
+        let countdownTimer = null; // Variable to hold the countdown timer ID
+        let timeRemaining = 0; // Variable to store remaining time in seconds
+        let voiceAlertEnabled = true; // Variable to track if voice alerts are enabled
+
+        // Check if the Web Speech API is available
+        const speechSynthesizer = window.speechSynthesis;
+        const utterance = new SpeechSynthesisUtterance('Drink water'); // Create utterance for the message
+
+        // Function to play the voice alert
+        function playVoiceAlert() {
+            if (speechSynthesizer && utterance) {
+                // Stop any ongoing speech before starting a new one
+                speechSynthesizer.cancel();
+                speechSynthesizer.speak(utterance);
+            } else {
+                console.warn("Web Speech API not supported in this browser.");
+            }
+        }
+
+
+        // Function to update the countdown display
+        function updateCountdown() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            countdownDiv.textContent = `Next reminder in: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            if (timeRemaining <= 0) {
+                // Countdown finished, clear countdown timer
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+                countdownDiv.textContent = "Getting ready..."; // Or similar message
+            } else {
+                timeRemaining--;
+            }
+        }
+
+        // Function to show a reminder message and play sound if enabled
+        function showReminder() {
+            reminderMessageDiv.textContent = "Time to drink water!";
+            // You could add a visual effect here, like changing background color temporarily
+            document.body.classList.add('bg-yellow-200'); // Highlight background
+
+            // Play voice alert if enabled
+            if (voiceAlertEnabled) {
+                playVoiceAlert(); // Play the voice alert
+            }
+
+            // Reset countdown after showing reminder
+            const intervalMinutes = parseInt(intervalInput.value);
+            timeRemaining = intervalMinutes * 60;
+            // Restart countdown timer if it was stopped or finished
+            if (countdownTimer === null) {
+                 countdownTimer = setInterval(updateCountdown, 1000);
+            }
+
+
+            setTimeout(() => {
+                reminderMessageDiv.textContent = ""; // Clear message after a few seconds
+                document.body.classList.remove('bg-yellow-200'); // Remove highlight
+                document.body.classList.add('bg-f0f9ff'); // Restore original background
+            }, 5000); // Message visible for 5 seconds
+        }
+
+        // Function to start the reminder timer
+        function startReminder() {
+            // Clear any existing timers first
+            stopReminder();
+
+            const intervalMinutes = parseInt(intervalInput.value);
+            if (isNaN(intervalMinutes) || intervalMinutes <= 0) {
+                reminderMessageDiv.textContent = "Please enter a valid interval in minutes.";
+                reminderMessageDiv.classList.remove('text-green-600');
+                reminderMessageDiv.classList.add('text-red-600');
+                countdownDiv.textContent = ""; // Clear countdown on error
+                return;
+            }
+
+            // Convert minutes to milliseconds and seconds
+            const intervalMilliseconds = intervalMinutes * 60 * 1000;
+            timeRemaining = intervalMinutes * 60; // Initialize time remaining in seconds
+
+            // Start the reminder timer
+            reminderTimer = setInterval(showReminder, intervalMilliseconds);
+
+            // Start the countdown timer
+            countdownTimer = setInterval(updateCountdown, 1000);
+
+            reminderMessageDiv.textContent = `Reminder started! You will be reminded every ${intervalMinutes} minutes.`;
+            reminderMessageDiv.classList.remove('text-red-600');
+            reminderMessageDiv.classList.add('text-green-600');
+
+            // Disable start button and enable stop button
+            startButton.disabled = true;
+            startButton.classList.add('opacity-50', 'cursor-not-allowed');
+            stopButton.disabled = false;
+            stopButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        // Function to stop the reminder timer
+        function stopReminder() {
+            if (reminderTimer !== null) {
+                clearInterval(reminderTimer);
+                reminderTimer = null; // Reset the timer variable
+            }
+            if (countdownTimer !== null) {
+                clearInterval(countdownTimer);
+                countdownTimer = null; // Reset the timer variable
+            }
+             // Also stop any ongoing speech when the reminder is stopped
+            if (speechSynthesizer && speechSynthesizer.speaking) {
+                speechSynthesizer.cancel();
+            }
+
+            reminderMessageDiv.textContent = "Reminder stopped.";
+            reminderMessageDiv.classList.remove('text-green-600');
+            reminderMessageDiv.classList.add('text-red-600');
+            countdownDiv.textContent = ""; // Clear countdown when stopped
+
+             // Restore original background if highlighted
+            document.body.classList.remove('bg-yellow-200');
+            document.body.classList.add('bg-f0f9ff'); // Restore original background
+
+
+            // Enable start button and disable stop button
+            startButton.disabled = false;
+            startButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            stopButton.disabled = true;
+            stopButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        // Function to toggle voice alerts
+        function toggleVoiceAlert() {
+            voiceAlertEnabled = !voiceAlertEnabled; // Toggle the state
+            if (voiceAlertEnabled) {
+                toggleVoiceButton.textContent = "Voice Alert: ON";
+                toggleVoiceButton.classList.remove('bg-gray-500');
+                toggleVoiceButton.classList.add('bg-gray-300');
+            } else {
+                toggleVoiceButton.textContent = "Voice Alert: OFF";
+                 toggleVoiceButton.classList.remove('bg-gray-300');
+                toggleVoiceButton.classList.add('bg-gray-500');
+                 // Stop speech if it's currently speaking when turned off
+                 if (speechSynthesizer && speechSynthesizer.speaking) {
+                    speechSynthesizer.cancel();
+                }
+            }
+        }
+
+        // Add event listeners to the buttons
+        startButton.addEventListener('click', startReminder);
+        stopButton.addEventListener('click', stopReminder);
+        toggleVoiceButton.addEventListener('click', toggleVoiceAlert); // Add event listener for voice toggle
+
+        // Initialize button states
+        stopButton.disabled = true;
+        stopButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+    </script>
+
+</body>
+</html>
