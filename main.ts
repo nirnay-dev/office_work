@@ -3,10 +3,15 @@ import { serve } from "https://deno.land/std@0.187.0/http/server.ts";
 // Helper function to list all .html files in the current directory
 async function listHtmlFiles(): Promise<string[]> {
   const htmlFiles: string[] = [];
-  for await (const entry of Deno.readDir(".")) {
-    if (entry.isFile && entry.name.endsWith(".html")) {
-      htmlFiles.push(entry.name);
+  try {
+    for await (const entry of Deno.readDir(".")) {
+      if (entry.isFile && entry.name.endsWith(".html")) {
+        htmlFiles.push(entry.name);
+      }
     }
+  } catch (error) {
+    console.error("Error reading directory:", error);
+    // Return empty array or handle error as appropriate
   }
   return htmlFiles;
 }
@@ -19,12 +24,17 @@ const handler = async (req: Request): Promise<Response> => {
   if (url.pathname !== "/") {
     try {
       const filePath = decodeURIComponent(url.pathname.slice(1));
+      // Basic security check: prevent directory traversal
+      if (filePath.includes("..")) {
+         return new Response("Invalid path", { status: 400 });
+      }
       const file = await Deno.readFile(filePath);
       const headers = new Headers();
       headers.set("Content-Type", "text/html");
       return new Response(file, { headers });
-    } catch {
-      return new Response("File not found", { status: 404 });
+    } catch (error) {
+       console.error("Error serving file:", error);
+       return new Response("File not found", { status: 404 });
     }
   }
 
@@ -39,15 +49,73 @@ const handler = async (req: Request): Promise<Response> => {
 
   const html = `
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
-      <title>HTML File List</title>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Available HTML Files</title>
+      <style>
+        body {
+          font-family: 'Arial', sans-serif;
+          line-height: 1.6;
+          margin: 0;
+          padding: 20px;
+          background-color: #f4f4f4;
+          color: #333;
+        }
+        .container {
+          max-width: 800px;
+          margin: 40px auto;
+          background: #fff;
+          padding: 30px;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+          color: #0056b3;
+          text-align: center;
+          margin-bottom: 30px;
+        }
+        ul {
+          list-style: none;
+          padding: 0;
+        }
+        li {
+          background: #e9e9e9;
+          margin-bottom: 10px;
+          padding: 12px 15px;
+          border-radius: 5px;
+          transition: background-color 0.3s ease;
+        }
+        li:hover {
+          background-color: #dcdcdc;
+        }
+        a {
+          text-decoration: none;
+          color: #007bff;
+          font-weight: bold;
+          display: block; /* Make the whole list item clickable via the link */
+        }
+        a:hover {
+          text-decoration: underline;
+          color: #0056b3;
+        }
+        /* Optional: Add a subtle border to list items */
+        li {
+          border-left: 5px solid #007bff;
+        }
+         li:hover {
+          border-left-color: #0056b3;
+        }
+      </style>
     </head>
     <body>
-      <h1>Available HTML Files</h1>
-      <ul>
-        ${links}
-      </ul>
+      <div class="container">
+        <h1>Available HTML Files</h1>
+        <ul>
+          ${links.length > 0 ? links : '<li>No HTML files found in the current directory.</li>'}
+        </ul>
+      </div>
     </body>
     </html>
   `;
@@ -56,5 +124,6 @@ const handler = async (req: Request): Promise<Response> => {
   });
 };
 
+console.log("Server running on http://localhost:8000");
 // Start the server
 serve(handler);
