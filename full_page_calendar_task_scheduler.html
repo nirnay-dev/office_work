@@ -59,6 +59,7 @@
             overflow-y: auto; /* Enable scrolling for tasks */
             max-height: calc(100vh - 80px); /* Limit height based on viewport */
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative; /* Needed for absolute positioning of close button */
         }
 
          body.dark-mode .month-task-view {
@@ -548,11 +549,34 @@
             border-bottom: 2px solid #007bff;
             padding-bottom: 5px;
              margin-bottom: 15px;
+            display: inline-block; /* Prevent close button from affecting title */
+            margin-right: 20px; /* Space for close button */
         }
          body.dark-mode .month-task-view h3 {
              color: #e0e0e0;
              border-bottom-color: #007bff;
          }
+
+         /* Style for the month view close button */
+         .month-task-view .close-button {
+             position: absolute;
+             top: 10px;
+             right: 10px;
+             font-size: 24px;
+             color: #555;
+             cursor: pointer;
+             transition: color 0.3s ease;
+         }
+          .month-task-view .close-button:hover {
+              color: #333;
+          }
+           body.dark-mode .month-task-view .close-button {
+               color: #b0b0b0;
+           }
+            body.dark-mode .month-task-view .close-button:hover {
+                color: #e0e0e0;
+            }
+
 
         .month-task-list {
             list-style: none;
@@ -627,7 +651,13 @@
                  border-radius: 0;
                  padding: 20px 0; /* Adjust padding for print */
                  border-top: 1px solid #ccc; /* Add separator */
+                 position: static; /* Remove absolute positioning for print */
             }
+
+             .month-task-view .close-button {
+                 display: none; /* Hide the close button in print */
+             }
+
 
             .calendar-header {
                 background-color: #fff; /* White background for header */
@@ -798,7 +828,6 @@
                  align-items: flex-start;
              }
              .calendar-header h2,
-             .calendar-header select, /* Keep select for year if not removed */
              #darkModeToggle,
              #downloadTasksButton,
              #toggleMonthViewButton,
@@ -840,7 +869,7 @@
         </div>
 
         <div class="month-task-view" id="monthTaskView">
-            <h3>Tasks for <span id="monthTaskViewMonthYear"></span></h3>
+            <span class="close-button" id="closeMonthView">&times;</span> <h3>Tasks for <span id="monthTaskViewMonthYear"></span></h3>
             <div id="monthTaskListContainer">
                 </div>
         </div>
@@ -897,6 +926,7 @@
         const toggleMonthViewButton = document.getElementById('toggleMonthViewButton');
         const monthTaskViewMonthYear = document.getElementById('monthTaskViewMonthYear');
         const monthTaskListContainer = document.getElementById('monthTaskListContainer');
+        const closeMonthViewButton = document.getElementById('closeMonthView'); // Get month view close button
 
 
         // Edit Task Modal elements
@@ -1232,6 +1262,11 @@
          // Event listener to close edit task modal
          closeEditModalButton.addEventListener('click', () => {
              editTaskModal.style.display = 'none';
+         });
+
+         // Event listener to close month view panel
+         closeMonthViewButton.addEventListener('click', () => {
+             toggleMonthView(); // Use the toggle function to hide and update state/button text
          });
 
 
