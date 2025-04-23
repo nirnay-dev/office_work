@@ -23,10 +23,18 @@
             color: #e0e0e0; /* Light text */
         }
 
-        .calendar-app {
+        .main-layout {
+            display: flex; /* Use flexbox for main layout */
             width: 100%;
-            max-width: 1000px; /* Max width for larger screens */
+            max-width: 1200px; /* Increased max width to accommodate side panel */
             margin: 20px;
+            gap: 20px; /* Gap between calendar and task view */
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+
+        .calendar-app {
+            flex-grow: 1; /* Allow calendar to grow */
+            flex-basis: 600px; /* Minimum width for calendar */
             background-color: #ffffff;
             border-radius: 12px; /* Rounded corners */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -41,6 +49,46 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
+        .month-task-view {
+            flex-basis: 350px; /* Minimum width for task view */
+            flex-shrink: 0; /* Prevent shrinking */
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            overflow-y: auto; /* Enable scrolling for tasks */
+            max-height: calc(100vh - 80px); /* Limit height based on viewport */
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+         body.dark-mode .month-task-view {
+             background-color: #2d2d2d;
+             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+         }
+
+         /* Style for the task view toggle button */
+         #toggleMonthViewButton {
+             background-color: #17a2b8; /* Info blue */
+             color: white;
+             border: none;
+             padding: 10px 15px;
+             border-radius: 6px;
+             cursor: pointer;
+             font-size: 1rem;
+             transition: background-color 0.3s ease;
+             margin-left: 10px;
+         }
+          #toggleMonthViewButton:hover {
+              background-color: #138496;
+          }
+           body.dark-mode #toggleMonthViewButton {
+               background-color: #20c997; /* Teal */
+           }
+            body.dark-mode #toggleMonthViewButton:hover {
+                background-color: #1a9b7a;
+            }
+
+
         .calendar-header {
             display: flex;
             justify-content: space-between;
@@ -51,6 +99,8 @@
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
             transition: background-color 0.3s ease;
+            flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+            gap: 10px; /* Gap between header items */
         }
 
         body.dark-mode .calendar-header {
@@ -88,12 +138,21 @@
             background-color: rgba(255, 255, 255, 0.1);
             border-color: rgba(255, 255, 255, 0.3);
         }
+
+        /* Style for Year Navigation Buttons */
+        .calendar-header #prevYear,
+        .calendar-header #nextYear {
+             font-size: 1.2rem; /* Slightly smaller font size for year arrows */
+             padding: 5px 8px; /* Adjusted padding */
+        }
          /* --- End Navigation Button Styles --- */
 
 
         .calendar-header h2 {
             margin: 0;
             font-size: 1.8rem;
+            flex-grow: 1; /* Allow month/year title to take space */
+            text-align: center; /* Center the title */
         }
 
         .calendar-grid {
@@ -279,7 +338,7 @@
            }
 
 
-        /* Modal for adding/editing tasks */
+        /* Modal Styles */
         .modal {
             display: none; /* Hidden by default */
             position: fixed; /* Stay in place */
@@ -301,7 +360,7 @@
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             width: 90%;
-            max-width: 400px; /* Max width for modal */
+            max-width: 500px; /* Increased max width for task list */
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -323,83 +382,116 @@
              color: #e0e0e0;
          }
 
-
-        .modal-content input[type="text"] {
-            width: calc(100% - 22px); /* Adjust for padding and border */
-            padding: 10px;
-            border: 1px solid #ccc;
+        .modal-task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 200px; /* Limit height and add scroll */
+            overflow-y: auto;
+            border: 1px solid #eee;
             border-radius: 5px;
-            font-size: 1rem;
-            background-color: #fff;
-            color: #333;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            padding: 10px;
         }
-         body.dark-mode .modal-content input[type="text"] {
-             background-color: #4a4a4a;
-             color: #e0e0e0;
+         body.dark-mode .modal-task-list {
              border-color: #555;
          }
 
-
-        .modal-buttons {
+        .modal-task-item {
             display: flex;
-            gap: 10px;
-            justify-content: flex-end; /* Align buttons to the right */
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
         }
-
-        .modal-buttons button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
-
-        .modal-buttons .save-button {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .modal-buttons .save-button:hover {
-            background-color: #218838;
-        }
-         body.dark-mode .modal-buttons .save-button {
-             background-color: #38c172;
+         .modal-task-item:last-child {
+             border-bottom: none;
          }
-          body.dark-mode .modal-buttons .save-button:hover {
-              background-color: #2d995b;
+          body.dark-mode .modal-task-item {
+              border-bottom-color: #555;
+          }
+
+        .modal-task-item span {
+            flex-grow: 1;
+            margin-right: 10px;
+            word-break: break-word; /* Allow long words to break */
+        }
+
+        .modal-task-actions button {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .modal-task-actions .edit-task-button {
+            background-color: #ffc107;
+            color: #333;
+            border: 1px solid #ffc107;
+        }
+        .modal-task-actions .edit-task-button:hover {
+            background-color: #e0a800;
+        }
+         body.dark-mode .modal-task-actions .edit-task-button {
+             background-color: #d49a00;
+             border-color: #d49a00;
+             color: white;
+         }
+          body.dark-mode .modal-task-actions .edit-task-button:hover {
+              background-color: #a07400;
           }
 
 
-         .modal-buttons .delete-button {
+        .modal-task-actions .delete-task-button {
             background-color: #dc3545;
             color: white;
+            border: 1px solid #dc3545;
+        }
+        .modal-task-actions .delete-task-button:hover {
+            background-color: #c82333;
+        }
+         body.dark-mode .modal-task-actions .delete-task-button {
+             background-color: #e3342f;
+             border-color: #e3342f;
          }
-
-         .modal-buttons .delete-button:hover {
-             background-color: #c82333;
-         }
-          body.dark-mode .modal-buttons .delete-button {
-              background-color: #e3342f;
-          }
-           body.dark-mode .modal-buttons .delete-button:hover {
+          body.dark-mode .modal-task-actions .delete-task-button:hover {
                background-color: #cb1b16;
            }
 
 
-         .modal-buttons .add-button {
-             background-color: #007bff;
-             color: white;
+        .modal-add-task-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+             border-top: 1px solid #eee;
+             padding-top: 15px;
+        }
+         body.dark-mode .modal-add-task-form {
+             border-top-color: #555;
          }
 
-         .modal-buttons .add-button:hover {
+
+        .modal-add-task-form input[type="text"] {
+            flex-grow: 1;
+            width: auto; /* Override previous width */
+        }
+
+        .modal-add-task-form button {
+             background-color: #007bff;
+             color: white;
+             border: none;
+             padding: 10px 15px;
+             border-radius: 5px;
+             cursor: pointer;
+             transition: background-color 0.3s ease;
+        }
+         .modal-add-task-form button:hover {
              background-color: #0056b3;
          }
-          body.dark-mode .modal-buttons .add-button {
+          body.dark-mode .modal-add-task-form button {
               background-color: #007bff;
           }
-           body.dark-mode .modal-buttons .add-button:hover {
+           body.dark-mode .modal-add-task-form button:hover {
                background-color: #0056b3;
            }
 
@@ -427,8 +519,248 @@
               color: #e0e0e0;
           }
 
+        /* Download Button Style */
+        #downloadTasksButton {
+             background-color: #17a2b8; /* Info blue */
+             color: white;
+             border: none;
+             padding: 10px 15px;
+             border-radius: 6px;
+             cursor: pointer;
+             font-size: 1rem;
+             transition: background-color 0.3s ease;
+             margin-left: 10px; /* Space from other header items */
+        }
+         #downloadTasksButton:hover {
+             background-color: #138496;
+         }
+          body.dark-mode #downloadTasksButton {
+              background-color: #20c997; /* Teal */
+          }
+           body.dark-mode #downloadTasksButton:hover {
+               background-color: #1a9b7a;
+           }
+
+        /* Month Task View Styles */
+        .month-task-view h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+             margin-bottom: 15px;
+        }
+         body.dark-mode .month-task-view h3 {
+             color: #e0e0e0;
+             border-bottom-color: #007bff;
+         }
+
+        .month-task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .month-task-list .task-date-group {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+         body.dark-mode .month-task-list .task-date-group {
+             border-bottom-color: #555;
+         }
+         .month-task-list .task-date-group:last-child {
+             border-bottom: none;
+         }
+
+
+        .month-task-list .task-date {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+         body.dark-mode .month-task-list .task-date {
+             color: #b0b0b0;
+         }
+
+
+        .month-task-list ul {
+            list-style: disc;
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        .month-task-list li {
+            margin-bottom: 3px;
+            word-break: break-word;
+        }
+
+
+        /* --- Print Styles --- */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: #fff; /* White background for printing */
+                color: #000; /* Black text for printing */
+            }
+
+            .main-layout {
+                flex-direction: column; /* Stack for printing */
+                gap: 0;
+                margin: 0;
+            }
+
+            .calendar-app {
+                margin: 0; /* Remove margin */
+                box-shadow: none; /* Remove shadow */
+                border-radius: 0; /* Remove border radius */
+                max-width: none; /* Allow to take full width */
+                width: 100%; /* Ensure full width */
+                flex-basis: auto; /* Reset flex basis */
+            }
+
+            .month-task-view {
+                 display: block !important; /* Ensure month view is visible in print */
+                 flex-basis: auto; /* Reset flex basis */
+                 max-height: none; /* Remove max height */
+                 box-shadow: none;
+                 border-radius: 0;
+                 padding: 20px 0; /* Adjust padding for print */
+                 border-top: 1px solid #ccc; /* Add separator */
+            }
+
+            .calendar-header {
+                background-color: #fff; /* White background for header */
+                color: #000; /* Black text for header */
+                border-bottom: 1px solid #ccc; /* Add a separator */
+                print-color-adjust: exact; /* Ensure colors are printed */
+                -webkit-print-color-adjust: exact; /* Safari */
+            }
+
+             .calendar-header button,
+             .calendar-header select,
+             #darkModeToggle,
+             #downloadTasksButton,
+             #toggleMonthViewButton /* Hide the toggle button in print */
+              {
+                 display: none; /* Hide buttons and dropdown in print */
+             }
+
+             .calendar-grid {
+                 gap: 0.5px; /* Reduce gap slightly */
+                 background-color: #fff; /* White background for grid */
+             }
+
+             .day-label {
+                 background-color: #eee; /* Light grey background for labels */
+                 color: #333;
+                 print-color-adjust: exact;
+                 -webkit-print-color-adjust: exact;
+             }
+
+             .day {
+                 min-height: 120px; /* Increase min height for better task display */
+                 overflow: visible; /* Allow tasks to overflow for printing */
+                 max-height: none; /* Remove max height constraint */
+                 border: 1px solid #ddd; /* Add borders for clarity */
+                 border-radius: 0; /* Remove rounded corners */
+                 box-shadow: none; /* Remove shadows */
+                 padding: 8px; /* Adjust padding */
+             }
+
+             .day.today {
+                 border-color: #000; /* Black border for today in print */
+                 box-shadow: none;
+             }
+
+             .day.has-task {
+                 background-color: #f0f0f0; /* Light grey for days with tasks */
+                 border-color: #ccc;
+                 print-color-adjust: exact;
+                 -webkit-print-color-adjust: exact;
+             }
+             .day.has-task.today {
+                  border-color: #000;
+             }
+
+
+             /* Gray out weekend days in print */
+             .day.weekend {
+                 background-color: #e0e0e0; /* A noticeable gray background */
+                 color: #000; /* Keep text black for readability */
+                 print-color-adjust: exact;
+                 -webkit-print-color-adjust: exact;
+             }
+              .day.weekend .day-number {
+                  color: #000; /* Keep day number black */
+              }
+              .day.weekend.has-task {
+                  background-color: #d0d0d0; /* Slightly darker gray for weekends with tasks */
+                  border-color: #ccc;
+                  print-color-adjust: exact;
+                  -webkit-print-color-adjust: exact;
+              }
+               .day.weekend.has-task.today {
+                   border-color: #000; /* Keep today's border black */
+               }
+
+
+             .day .day-number {
+                 color: #000; /* Black day number */
+             }
+
+             .day .task-list-preview {
+                 color: #333; /* Darker task text */
+                 white-space: normal; /* Allow task text to wrap */
+                 overflow: visible; /* Ensure all tasks are visible */
+                 text-overflow: clip; /* No ellipsis in print */
+             }
+
+             .day .task-list-preview li {
+                 border-bottom: none; /* Remove separators in print */
+                 margin-bottom: 2px; /* Small margin between tasks */
+             }
+
+             .modal {
+                 display: none !important; /* Hide modals completely in print */
+             }
+
+             /* Print styles for the month task view */
+             .month-task-view h3 {
+                 border-bottom-color: #000; /* Black border for header */
+                 color: #000;
+             }
+             .month-task-list .task-date-group {
+                 border-bottom-color: #ccc; /* Lighter border */
+             }
+             .month-task-list .task-date {
+                 color: #333; /* Darker date text */
+             }
+             .month-task-list ul {
+                 list-style: disc; /* Keep bullet points */
+             }
+             .month-task-list li {
+                 color: #000; /* Black task text */
+             }
+        }
+        /* --- End Print Styles --- */
+
 
         /* Responsive adjustments */
+        @media (max-width: 992px) { /* Adjust breakpoint for stacking */
+            .main-layout {
+                flex-direction: column; /* Stack calendar and task view */
+                gap: 20px;
+            }
+             .calendar-app {
+                 flex-basis: auto; /* Reset flex basis */
+             }
+            .month-task-view {
+                 flex-basis: auto; /* Reset flex basis */
+                 max-height: 400px; /* Limit height when stacked */
+            }
+        }
+
         @media (max-width: 768px) {
             .calendar-grid {
                 grid-template-columns: repeat(7, 1fr); /* Keep 7 columns on smaller screens */
@@ -461,94 +793,221 @@
              .modal-buttons button {
                  width: 100%; /* Full width buttons */
              }
+             .calendar-header {
+                 flex-direction: column; /* Stack header items on very small screens */
+                 align-items: flex-start;
+             }
+             .calendar-header h2,
+             .calendar-header select, /* Keep select for year if not removed */
+             #darkModeToggle,
+             #downloadTasksButton,
+             #toggleMonthViewButton,
+             #prevYear, /* Add year buttons */
+             #nextYear {
+                 margin-bottom: 5px;
+             }
+             .modal-add-task-form {
+                 flex-direction: column;
+                 gap: 5px;
+             }
+             .modal-add-task-form input[type="text"] {
+                 width: calc(100% - 20px); /* Adjust width for stacked layout */
+             }
         }
     </style>
      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div class="calendar-app">
-        <div class="calendar-header">
-            <button id="prevMonth">&lt;</button> <h2 id="currentMonthYear"></h2>
-             <button id="nextMonth">&gt;</button> <button id="darkModeToggle">Dark Mode</button>
+    <div class="main-layout">
+        <div class="calendar-app">
+            <div class="calendar-header">
+                <button id="prevMonth">&lt;</button>
+                 <button id="prevYear">&lt;&lt;</button> <h2 id="currentMonthYear"></h2>
+                 <button id="nextYear">&gt;&gt;</button> <button id="nextMonth">&gt;</button>
+                 <button id="darkModeToggle">Dark Mode</button>
+                 <button id="downloadTasksButton">Download Tasks</button>
+                 <button id="toggleMonthViewButton">Show Month Tasks</button> </div>
+            <div class="calendar-grid" id="calendarGrid">
+                <div class="day-label">Sun</div>
+                <div class="day-label">Mon</div>
+                <div class="day-label">Tue</div>
+                <div class="day-label">Wed</div>
+                <div class="day-label">Thu</div>
+                <div class="day-label">Fri</div>
+                <div class="day-label">Sat</div>
+                </div>
         </div>
-        <div class="calendar-grid" id="calendarGrid">
-            <div class="day-label">Sun</div>
-            <div class="day-label">Mon</div>
-            <div class="day-label">Tue</div>
-            <div class="day-label">Wed</div>
-            <div class="day-label">Thu</div>
-            <div class="day-label">Fri</div>
-            <div class="day-label">Sat</div>
-            </div>
+
+        <div class="month-task-view" id="monthTaskView">
+            <h3>Tasks for <span id="monthTaskViewMonthYear"></span></h3>
+            <div id="monthTaskListContainer">
+                </div>
+        </div>
     </div>
 
     <div id="taskModal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
             <h3 id="modalTitle"></h3>
-            <input type="text" id="taskDescription" placeholder="Task Description">
-            <div class="modal-buttons">
-                <button id="deleteTaskButton" class="delete-button" style="display: none;">Delete Task</button>
-                <button id="saveTaskButton" class="save-button" style="display: none;">Save Changes</button>
-                <button id="addTaskButton" class="add-button" style="display: none;">Add Task</button>
+            <ul id="modalTaskList" class="modal-task-list">
+                </ul>
+            <div class="modal-add-task-form">
+                <input type="text" id="newTaskDescription" placeholder="Add New Task">
+                <button id="addNewTaskButton">Add Task</button>
             </div>
              <input type="hidden" id="modalDate">
-             <input type="hidden" id="modalTaskIndex">
+             <input type="hidden" id="editingTaskIndex">
         </div>
     </div>
+
+     <div id="editTaskModal" class="modal">
+         <div class="modal-content">
+             <span class="close-button" id="closeEditModal">&times;</span>
+             <h3>Edit Task</h3>
+             <input type="text" id="editTaskDescription">
+             <div class="modal-buttons">
+                 <button id="confirmDeleteTaskButton" class="delete-button">Delete Task</button>
+                 <button id="confirmSaveTaskButton" class="save-button">Save Changes</button>
+             </div>
+              <input type="hidden" id="editModalDate">
+              <input type="hidden" id="editModalTaskIndex">
+         </div>
+     </div>
+
 
     <script>
         const calendarGrid = document.getElementById('calendarGrid');
         const currentMonthYear = document.getElementById('currentMonthYear');
         const prevMonthButton = document.getElementById('prevMonth');
         const nextMonthButton = document.getElementById('nextMonth');
+        const prevYearButton = document.getElementById('prevYear'); // Get prev year button
+        const nextYearButton = document.getElementById('nextYear'); // Get next year button
         const taskModal = document.getElementById('taskModal');
-        const closeButton = document.querySelector('.close-button');
+        const closeButton = taskModal.querySelector('.close-button'); // Get close button specific to taskModal
         const modalTitleHeader = document.getElementById('modalTitle');
-        const taskDescriptionInput = document.getElementById('taskDescription');
-        const saveTaskButton = document.getElementById('saveTaskButton');
-        const deleteTaskButton = document.getElementById('deleteTaskButton');
-        const addTaskButton = document.getElementById('addTaskButton');
+        const modalTaskList = document.getElementById('modalTaskList');
+        const newTaskDescriptionInput = document.getElementById('newTaskDescription');
+        const addNewTaskButton = document.getElementById('addNewTaskButton');
         const modalDateInput = document.getElementById('modalDate');
-        const modalTaskIndexInput = document.getElementById('modalTaskIndex');
         const darkModeToggle = document.getElementById('darkModeToggle');
         const body = document.body;
+        const downloadTasksButton = document.getElementById('downloadTasksButton');
+        const monthTaskView = document.getElementById('monthTaskView');
+        const toggleMonthViewButton = document.getElementById('toggleMonthViewButton');
+        const monthTaskViewMonthYear = document.getElementById('monthTaskViewMonthYear');
+        const monthTaskListContainer = document.getElementById('monthTaskListContainer');
+
+
+        // Edit Task Modal elements
+        const editTaskModal = document.getElementById('editTaskModal');
+        const closeEditModalButton = document.getElementById('closeEditModal');
+        const editTaskDescriptionInput = document.getElementById('editTaskDescription');
+        const confirmSaveTaskButton = document.getElementById('confirmSaveTaskButton');
+        const confirmDeleteTaskButton = document.getElementById('confirmDeleteTaskButton');
+        const editModalDateInput = document.getElementById('editModalDate');
+        const editModalTaskIndexInput = document.getElementById('editModalTaskIndex');
 
 
         let currentDate = new Date();
 
         // Load tasks from localStorage
         const tasks = JSON.parse(localStorage.getItem('calendarTasks')) || {};
+        // Load month view visibility preference
+        let isMonthViewVisible = localStorage.getItem('monthViewVisible') === 'true';
+
 
         // Function to save tasks to localStorage
         function saveTasks() {
             localStorage.setItem('calendarTasks', JSON.stringify(tasks));
         }
 
-        // Function to open the modal for adding a task
-        function openAddTaskModal(dateString) {
-            modalTitleHeader.textContent = `Add Task for: ${dateString}`;
-            taskDescriptionInput.value = '';
-            modalDateInput.value = dateString;
-            modalTaskIndexInput.value = ''; // Clear index for adding
-            addTaskButton.style.display = 'inline-block';
-            saveTaskButton.style.display = 'none';
-            deleteTaskButton.style.display = 'none';
-            taskModal.style.display = 'flex';
+        // Function to render tasks in the main task modal
+        function renderModalTasks(dateString) {
+            modalTaskList.innerHTML = ''; // Clear existing tasks
+
+            const tasksForDate = tasks[dateString] || [];
+
+            if (tasksForDate.length === 0) {
+                const listItem = document.createElement('li');
+                listItem.textContent = 'No tasks for this date.';
+                modalTaskList.appendChild(listItem);
+            } else {
+                tasksForDate.forEach((task, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('modal-task-item');
+                    listItem.innerHTML = `
+                        <span>${task}</span>
+                        <div class="modal-task-actions">
+                            <button class="edit-task-button" data-index="${index}">Edit</button>
+                            <button class="delete-task-button" data-index="${index}">Delete</button>
+                        </div>
+                    `;
+                    modalTaskList.appendChild(listItem);
+                });
+            }
         }
 
-         // Function to open the modal for editing a task
+
+        // Function to open the main task modal (Day View)
+        function openTaskModal(dateString) {
+            modalTitleHeader.textContent = `Tasks for: ${dateString}`;
+            modalDateInput.value = dateString;
+            renderModalTasks(dateString); // Render tasks for the selected date
+            taskModal.style.display = 'flex';
+             newTaskDescriptionInput.value = ''; // Clear new task input
+        }
+
+         // Function to open the edit task modal
          function openEditTaskModal(dateString, taskIndex, taskDescription) {
-             modalTitleHeader.textContent = `Edit Task for: ${dateString}`;
-             taskDescriptionInput.value = taskDescription;
-             modalDateInput.value = dateString;
-             modalTaskIndexInput.value = taskIndex; // Store index for editing/deleting
-             addTaskButton.style.display = 'none';
-             saveTaskButton.style.display = 'inline-block';
-             deleteTaskButton.style.display = 'inline-block';
-             taskModal.style.display = 'flex';
+             editTaskDescriptionInput.value = taskDescription;
+             editModalDateInput.value = dateString;
+             editModalTaskIndexInput.value = taskIndex;
+             editTaskModal.style.display = 'flex';
          }
+
+        // Function to render the month's tasks in the side view
+        function renderMonthTasksView() {
+            monthTaskListContainer.innerHTML = ''; // Clear existing tasks
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            monthTaskViewMonthYear.textContent = `${new Date(year, month).toLocaleString('default', { month: 'long' })} ${year}`;
+
+            const datesWithTasks = Object.keys(tasks).filter(dateString => {
+                const [taskYear, taskMonth] = dateString.split('-').map(Number);
+                return taskYear === year && taskMonth === month + 1; // Month is 0-indexed in JS Date, 1-indexed in dateString
+            }).sort(); // Sort dates chronologically
+
+            if (datesWithTasks.length === 0) {
+                const noTasksMessage = document.createElement('p');
+                noTasksMessage.textContent = 'No tasks scheduled for this month.';
+                monthTaskListContainer.appendChild(noTasksMessage);
+            } else {
+                datesWithTasks.forEach(dateString => {
+                    const tasksForDate = tasks[dateString];
+                    if (tasksForDate && tasksForDate.length > 0) {
+                        const dateGroup = document.createElement('div');
+                        dateGroup.classList.add('task-date-group');
+
+                        const dateHeader = document.createElement('div');
+                        dateHeader.classList.add('task-date');
+                        dateHeader.textContent = dateString; // Display the full date
+                        dateGroup.appendChild(dateHeader);
+
+                        const taskList = document.createElement('ul');
+                        tasksForDate.forEach(task => {
+                            const taskItem = document.createElement('li');
+                            taskItem.textContent = task;
+                            taskList.appendChild(taskItem);
+                        });
+                        dateGroup.appendChild(taskList);
+                        monthTaskListContainer.appendChild(dateGroup);
+                    }
+                });
+            }
+        }
+
 
         // Function to render the calendar
         function renderCalendar() {
@@ -563,7 +1022,8 @@
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const startingDayOfWeek = firstDayOfMonth.getDay(); // 0 for Sunday, 6 for Saturday
 
-            currentMonthYear.textContent = `${new Date(year, month).toLocaleString('default', { month: 'long' })} ${year}`;
+            currentMonthYear.textContent = `${new Date(year, month).toLocaleString('default', { month: 'long' })} ${year}`; // Display Month and Year
+
 
             // Add empty divs for days before the first day of the month
             for (let i = 0; i < startingDayOfWeek; i++) {
@@ -601,16 +1061,18 @@
                 // Display tasks for this date and add click listeners to tasks
                 if (tasks[dateString] && tasks[dateString].length > 0) {
                      day.classList.add('has-task'); // Add class to highlight days with tasks
-                    tasks[dateString].forEach((task, index) => {
+                    // Limit preview to a few tasks
+                    const previewTasks = tasks[dateString].slice(0, 3); // Show up to 3 tasks
+                    previewTasks.forEach((task) => {
                         const taskItem = document.createElement('li');
                         taskItem.textContent = task;
-                        // Add click listener to open modal for editing/deleting
-                        taskItem.addEventListener('click', (event) => {
-                            event.stopPropagation(); // Prevent the day click from firing
-                            openEditTaskModal(dateString, index, task);
-                        });
                         taskListPreview.appendChild(taskItem);
                     });
+                    if (tasks[dateString].length > 3) {
+                         const moreItem = document.createElement('li');
+                         moreItem.textContent = `+${tasks[dateString].length - 3} more...`;
+                         taskListPreview.appendChild(moreItem);
+                    }
                 }
 
                 // Highlight today
@@ -619,9 +1081,9 @@
                     day.classList.add('today');
                 }
 
-                // Add click listener to open modal for adding a task
+                // Add click listener to open the main task modal
                 day.addEventListener('click', () => {
-                    openAddTaskModal(dateString);
+                    openTaskModal(dateString);
                 });
 
                 calendarGrid.appendChild(day);
@@ -647,39 +1109,9 @@
             }
         }
 
-
-        // Event listeners for calendar navigation
-        prevMonthButton.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            renderCalendar();
-        });
-
-        nextMonthButton.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar();
-        });
-
-        // Event listener to close modal
-        closeButton.addEventListener('click', () => {
-            taskModal.style.display = 'none';
-            taskDescriptionInput.value = ''; // Clear input on close
-            modalDateInput.value = '';
-            modalTaskIndexInput.value = '';
-        });
-
-        // Close modal when clicking outside of it
-        window.addEventListener('click', (event) => {
-            if (event.target === taskModal) {
-                taskModal.style.display = 'none';
-                taskDescriptionInput.value = ''; // Clear input on close
-                modalDateInput.value = '';
-                modalTaskIndexInput.value = '';
-            }
-        });
-
-        // Event listener to add a new task
-        addTaskButton.addEventListener('click', () => {
-            const description = taskDescriptionInput.value.trim();
+        // Function to handle adding a new task from the modal
+        function addNewTaskFromModal() {
+            const description = newTaskDescriptionInput.value.trim();
             const date = modalDateInput.value;
 
             if (description && date) {
@@ -688,71 +1120,184 @@
                 }
                 tasks[date].push(description);
                 saveTasks(); // Save to localStorage
-                taskModal.style.display = 'none'; // Close modal
-                taskDescriptionInput.value = ''; // Clear input
-                modalDateInput.value = '';
-                renderCalendar(); // Re-render calendar to show the new task
+                newTaskDescriptionInput.value = ''; // Clear input
+                renderModalTasks(date); // Re-render task list in modal
+                renderCalendar(); // Re-render calendar to update highlights
+                renderMonthTasksView(); // Update month view
             } else {
                 alert('Please enter a task description.');
             }
-        });
+        }
 
-        // Event listener to save edited task
-        saveTaskButton.addEventListener('click', () => {
-            const description = taskDescriptionInput.value.trim();
-            const date = modalDateInput.value;
-            const index = parseInt(modalTaskIndexInput.value); // Get the task index
+         // Function to handle saving edited task from the edit modal
+         function saveEditedTask() {
+             const description = editTaskDescriptionInput.value.trim();
+             const date = editModalDateInput.value;
+             const index = parseInt(editModalTaskIndexInput.value);
 
-            if (description && date && !isNaN(index) && tasks[date] && tasks[date][index] !== undefined) {
-                tasks[date][index] = description; // Update the task
-                saveTasks(); // Save to localStorage
-                taskModal.style.display = 'none'; // Close modal
-                taskDescriptionInput.value = ''; // Clear input
-                modalDateInput.value = '';
-                modalTaskIndexInput.value = '';
-                renderCalendar(); // Re-render calendar to show the updated task
-            } else if (!description) {
+             if (description && date && !isNaN(index) && tasks[date] && tasks[date][index] !== undefined) {
+                 tasks[date][index] = description; // Update the task
+                 saveTasks(); // Save to localStorage
+                 editTaskModal.style.display = 'none'; // Close edit modal
+                 renderModalTasks(date); // Re-render task list in main modal
+                 renderCalendar(); // Re-render calendar
+                 renderMonthTasksView(); // Update month view
+             } else if (!description) {
                  alert('Please enter a task description.');
-            } else {
+             } else {
                  console.error("Error saving task: Invalid data or index.");
                  alert("Could not save task. Please try again.");
+             }
+         }
+
+          // Function to handle deleting task from the edit modal
+          function deleteConfirmedTask() {
+              const date = editModalDateInput.value;
+              const index = parseInt(editModalTaskIndexInput.value);
+
+              if (date && !isNaN(index) && tasks[date] && tasks[date][index] !== undefined) {
+                  tasks[date].splice(index, 1); // Remove the task
+
+                  if (tasks[date].length === 0) {
+                      delete tasks[date]; // Remove date key if no tasks left
+                  }
+
+                  saveTasks(); // Save to localStorage
+                  editTaskModal.style.display = 'none'; // Close edit modal
+                  renderModalTasks(date); // Re-render task list in main modal
+                  renderCalendar(); // Re-render calendar
+                  renderMonthTasksView(); // Update month view
+              } else {
+                  console.error("Error deleting task: Invalid data or index.");
+                  alert("Could not delete task. Please try again.");
+              }
+          }
+
+        // Function to handle downloading tasks
+        function downloadTasks() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "calendar_tasks.json");
+            document.body.appendChild(downloadAnchorNode); // Required for Firefox
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // Function to toggle month task view visibility
+        function toggleMonthView() {
+            isMonthViewVisible = !isMonthViewVisible;
+            monthTaskView.style.display = isMonthViewVisible ? 'block' : 'none';
+            toggleMonthViewButton.textContent = isMonthViewVisible ? 'Hide Month Tasks' : 'Show Month Tasks';
+            localStorage.setItem('monthViewVisible', isMonthViewVisible); // Save preference
+        }
+
+        // Apply saved month view visibility preference on page load
+        function applySavedMonthViewPreference() {
+             monthTaskView.style.display = isMonthViewVisible ? 'block' : 'none';
+             toggleMonthViewButton.textContent = isMonthViewVisible ? 'Hide Month Tasks' : 'Show Month Tasks';
+        }
+
+        // Function to navigate year
+        function navigateYear(delta) {
+            currentDate.setFullYear(currentDate.getFullYear() + delta);
+            renderCalendar();
+            renderMonthTasksView();
+        }
+
+
+        // Event listeners for calendar navigation
+        prevMonthButton.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+            renderMonthTasksView(); // Update month view when month changes
+        });
+
+        nextMonthButton.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+            renderMonthTasksView(); // Update month view when month changes
+        });
+
+        // Event listeners for year navigation buttons
+        prevYearButton.addEventListener('click', () => navigateYear(-1));
+        nextYearButton.addEventListener('click', () => navigateYear(1));
+
+
+        // Event listener to close main task modal
+        closeButton.addEventListener('click', () => {
+            taskModal.style.display = 'none';
+        });
+
+         // Event listener to close edit task modal
+         closeEditModalButton.addEventListener('click', () => {
+             editTaskModal.style.display = 'none';
+         });
+
+
+        // Close modals when clicking outside of them
+        window.addEventListener('click', (event) => {
+            if (event.target === taskModal) {
+                taskModal.style.display = 'none';
+            }
+            if (event.target === editTaskModal) {
+                 editTaskModal.style.display = 'none';
             }
         });
 
-         // Event listener to delete task
-         deleteTaskButton.addEventListener('click', () => {
-             const date = modalDateInput.value;
-             const index = parseInt(modalTaskIndexInput.value); // Get the task index
+        // Event listener for adding a new task from the modal
+        addNewTaskButton.addEventListener('click', addNewTaskFromModal);
 
-             if (date && !isNaN(index) && tasks[date] && tasks[date][index] !== undefined) {
-                 // Remove the task using splice
-                 tasks[date].splice(index, 1);
-
-                 // If the array for the date is now empty, remove the date key
-                 if (tasks[date].length === 0) {
-                     delete tasks[date];
-                 }
-
-                 saveTasks(); // Save to localStorage
-                 taskModal.style.display = 'none'; // Close modal
-                 taskDescriptionInput.value = ''; // Clear input
-                 modalDateInput.value = '';
-                 modalTaskIndexInput.value = '';
-                 renderCalendar(); // Re-render calendar
-             } else {
-                 console.error("Error deleting task: Invalid data or index.");
-                 alert("Could not delete task. Please try again.");
+         // Event listener for clicking edit/delete buttons within the modal task list
+         modalTaskList.addEventListener('click', (event) => {
+             const target = event.target;
+             if (target.classList.contains('edit-task-button')) {
+                 const index = parseInt(target.dataset.index);
+                 const date = modalDateInput.value;
+                 const taskDescription = tasks[date][index];
+                 openEditTaskModal(date, index, taskDescription);
+             } else if (target.classList.contains('delete-task-button')) {
+                  // Directly delete from here for simplicity, or open a confirmation modal
+                  const index = parseInt(target.dataset.index);
+                  const date = modalDateInput.value;
+                  if (confirm('Are you sure you want to delete this task?')) {
+                       if (date && !isNaN(index) && tasks[date] && tasks[date][index] !== undefined) {
+                           tasks[date].splice(index, 1);
+                           if (tasks[date].length === 0) {
+                               delete tasks[date];
+                           }
+                           saveTasks();
+                           renderModalTasks(date); // Re-render task list
+                           renderCalendar(); // Re-render calendar
+                           renderMonthTasksView(); // Update month view
+                       } else {
+                           console.error("Error deleting task from list: Invalid data or index.");
+                       }
+                  }
              }
          });
+
+
+        // Event listeners for buttons in the edit task modal
+        confirmSaveTaskButton.addEventListener('click', saveEditedTask);
+        confirmDeleteTaskButton.addEventListener('click', deleteConfirmedTask);
+
 
         // Event listener for dark mode toggle button
         darkModeToggle.addEventListener('click', toggleDarkMode);
 
-        // Apply saved dark mode preference on page load
-        applySavedDarkModePreference();
+        // Event listener for download button
+        downloadTasksButton.addEventListener('click', downloadTasks);
 
-        // Initial render of the calendar
+        // Event listener for month view toggle button
+        toggleMonthViewButton.addEventListener('click', toggleMonthView);
+
+
+        // Initial setup
+        applySavedDarkModePreference();
+        applySavedMonthViewPreference(); // Apply month view preference on load
         renderCalendar();
+        renderMonthTasksView(); // Initial render of month view
 
     </script>
 </body>
