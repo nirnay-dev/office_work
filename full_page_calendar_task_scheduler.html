@@ -67,27 +67,33 @@
              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
          }
 
-         /* Style for the task view toggle button */
-         #toggleMonthViewButton {
-             background-color: #17a2b8; /* Info blue */
-             color: white;
-             border: none;
+         /* --- General Button Styles --- */
+         button {
              padding: 10px 15px;
              border-radius: 6px;
              cursor: pointer;
              font-size: 1rem;
-             transition: background-color 0.3s ease;
+             transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+             border: none; /* Remove default border */
+         }
+
+         button:hover {
+             opacity: 0.9; /* Subtle hover effect */
+         }
+
+         button:active {
+             opacity: 0.7; /* Subtle active effect */
+         }
+
+         /* Style for the task view toggle button */
+         #toggleMonthViewButton {
+             background-color: #17a2b8; /* Info blue */
+             color: white;
              margin-left: 10px;
          }
-          #toggleMonthViewButton:hover {
-              background-color: #138496;
-          }
-           body.dark-mode #toggleMonthViewButton {
+          body.dark-mode #toggleMonthViewButton {
                background-color: #20c997; /* Teal */
            }
-            body.dark-mode #toggleMonthViewButton:hover {
-                background-color: #1a9b7a;
-            }
 
 
         .calendar-header {
@@ -108,19 +114,13 @@
             background-color: #0056b3; /* Darker blue header in dark mode */
         }
 
-        /* --- Navigation Button Styles --- */
+        /* --- Header Navigation Button Styles --- */
         .calendar-header button {
             background-color: transparent; /* Transparent background */
             color: white; /* Icon/text color */
             border: 1px solid transparent; /* Subtle transparent border */
             padding: 5px 10px; /* Adjusted padding */
-            border-radius: 6px; /* Rounded corners */
-            cursor: pointer;
             font-size: 1.5rem; /* Larger font size for icons */
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-            display: flex; /* Use flex to center icon/text */
-            align-items: center;
-            justify-content: center;
         }
 
         .calendar-header button:hover {
@@ -146,7 +146,7 @@
              font-size: 1.2rem; /* Slightly smaller font size for year arrows */
              padding: 5px 8px; /* Adjusted padding */
         }
-         /* --- End Navigation Button Styles --- */
+         /* --- End Header Navigation Button Styles --- */
 
 
         .calendar-header h2 {
@@ -483,6 +483,8 @@
         .modal-task-item input[type="checkbox"] {
             margin-right: 10px;
             cursor: pointer;
+             width: 18px; /* Increase checkbox size */
+             height: 18px;
         }
 
          .modal-task-item span.completed {
@@ -621,6 +623,8 @@
         }
          .modal-holiday-checkbox input[type="checkbox"] {
              cursor: pointer;
+              width: 18px; /* Increase checkbox size */
+              height: 18px;
          }
 
 
@@ -763,6 +767,8 @@
          .month-task-list li input[type="checkbox"] {
              margin-right: 10px;
              cursor: pointer;
+              width: 18px; /* Increase checkbox size */
+              height: 18px;
          }
 
           .month-task-list li span.completed {
@@ -1074,37 +1080,37 @@
     <div class="main-layout">
         <div class="calendar-app">
             <div class="calendar-header">
-                <button id="prevMonth">&lt;</button>
-                 <button id="prevYear">&lt;&lt;</button> <h2 id="currentMonthYear"></h2>
-                 <button id="nextYear">&gt;&gt;</button> <button id="nextMonth">&gt;</button>
-                 <button id="darkModeToggle">Dark Mode</button>
-                 <button id="downloadTasksButton">Download Tasks</button>
-                 <button id="toggleMonthViewButton">Show Month Tasks</button> </div>
-            <div class="calendar-grid" id="calendarGrid">
-                <div class="day-label">Sun</div>
-                <div class="day-label">Mon</div>
-                <div class="day-label">Tue</div>
-                <div class="day-label">Wed</div>
-                <div class="day-label">Thu</div>
-                <div class="day-label">Fri</div>
-                <div class="day-label">Sat</div>
+                <button id="prevMonth" aria-label="Previous Month">&lt;</button>
+                 <button id="prevYear" aria-label="Previous Year">&lt;&lt;</button> <h2 id="currentMonthYear"></h2>
+                 <button id="nextYear" aria-label="Next Year">&gt;&gt;</button> <button id="nextMonth" aria-label="Next Month">&gt;</button>
+                 <button id="darkModeToggle" aria-label="Toggle Dark Mode">Dark Mode</button>
+                 <button id="downloadTasksButton" aria-label="Download Tasks">Download Tasks</button>
+                 <button id="toggleMonthViewButton" aria-label="Toggle Month View">Show Month Tasks</button> </div>
+            <div class="calendar-grid" id="calendarGrid" role="grid" aria-labelledby="currentMonthYear">
+                <div class="day-label" role="columnheader">Sun</div>
+                <div class="day-label" role="columnheader">Mon</div>
+                <div class="day-label" role="columnheader">Tue</div>
+                <div class="day-label" role="columnheader">Wed</div>
+                <div class="day-label" role="columnheader">Thu</div>
+                <div class="day-label" role="columnheader">Fri</div>
+                <div class="day-label" role="columnheader">Sat</div>
                 </div>
         </div>
 
         <div class="month-task-view" id="monthTaskView">
-            <span class="close-button" id="closeMonthView">&times;</span> <h3>Tasks for <span id="monthTaskViewMonthYear"></span></h3>
+            <span class="close-button" id="closeMonthView" aria-label="Close Month View">&times;</span> <h3>Tasks for <span id="monthTaskViewMonthYear"></span></h3>
             <div id="monthTaskListContainer">
                 </div>
         </div>
     </div>
 
-    <div id="taskModal" class="modal">
+    <div id="taskModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal-content">
-            <span class="close-button">&times;</span>
+            <span class="close-button" aria-label="Close Modal">&times;</span>
             <h3 id="modalTitle"></h3>
 
             <div class="modal-holiday-checkbox">
-                 <input type="checkbox" id="isHolidayCheckbox">
+                 <input type="checkbox" id="isHolidayCheckbox" aria-label="Mark as Holiday or Leave">
                  <label for="isHolidayCheckbox">Mark as Holiday/Leave</label>
             </div>
 
@@ -1112,10 +1118,10 @@
                 </ul>
             <div class="modal-add-task-form">
                  <div class="category-select-container">
-                      <select id="newTaskCategorySelect"></select>
-                      <input type="text" id="addNewCategoryInput" placeholder="New Category">
+                      <label for="newTaskCategorySelect" class="sr-only">Select Category</label> <select id="newTaskCategorySelect" aria-label="Select Task Category"></select>
+                      <label for="addNewCategoryInput" class="sr-only">Add New Category</label> <input type="text" id="addNewCategoryInput" placeholder="New Category" aria-label="Add New Category">
                  </div>
-                <input type="text" id="newTaskDescription" placeholder="Add New Task">
+                 <label for="newTaskDescription" class="sr-only">New Task Description</label> <input type="text" id="newTaskDescription" placeholder="Add New Task" aria-label="Add New Task Description">
                 <button id="addNewTaskButton">Add Task</button>
             </div>
              <input type="hidden" id="modalDate">
@@ -1123,12 +1129,12 @@
         </div>
     </div>
 
-     <div id="editTaskModal" class="modal">
+     <div id="editTaskModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="editTaskModalTitle">
          <div class="modal-content">
-             <span class="close-button" id="closeEditModal">&times;</span>
-             <h3>Edit Task</h3>
-              <select id="editTaskCategorySelect"></select>
-             <input type="text" id="editTaskDescription">
+             <span class="close-button" id="closeEditModal" aria-label="Close Edit Modal">&times;</span>
+             <h3 id="editTaskModalTitle">Edit Task</h3>
+              <label for="editTaskCategorySelect" class="sr-only">Select Category</label> <select id="editTaskCategorySelect" aria-label="Select Task Category"></select>
+              <label for="editTaskDescription" class="sr-only">Edit Task Description</label> <input type="text" id="editTaskDescription" aria-label="Edit Task Description">
              <div class="modal-buttons">
                  <button id="confirmDeleteTaskButton" class="delete-button">Delete Task</button>
                  <button id="confirmSaveTaskButton" class="save-button">Save Changes</button>
@@ -1470,6 +1476,7 @@
                 day.classList.add('day');
                 const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
                 day.dataset.date = dateString;
+                day.setAttribute('role', 'gridcell'); // Accessibility
 
                 // Determine the day of the week for the current day number
                 const dayOfWeek = new Date(year, month, i).getDay(); // 0 for Sunday, 6 for Saturday
