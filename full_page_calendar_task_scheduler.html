@@ -191,7 +191,7 @@
             background-color: #ffffff;
             border-radius: 4px; /* Rounded corners for days */
             cursor: pointer; /* Cursor indicates it's interactive */
-            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease, border-color 0.3s ease;
             position: relative;
             overflow-y: auto; /* Enable scrolling for tasks */
             max-height: 150px; /* Max height to prevent excessive growth */
@@ -226,7 +226,6 @@
              box-shadow: 0 0 10px rgba(56, 193, 114, 0.4);
          }
 
-
         /* Style for days with tasks */
         .day.has-task {
             background-color: #fff3cd; /* Light yellow background */
@@ -242,6 +241,22 @@
           }
           body.dark-mode .day.has-task.today {
               border-color: #38c172; /* Keep today's border in dark mode */
+          }
+
+        /* Style for days with high task density */
+        .day.high-density {
+            border-width: 2px; /* Thicker border */
+            border-style: dashed; /* Dashed border */
+            border-color: #dc3545; /* Red border */
+        }
+         body.dark-mode .day.high-density {
+             border-color: #e3342f; /* Darker red in dark mode */
+         }
+         .day.high-density.today {
+             border-color: #28a745; /* Keep today's border */
+         }
+          body.dark-mode .day.high-density.today {
+              border-color: #38c172;
           }
 
 
@@ -275,6 +290,54 @@
           }
           body.dark-mode .day.weekend.has-task.today {
               border-color: #38c172; /* Keep today's border in dark mode */
+          }
+
+        /* Style for days with tasks due soon */
+        .day.due-soon {
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5); /* Yellow shadow */
+             border-color: #ffc107; /* Yellow border */
+        }
+         body.dark-mode .day.due-soon {
+             box-shadow: 0 0 10px rgba(212, 154, 0, 0.6); /* Darker yellow shadow */
+             border-color: #d49a00;
+         }
+         .day.due-soon.today {
+             border-color: #28a745; /* Keep today's border */
+             box-shadow: 0 0 10px rgba(40, 167, 69, 0.3); /* Keep today's shadow */
+         }
+          body.dark-mode .day.due-soon.today {
+              border-color: #38c172;
+              box-shadow: 0 0 10px rgba(56, 193, 114, 0.4);
+          }
+          .day.due-soon.has-task {
+              border-color: #ffc107; /* Keep task border */
+          }
+           body.dark-mode .day.due-soon.has-task {
+               border-color: #d49a00;
+           }
+
+        /* Style for Holiday/Leave days */
+        .day.holiday {
+            background-color: #d4edda; /* Light green background */
+            border: 2px dashed #28a745; /* Green dashed border */
+        }
+         body.dark-mode .day.holiday {
+             background-color: #28a745; /* Darker green */
+             border-color: #38c172;
+         }
+         .day.holiday.today {
+             border-color: #28a745; /* Keep today's border */
+         }
+          body.dark-mode .day.holiday.today {
+              border-color: #38c172;
+          }
+         .day.holiday.has-task {
+             background-color: #c3e6cb; /* Slightly darker green for holiday with tasks */
+             border-color: #ffc107; /* Keep task border if applicable */
+         }
+          body.dark-mode .day.holiday.has-task {
+              background-color: #218838;
+              border-color: #d49a00;
           }
 
 
@@ -417,6 +480,20 @@
             word-break: break-word; /* Allow long words to break */
         }
 
+        .modal-task-item input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+         .modal-task-item span.completed {
+             text-decoration: line-through;
+             color: #6c757d; /* Muted color for completed tasks */
+         }
+          body.dark-mode .modal-task-item span.completed {
+              color: #999;
+          }
+
+
         .modal-task-actions button {
             padding: 4px 8px;
             font-size: 0.8rem;
@@ -466,10 +543,49 @@
             margin-top: 15px;
              border-top: 1px solid #eee;
              padding-top: 15px;
+            flex-wrap: wrap; /* Allow wrapping */
         }
          body.dark-mode .modal-add-task-form {
              border-top-color: #555;
          }
+
+         .modal-add-task-form .category-select-container {
+             display: flex;
+             align-items: center;
+             gap: 5px;
+             flex-basis: 100%; /* Take full width on small screens */
+         }
+          .modal-add-task-form select {
+              padding: 8px;
+              border-radius: 5px;
+              border: 1px solid #ccc;
+              font-size: 1rem;
+              background-color: #fff;
+              color: #333;
+              transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+              flex-grow: 1; /* Allow select to grow */
+          }
+           body.dark-mode .modal-add-task-form select {
+               background-color: #4a4a4a;
+               color: #e0e0e0;
+               border-color: #555;
+           }
+
+          .modal-add-task-form .add-category-input {
+              padding: 8px;
+              border-radius: 5px;
+              border: 1px solid #ccc;
+              font-size: 1rem;
+              background-color: #fff;
+              color: #333;
+              transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+              width: 100px; /* Fixed width for add category input */
+          }
+           body.dark-mode .modal-add-task-form .add-category-input {
+               background-color: #4a4a4a;
+               color: #e0e0e0;
+               border-color: #555;
+           }
 
 
         .modal-add-task-form input[type="text"] {
@@ -495,6 +611,17 @@
            body.dark-mode .modal-add-task-form button:hover {
                background-color: #0056b3;
            }
+
+        /* Holiday/Leave Checkbox in Modal */
+        .modal-holiday-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+         .modal-holiday-checkbox input[type="checkbox"] {
+             cursor: pointer;
+         }
 
 
         .close-button {
@@ -606,17 +733,87 @@
              color: #b0b0b0;
          }
 
+         .month-task-list ul {
+             list-style: none; /* Remove default bullets */
+             padding-left: 0; /* Remove default padding */
+             margin: 0;
+         }
 
-        .month-task-list ul {
-            list-style: disc;
-            padding-left: 20px;
-            margin: 0;
-        }
+         .month-task-list li {
+             margin-bottom: 5px;
+             word-break: break-word;
+             display: flex; /* Use flex for layout */
+             align-items: center;
+             padding: 5px 0;
+             border-bottom: 1px dotted #eee;
+         }
+          .month-task-list li:last-child {
+              border-bottom: none;
+          }
+           body.dark-mode .month-task-list li {
+               border-bottom-color: #555;
+           }
 
-        .month-task-list li {
-            margin-bottom: 3px;
-            word-break: break-word;
-        }
+
+         .month-task-list li span {
+             flex-grow: 1; /* Allow task description to take space */
+             margin-right: 10px;
+         }
+
+         .month-task-list li input[type="checkbox"] {
+             margin-right: 10px;
+             cursor: pointer;
+         }
+
+          .month-task-list li span.completed {
+              text-decoration: line-through;
+              color: #6c757d; /* Muted color for completed tasks */
+          }
+           body.dark-mode .month-task-list li span.completed {
+               color: #999;
+           }
+
+
+         .month-task-list li .task-actions button {
+             padding: 3px 6px;
+             font-size: 0.7rem;
+             margin-left: 5px;
+             border-radius: 3px;
+             cursor: pointer;
+         }
+          .month-task-list li .task-actions .edit-task-button {
+              background-color: #ffc107;
+              color: #333;
+              border: 1px solid #ffc107;
+          }
+           .month-task-list li .task-actions .edit-task-button:hover {
+               background-color: #e0a800;
+           }
+            body.dark-mode .month-task-list li .task-actions .edit-task-button {
+                background-color: #d49a00;
+                border-color: #d49a00;
+                color: white;
+            }
+             body.dark-mode .month-task-list li .task-actions .edit-task-button:hover {
+                 background-color: #a07400;
+             }
+
+
+          .month-task-list li .task-actions .delete-task-button {
+             background-color: #dc3545;
+             color: white;
+             border: 1px solid #dc3545;
+          }
+           .month-task-list li .task-actions .delete-task-button:hover {
+               background-color: #c82333;
+           }
+            body.dark-mode .month-task-list li .task-actions .delete-task-button {
+                background-color: #e3342f;
+                border-color: #e3342f;
+            }
+             body.dark-mode .month-task-list li .task-actions .delete-task-button:hover {
+                 background-color: #cb1b16;
+             }
 
 
         /* --- Print Styles --- */
@@ -734,6 +931,24 @@
                    border-color: #000; /* Keep today's border black */
                }
 
+             /* Print styles for Holiday/Leave days */
+             .day.holiday {
+                 background-color: #d4edda; /* Light green background */
+                 border: 2px dashed #28a745; /* Green dashed border */
+                 print-color-adjust: exact;
+                 -webkit-print-color-adjust: exact;
+             }
+              .day.holiday.today {
+                  border-color: #000; /* Black border for today */
+              }
+               .day.holiday.has-task {
+                   background-color: #c3e6cb; /* Slightly darker green for holiday with tasks */
+                   border-color: #ccc; /* Lighter border */
+               }
+                .day.holiday.has-task.today {
+                    border-color: #000;
+                }
+
 
              .day .day-number {
                  color: #000; /* Black day number */
@@ -772,6 +987,14 @@
              .month-task-list li {
                  color: #000; /* Black task text */
              }
+              .month-task-list li span.completed {
+                  text-decoration: line-through;
+                  color: #666; /* Muted color for completed tasks in print */
+              }
+               .month-task-list li input[type="checkbox"],
+               .month-task-list li .task-actions {
+                   display: none; /* Hide checkboxes and actions in print */
+               }
         }
         /* --- End Print Styles --- */
 
@@ -879,9 +1102,19 @@
         <div class="modal-content">
             <span class="close-button">&times;</span>
             <h3 id="modalTitle"></h3>
+
+            <div class="modal-holiday-checkbox">
+                 <input type="checkbox" id="isHolidayCheckbox">
+                 <label for="isHolidayCheckbox">Mark as Holiday/Leave</label>
+            </div>
+
             <ul id="modalTaskList" class="modal-task-list">
                 </ul>
             <div class="modal-add-task-form">
+                 <div class="category-select-container">
+                      <select id="newTaskCategorySelect"></select>
+                      <input type="text" id="addNewCategoryInput" placeholder="New Category">
+                 </div>
                 <input type="text" id="newTaskDescription" placeholder="Add New Task">
                 <button id="addNewTaskButton">Add Task</button>
             </div>
@@ -894,6 +1127,7 @@
          <div class="modal-content">
              <span class="close-button" id="closeEditModal">&times;</span>
              <h3>Edit Task</h3>
+              <select id="editTaskCategorySelect"></select>
              <input type="text" id="editTaskDescription">
              <div class="modal-buttons">
                  <button id="confirmDeleteTaskButton" class="delete-button">Delete Task</button>
@@ -917,6 +1151,8 @@
         const modalTitleHeader = document.getElementById('modalTitle');
         const modalTaskList = document.getElementById('modalTaskList');
         const newTaskDescriptionInput = document.getElementById('newTaskDescription');
+        const newTaskCategorySelect = document.getElementById('newTaskCategorySelect'); // Get new task category select
+        const addNewCategoryInput = document.getElementById('addNewCategoryInput'); // Get add new category input
         const addNewTaskButton = document.getElementById('addNewTaskButton');
         const modalDateInput = document.getElementById('modalDate');
         const darkModeToggle = document.getElementById('darkModeToggle');
@@ -927,12 +1163,14 @@
         const monthTaskViewMonthYear = document.getElementById('monthTaskViewMonthYear');
         const monthTaskListContainer = document.getElementById('monthTaskListContainer');
         const closeMonthViewButton = document.getElementById('closeMonthView'); // Get month view close button
+        const isHolidayCheckbox = document.getElementById('isHolidayCheckbox'); // Get holiday checkbox
 
 
         // Edit Task Modal elements
         const editTaskModal = document.getElementById('editTaskModal');
         const closeEditModalButton = document.getElementById('closeEditModal');
         const editTaskDescriptionInput = document.getElementById('editTaskDescription');
+        const editTaskCategorySelect = document.getElementById('editTaskCategorySelect'); // Get edit task category select
         const confirmSaveTaskButton = document.getElementById('confirmSaveTaskButton');
         const confirmDeleteTaskButton = document.getElementById('confirmDeleteTaskButton');
         const editModalDateInput = document.getElementById('editModalDate');
@@ -941,15 +1179,59 @@
 
         let currentDate = new Date();
 
-        // Load tasks from localStorage
+        // Load data from localStorage
         const tasks = JSON.parse(localStorage.getItem('calendarTasks')) || {};
+        const holidays = JSON.parse(localStorage.getItem('calendarHolidays')) || {};
+        let categories = JSON.parse(localStorage.getItem('calendarCategories')) || ['General', 'Work', 'Personal']; // Default categories
+
+        // Ensure loaded tasks have the new structure if they are old format
+        for (const date in tasks) {
+            tasks[date] = tasks[date].map(task => {
+                if (typeof task === 'string') {
+                    return { description: task, category: '', completed: false };
+                }
+                return task; // Assume it's already in the new object format
+            });
+        }
+
         // Load month view visibility preference
         let isMonthViewVisible = localStorage.getItem('monthViewVisible') === 'true';
 
 
-        // Function to save tasks to localStorage
+        // Function to save data to localStorage
         function saveTasks() {
             localStorage.setItem('calendarTasks', JSON.stringify(tasks));
+        }
+
+        function saveHolidays() {
+            localStorage.setItem('calendarHolidays', JSON.stringify(holidays));
+        }
+
+        function saveCategories() {
+             localStorage.setItem('calendarCategories', JSON.stringify(categories));
+        }
+
+
+        // Function to populate category dropdowns
+        function populateCategorySelects() {
+            newTaskCategorySelect.innerHTML = '';
+            editTaskCategorySelect.innerHTML = '';
+
+            // Add a default empty option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select Category';
+            newTaskCategorySelect.appendChild(defaultOption.cloneNode(true));
+            editTaskCategorySelect.appendChild(defaultOption.cloneNode(true));
+
+
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                newTaskCategorySelect.appendChild(option.cloneNode(true));
+                editTaskCategorySelect.appendChild(option.cloneNode(true));
+            });
         }
 
         // Function to render tasks in the main task modal
@@ -966,13 +1248,63 @@
                 tasksForDate.forEach((task, index) => {
                     const listItem = document.createElement('li');
                     listItem.classList.add('modal-task-item');
-                    listItem.innerHTML = `
-                        <span>${task}</span>
-                        <div class="modal-task-actions">
-                            <button class="edit-task-button" data-index="${index}">Edit</button>
-                            <button class="delete-task-button" data-index="${index}">Delete</button>
-                        </div>
-                    `;
+
+                    const taskSpan = document.createElement('span');
+                    taskSpan.textContent = task.description;
+                    if (task.completed) {
+                        taskSpan.classList.add('completed');
+                    }
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = task.completed;
+                    checkbox.setAttribute('aria-label', 'Mark task as complete'); // Accessibility
+                    checkbox.addEventListener('change', () => {
+                        tasks[dateString][index].completed = checkbox.checked;
+                        saveTasks();
+                        renderModalTasks(dateString); // Re-render modal tasks
+                        renderCalendar(); // Update calendar view
+                        renderMonthTasksView(); // Update month view
+                    });
+
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.classList.add('modal-task-actions');
+
+                    const editButton = document.createElement('button');
+                    editButton.classList.add('edit-task-button');
+                    editButton.textContent = 'Edit';
+                    editButton.dataset.index = index; // Store index
+                    editButton.setAttribute('aria-label', `Edit task: ${task.description}`); // Accessibility
+                    editButton.addEventListener('click', () => {
+                         openEditTaskModal(dateString, index, tasks[dateString][index]);
+                    });
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.classList.add('delete-task-button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.dataset.index = index; // Store index
+                    deleteButton.setAttribute('aria-label', `Delete task: ${task.description}`); // Accessibility
+                     deleteButton.addEventListener('click', () => {
+                         if (confirm('Are you sure you want to delete this task?')) {
+                             deleteTask(dateString, index);
+                         }
+                     });
+
+                    listItem.appendChild(checkbox);
+                    listItem.appendChild(taskSpan);
+                    // Optionally display category in modal list
+                    if (task.category) {
+                        const categorySpan = document.createElement('span');
+                        categorySpan.textContent = `[${task.category}]`;
+                        categorySpan.style.fontSize = '0.9em';
+                        categorySpan.style.color = '#666';
+                        categorySpan.style.marginLeft = '5px';
+                        listItem.appendChild(categorySpan);
+                    }
+                    actionsDiv.appendChild(editButton);
+                    actionsDiv.appendChild(deleteButton);
+                    listItem.appendChild(actionsDiv);
+
                     modalTaskList.appendChild(listItem);
                 });
             }
@@ -983,14 +1315,24 @@
         function openTaskModal(dateString) {
             modalTitleHeader.textContent = `Tasks for: ${dateString}`;
             modalDateInput.value = dateString;
+
+            // Set holiday checkbox state
+            isHolidayCheckbox.checked = !!holidays[dateString];
+
             renderModalTasks(dateString); // Render tasks for the selected date
+            populateCategorySelects(); // Populate category dropdown
+
             taskModal.style.display = 'flex';
              newTaskDescriptionInput.value = ''; // Clear new task input
+             addNewCategoryInput.value = ''; // Clear add new category input
+             newTaskCategorySelect.value = ''; // Reset category dropdown
         }
 
          // Function to open the edit task modal
-         function openEditTaskModal(dateString, taskIndex, taskDescription) {
-             editTaskDescriptionInput.value = taskDescription;
+         function openEditTaskModal(dateString, taskIndex, taskObject) {
+             editTaskDescriptionInput.value = taskObject.description;
+             populateCategorySelects(); // Populate category dropdown
+             editTaskCategorySelect.value = taskObject.category || ''; // Set selected category
              editModalDateInput.value = dateString;
              editModalTaskIndexInput.value = taskIndex;
              editTaskModal.style.display = 'flex';
@@ -1026,9 +1368,70 @@
                         dateGroup.appendChild(dateHeader);
 
                         const taskList = document.createElement('ul');
-                        tasksForDate.forEach(task => {
+                        tasksForDate.forEach((task, index) => {
                             const taskItem = document.createElement('li');
-                            taskItem.textContent = task;
+
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.checked = task.completed;
+                            checkbox.setAttribute('aria-label', 'Mark task as complete'); // Accessibility
+                            checkbox.addEventListener('change', () => {
+                                tasks[dateString][index].completed = checkbox.checked;
+                                saveTasks();
+                                renderCalendar(); // Update calendar view
+                                renderMonthTasksView(); // Update month view
+                                // If task modal is open for this date, re-render it too
+                                if (taskModal.style.display === 'flex' && modalDateInput.value === dateString) {
+                                    renderModalTasks(dateString);
+                                }
+                            });
+
+                            const taskSpan = document.createElement('span');
+                            taskSpan.textContent = task.description;
+                            if (task.completed) {
+                                taskSpan.classList.add('completed');
+                            }
+
+                            const actionsDiv = document.createElement('div');
+                            actionsDiv.classList.add('task-actions'); // Use a different class name to avoid conflict with modal actions
+
+                            const editButton = document.createElement('button');
+                            editButton.classList.add('edit-task-button');
+                            editButton.textContent = 'Edit';
+                            editButton.dataset.index = index;
+                            editButton.dataset.date = dateString;
+                             editButton.setAttribute('aria-label', `Edit task: ${task.description}`); // Accessibility
+                            editButton.addEventListener('click', () => {
+                                openEditTaskModal(dateString, index, tasks[dateString][index]);
+                            });
+
+                            const deleteButton = document.createElement('button');
+                            deleteButton.classList.add('delete-task-button');
+                            deleteButton.textContent = 'Delete';
+                            deleteButton.dataset.index = index;
+                             deleteButton.dataset.date = dateString;
+                             deleteButton.setAttribute('aria-label', `Delete task: ${task.description}`); // Accessibility
+                             deleteButton.addEventListener('click', () => {
+                                 if (confirm('Are you sure you want to delete this task?')) {
+                                     deleteTask(dateString, index);
+                                 }
+                             });
+
+                            taskItem.appendChild(checkbox);
+                            taskItem.appendChild(taskSpan);
+                             // Optionally display category in month view list
+                             if (task.category) {
+                                 const categorySpan = document.createElement('span');
+                                 categorySpan.textContent = `[${task.category}]`;
+                                 categorySpan.style.fontSize = '0.9em';
+                                 categorySpan.style.color = '#666';
+                                 categorySpan.style.marginLeft = '5px';
+                                 taskItem.appendChild(categorySpan);
+                             }
+                            actionsDiv.appendChild(editButton);
+                            actionsDiv.appendChild(deleteButton);
+                            taskItem.appendChild(actionsDiv);
+
                             taskList.appendChild(taskItem);
                         });
                         dateGroup.appendChild(taskList);
@@ -1076,6 +1479,39 @@
                     day.classList.add('weekend');
                 }
 
+                // Check if it's a holiday/leave
+                if (holidays[dateString]) {
+                    day.classList.add('holiday');
+                }
+
+
+                // Check for tasks and add 'has-task' class
+                const tasksForDate = tasks[dateString] || [];
+                if (tasksForDate.length > 0) {
+                     day.classList.add('has-task'); // Add class to highlight days with tasks
+
+                     // Check for high task density
+                     if (tasksForDate.length > 5) { // Threshold for high density
+                          day.classList.add('high-density');
+                     }
+
+                     // Check for tasks due soon (within the next 7 days)
+                     const today = new Date();
+                     today.setHours(0, 0, 0, 0);
+                     const taskDate = new Date(dateString);
+                     taskDate.setHours(0, 0, 0, 0);
+                     const timeDiff = taskDate.getTime() - today.getTime();
+                     const dayDiff = timeDiff / (1000 * 3600 * 24);
+
+                     if (dayDiff >= 0 && dayDiff <= 7) { // Tasks due today or in the next 7 days
+                         // Check if at least one task is not completed
+                         const hasIncompleteTaskDueSoon = tasksForDate.some(task => !task.completed);
+                         if (hasIncompleteTaskDueSoon) {
+                              day.classList.add('due-soon');
+                         }
+                     }
+                }
+
 
                 // Add day number
                 const dayNumber = document.createElement('div');
@@ -1088,19 +1524,21 @@
                 taskListPreview.classList.add('task-list-preview');
                 day.appendChild(taskListPreview);
 
-                // Display tasks for this date and add click listeners to tasks
-                if (tasks[dateString] && tasks[dateString].length > 0) {
-                     day.classList.add('has-task'); // Add class to highlight days with tasks
+                // Display tasks for this date
+                if (tasksForDate.length > 0) {
                     // Limit preview to a few tasks
-                    const previewTasks = tasks[dateString].slice(0, 3); // Show up to 3 tasks
+                    const previewTasks = tasksForDate.slice(0, 3); // Show up to 3 tasks
                     previewTasks.forEach((task) => {
                         const taskItem = document.createElement('li');
-                        taskItem.textContent = task;
+                        taskItem.textContent = task.description; // Display description
+                        if (task.completed) {
+                            taskItem.classList.add('completed');
+                        }
                         taskListPreview.appendChild(taskItem);
                     });
-                    if (tasks[dateString].length > 3) {
+                    if (tasksForDate.length > 3) {
                          const moreItem = document.createElement('li');
-                         moreItem.textContent = `+${tasks[dateString].length - 3} more...`;
+                         moreItem.textContent = `+${tasksForDate.length - 3} more...`;
                          taskListPreview.appendChild(moreItem);
                     }
                 }
@@ -1110,6 +1548,10 @@
                 if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) {
                     day.classList.add('today');
                 }
+
+                /* Removed individual task click listeners from day cells
+                   Tasks are now managed via the modal opened by clicking the day
+                */
 
                 // Add click listener to open the main task modal
                 day.addEventListener('click', () => {
@@ -1142,15 +1584,31 @@
         // Function to handle adding a new task from the modal
         function addNewTaskFromModal() {
             const description = newTaskDescriptionInput.value.trim();
+            let category = newTaskCategorySelect.value; // Get category from select
+
+            // If a new category is typed, use that and add to categories list
+            const newCategory = addNewCategoryInput.value.trim();
+            if (newCategory) {
+                 category = newCategory;
+                 if (!categories.includes(category)) {
+                      categories.push(category);
+                      saveCategories();
+                      populateCategorySelects(); // Update dropdowns
+                 }
+            }
+
+
             const date = modalDateInput.value;
 
             if (description && date) {
                 if (!tasks[date]) {
                     tasks[date] = [];
                 }
-                tasks[date].push(description);
+                tasks[date].push({ description: description, category: category, completed: false }); // Save as object
                 saveTasks(); // Save to localStorage
                 newTaskDescriptionInput.value = ''; // Clear input
+                addNewCategoryInput.value = ''; // Clear add new category input
+                newTaskCategorySelect.value = ''; // Reset category dropdown
                 renderModalTasks(date); // Re-render task list in modal
                 renderCalendar(); // Re-render calendar to update highlights
                 renderMonthTasksView(); // Update month view
@@ -1162,11 +1620,14 @@
          // Function to handle saving edited task from the edit modal
          function saveEditedTask() {
              const description = editTaskDescriptionInput.value.trim();
+             const category = editTaskCategorySelect.value; // Get category from select
              const date = editModalDateInput.value;
              const index = parseInt(editModalTaskIndexInput.value);
 
              if (description && date && !isNaN(index) && tasks[date] && tasks[date][index] !== undefined) {
-                 tasks[date][index] = description; // Update the task
+                 // Preserve completed status
+                 tasks[date][index].description = description;
+                 tasks[date][index].category = category;
                  saveTasks(); // Save to localStorage
                  editTaskModal.style.display = 'none'; // Close edit modal
                  renderModalTasks(date); // Re-render task list in main modal
@@ -1180,35 +1641,37 @@
              }
          }
 
-          // Function to handle deleting task from the edit modal
-          function deleteConfirmedTask() {
-              const date = editModalDateInput.value;
-              const index = parseInt(editModalTaskIndexInput.value);
+        // Function to handle deleting task
+        function deleteTask(date, index) {
+             if (date && !isNaN(index) && tasks[date] && tasks[date][index] !== undefined) {
+                 tasks[date].splice(index, 1); // Remove the task
 
-              if (date && !isNaN(index) && tasks[date] && tasks[date][index] !== undefined) {
-                  tasks[date].splice(index, 1); // Remove the task
+                 if (tasks[date].length === 0) {
+                     delete tasks[date]; // Remove date key if no tasks left
+                 }
 
-                  if (tasks[date].length === 0) {
-                      delete tasks[date]; // Remove date key if no tasks left
-                  }
-
-                  saveTasks(); // Save to localStorage
-                  editTaskModal.style.display = 'none'; // Close edit modal
-                  renderModalTasks(date); // Re-render task list in main modal
-                  renderCalendar(); // Re-render calendar
-                  renderMonthTasksView(); // Update month view
-              } else {
-                  console.error("Error deleting task: Invalid data or index.");
-                  alert("Could not delete task. Please try again.");
-              }
-          }
+                 saveTasks(); // Save to localStorage
+                 // Check which modal is open and re-render accordingly
+                 if (taskModal.style.display === 'flex' && modalDateInput.value === date) {
+                      renderModalTasks(date); // Re-render task list in main modal
+                 }
+                 if (editTaskModal.style.display === 'flex' && editModalDateInput.value === date && parseInt(editModalTaskIndexInput.value) === index) {
+                      editTaskModal.style.display = 'none'; // Close edit modal if the deleted task was being edited
+                 }
+                 renderCalendar(); // Re-render calendar
+                 renderMonthTasksView(); // Update month view
+             } else {
+                 console.error("Error deleting task: Invalid data or index.");
+                 alert("Could not delete task. Please try again.");
+             }
+        }
 
         // Function to handle downloading tasks
         function downloadTasks() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks, null, 2));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ tasks: tasks, holidays: holidays, categories: categories }, null, 2));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "calendar_tasks.json");
+            downloadAnchorNode.setAttribute("download", "calendar_data.json"); // Changed filename
             document.body.appendChild(downloadAnchorNode); // Required for Firefox
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
@@ -1234,6 +1697,18 @@
             renderCalendar();
             renderMonthTasksView();
         }
+
+        // Event listener for holiday checkbox change
+        isHolidayCheckbox.addEventListener('change', () => {
+             const dateString = modalDateInput.value;
+             if (isHolidayCheckbox.checked) {
+                 holidays[dateString] = true;
+             } else {
+                 delete holidays[dateString];
+             }
+             saveHolidays();
+             renderCalendar(); // Re-render calendar to show holiday status
+        });
 
 
         // Event listeners for calendar navigation
@@ -1289,25 +1764,12 @@
              if (target.classList.contains('edit-task-button')) {
                  const index = parseInt(target.dataset.index);
                  const date = modalDateInput.value;
-                 const taskDescription = tasks[date][index];
-                 openEditTaskModal(date, index, taskDescription);
+                 openEditTaskModal(date, index, tasks[date][index]); // Pass the task object
              } else if (target.classList.contains('delete-task-button')) {
-                  // Directly delete from here for simplicity, or open a confirmation modal
                   const index = parseInt(target.dataset.index);
                   const date = modalDateInput.value;
                   if (confirm('Are you sure you want to delete this task?')) {
-                       if (date && !isNaN(index) && tasks[date] && tasks[date][index] !== undefined) {
-                           tasks[date].splice(index, 1);
-                           if (tasks[date].length === 0) {
-                               delete tasks[date];
-                           }
-                           saveTasks();
-                           renderModalTasks(date); // Re-render task list
-                           renderCalendar(); // Re-render calendar
-                           renderMonthTasksView(); // Update month view
-                       } else {
-                           console.error("Error deleting task from list: Invalid data or index.");
-                       }
+                       deleteTask(date, index);
                   }
              }
          });
@@ -1315,7 +1777,13 @@
 
         // Event listeners for buttons in the edit task modal
         confirmSaveTaskButton.addEventListener('click', saveEditedTask);
-        confirmDeleteTaskButton.addEventListener('click', deleteConfirmedTask);
+        confirmDeleteTaskButton.addEventListener('click', () => {
+             const date = editModalDateInput.value;
+             const index = parseInt(editModalTaskIndexInput.value);
+             if (confirm('Are you sure you want to delete this task?')) {
+                  deleteTask(date, index);
+             }
+        });
 
 
         // Event listener for dark mode toggle button
@@ -1331,6 +1799,7 @@
         // Initial setup
         applySavedDarkModePreference();
         applySavedMonthViewPreference(); // Apply month view preference on load
+        populateCategorySelects(); // Populate categories on initial load
         renderCalendar();
         renderMonthTasksView(); // Initial render of month view
 
