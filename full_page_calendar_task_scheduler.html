@@ -12,15 +12,22 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f4f4f9;
+            background-color: #f4f4f9; /* Default Light Mode Background */
+            color: #333; /* Default Light Mode Text */
             min-height: 100vh;
-            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for dark mode */
+            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for mode changes */
         }
 
         /* Dark Mode Styles */
         body.dark-mode {
             background-color: #1e1e1e; /* Dark background */
             color: #e0e0e0; /* Light text */
+        }
+
+        /* Gray Mode Styles */
+        body.gray-mode {
+            background-color: #cccccc; /* Light gray background */
+            color: #333333; /* Dark gray text */
         }
 
         .main-layout {
@@ -35,7 +42,7 @@
         .calendar-app {
             flex-grow: 1; /* Allow calendar to grow */
             flex-basis: 600px; /* Minimum width for calendar */
-            background-color: #ffffff;
+            background-color: #ffffff; /* Default Light Mode */
             border-radius: 12px; /* Rounded corners */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             overflow: hidden; /* Ensure shadow is visible */
@@ -49,10 +56,16 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
+        body.gray-mode .calendar-app {
+            background-color: #eeeeee; /* Slightly lighter gray */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+
         .month-task-view {
             flex-basis: 350px; /* Minimum width for task view */
             flex-shrink: 0; /* Prevent shrinking */
-            background-color: #ffffff;
+            background-color: #ffffff; /* Default Light Mode */
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             padding: 20px;
@@ -66,6 +79,12 @@
              background-color: #2d2d2d;
              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
          }
+
+         body.gray-mode .month-task-view {
+             background-color: #eeeeee;
+             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+         }
+
 
          /* --- General Button Styles --- */
          button {
@@ -90,9 +109,15 @@
              background-color: #17a2b8; /* Info blue */
              color: white;
              margin-left: 10px;
+             /* Adjusted padding and font size to match other header buttons */
+             padding: 5px 10px;
+             font-size: 1rem; /* Kept 1rem for readability */
          }
           body.dark-mode #toggleMonthViewButton {
                background-color: #20c997; /* Teal */
+           }
+           body.gray-mode #toggleMonthViewButton {
+               background-color: #6c757d; /* Gray */
            }
 
 
@@ -101,7 +126,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 15px 20px;
-            background-color: #007bff;
+            background-color: #007bff; /* Default Light Mode */
             color: white;
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
@@ -113,6 +138,11 @@
         body.dark-mode .calendar-header {
             background-color: #0056b3; /* Darker blue header in dark mode */
         }
+
+        body.gray-mode .calendar-header {
+            background-color: #6c757d; /* Medium gray header */
+        }
+
 
         /* --- Header Navigation Button Styles --- */
         .calendar-header button {
@@ -140,6 +170,18 @@
             border-color: rgba(255, 255, 255, 0.3);
         }
 
+        /* Gray mode adjustments for navigation buttons */
+         body.gray-mode .calendar-header button {
+             color: #e0e0e0; /* Lighter color in gray mode */
+             background-color: transparent;
+             border-color: transparent;
+         }
+          body.gray-mode .calendar-header button:hover {
+              background-color: rgba(255, 255, 255, 0.1);
+              border-color: rgba(255, 255, 255, 0.3);
+          }
+
+
         /* Style for Year Navigation Buttons */
         .calendar-header #prevYear,
         .calendar-header #nextYear {
@@ -161,7 +203,7 @@
             grid-template-columns: repeat(7, 1fr);
             gap: 1px; /* Small gap between days */
             padding: 10px;
-            background-color: #e9ecef; /* Light background for grid */
+            background-color: #e9ecef; /* Default Light Mode */
             transition: background-color 0.3s ease;
         }
 
@@ -169,13 +211,17 @@
              background-color: #3a3a3a; /* Darker background for grid */
          }
 
+         body.gray-mode .calendar-grid {
+             background-color: #dddddd; /* Lighter gray for grid */
+         }
+
 
         .day-label {
             font-weight: bold;
             text-align: center;
             padding: 10px 0;
-            color: #555;
-            background-color: #dee2e6; /* Slightly darker background for labels */
+            color: #555; /* Default Light Mode */
+            background-color: #dee2e6; /* Default Light Mode */
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
@@ -183,12 +229,16 @@
              color: #b0b0b0;
              background-color: #4a4a4a;
          }
+         body.gray-mode .day-label {
+             color: #555555;
+             background-color: #cccccc;
+         }
 
 
         .day {
             min-height: 100px; /* Minimum height for day cells */
             padding: 10px;
-            background-color: #ffffff;
+            background-color: #ffffff; /* Default Light Mode */
             border-radius: 4px; /* Rounded corners for days */
             cursor: pointer; /* Cursor indicates it's interactive */
             transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease, border-color 0.3s ease;
@@ -200,7 +250,7 @@
         }
 
         .day:hover {
-            background-color: #f8f9fa;
+            background-color: #f8f9fa; /* Default Light Mode */
             transform: translateY(-2px); /* Slight lift on hover */
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
@@ -216,6 +266,17 @@
              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Darker shadow on hover */
          }
 
+         body.gray-mode .day {
+             background-color: #f8f8f8; /* Very light gray */
+             color: #333333;
+             box-shadow: none;
+         }
+          body.gray-mode .day:hover {
+              background-color: #eeeeee;
+              transform: translateY(-2px);
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+
 
         .day.today {
             border: 2px solid #28a745; /* Green border for today */
@@ -225,11 +286,16 @@
              border-color: #38c172; /* Brighter green for today in dark mode */
              box-shadow: 0 0 10px rgba(56, 193, 114, 0.4);
          }
+         body.gray-mode .day.today {
+             border-color: #5cb85c; /* Another green for today in gray mode */
+             box-shadow: 0 0 10px rgba(92, 184, 92, 0.3);
+         }
+
 
         /* Style for days with tasks */
         .day.has-task {
-            background-color: #fff3cd; /* Light yellow background */
-            border: 1px solid #ffc107; /* Yellow border */
+            background-color: #fff3cd; /* Default Light Mode */
+            border: 1px solid #ffc107; /* Default Light Mode */
         }
 
          .day.has-task.today {
@@ -242,12 +308,20 @@
           body.dark-mode .day.has-task.today {
               border-color: #38c172; /* Keep today's border in dark mode */
           }
+          body.gray-mode .day.has-task {
+              background-color: #ffeeba; /* Lighter yellow */
+              border-color: #ffc107;
+          }
+           body.gray-mode .day.has-task.today {
+               border-color: #5cb85c;
+           }
+
 
         /* Style for days with high task density */
         .day.high-density {
             border-width: 2px; /* Thicker border */
             border-style: dashed; /* Dashed border */
-            border-color: #dc3545; /* Red border */
+            border-color: #dc3545; /* Default Light Mode */
         }
          body.dark-mode .day.high-density {
              border-color: #e3342f; /* Darker red in dark mode */
@@ -258,12 +332,18 @@
           body.dark-mode .day.high-density.today {
               border-color: #38c172;
           }
+          body.gray-mode .day.high-density {
+              border-color: #d9534f; /* Another red */
+          }
+           body.gray-mode .day.high-density.today {
+               border-color: #5cb85c;
+           }
 
 
         /* Style for weekend days - Adjusted for better visibility */
         .day.weekend {
-            background-color: #cfe2ff; /* Light blue background for weekends */
-            color: #084298; /* Dark blue text color */
+            background-color: #cfe2ff; /* Default Light Mode */
+            color: #084298; /* Default Light Mode */
         }
 
          .day.weekend.today {
@@ -292,10 +372,26 @@
               border-color: #38c172; /* Keep today's border in dark mode */
           }
 
+          body.gray-mode .day.weekend {
+              background-color: #dddddd; /* Medium gray */
+              color: #555555;
+          }
+           body.gray-mode .day.weekend.today {
+               border-color: #5cb85c;
+           }
+           body.gray-mode .day.weekend.has-task {
+               background-color: #cccccc; /* Darker gray */
+               border-color: #ffc107;
+           }
+            body.gray-mode .day.weekend.has-task.today {
+                border-color: #5cb85c;
+            }
+
+
         /* Style for days with tasks due soon */
         .day.due-soon {
-            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5); /* Yellow shadow */
-             border-color: #ffc107; /* Yellow border */
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5); /* Default Light Mode */
+             border-color: #ffc107; /* Default Light Mode */
         }
          body.dark-mode .day.due-soon {
              box-shadow: 0 0 10px rgba(212, 154, 0, 0.6); /* Darker yellow shadow */
@@ -315,11 +411,23 @@
            body.dark-mode .day.due-soon.has-task {
                border-color: #d49a00;
            }
+           body.gray-mode .day.due-soon {
+               box-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
+               border-color: #ffc107;
+           }
+            body.gray-mode .day.due-soon.today {
+                border-color: #5cb85c;
+                box-shadow: 0 0 10px rgba(92, 184, 92, 0.3);
+            }
+             body.gray-mode .day.due-soon.has-task {
+                 border-color: #ffc107;
+             }
+
 
         /* Style for Holiday/Leave days */
         .day.holiday {
-            background-color: #d4edda; /* Light green background */
-            border: 2px dashed #28a745; /* Green dashed border */
+            background-color: #d4edda; /* Default Light Mode */
+            border: 2px dashed #28a745; /* Default Light Mode */
         }
          body.dark-mode .day.holiday {
              background-color: #28a745; /* Darker green */
@@ -339,12 +447,23 @@
               background-color: #218838;
               border-color: #d49a00;
           }
+          body.gray-mode .day.holiday {
+              background-color: #bce8f1; /* Light blue */
+              border-color: #31b0d5; /* Blue */
+          }
+           body.gray-mode .day.holiday.today {
+               border-color: #5cb85c;
+           }
+            body.gray-mode .day.holiday.has-task {
+                background-color: #a6e1ec; /* Slightly darker blue */
+                border-color: #ffc107;
+            }
 
 
         .day .day-number {
             font-size: 1.2em;
             font-weight: bold;
-            color: #333;
+            color: #333; /* Default Light Mode */
             margin-bottom: 5px;
         }
          .day.weekend .day-number {
@@ -356,11 +475,17 @@
            body.dark-mode .day.weekend .day-number {
                color: #a0c0e0;
            }
+           body.gray-mode .day .day-number {
+               color: #333333;
+           }
+            body.gray-mode .day.weekend .day-number {
+                color: #555555;
+            }
 
 
         .day .task-list-preview {
             font-size: 0.8em;
-            color: #666;
+            color: #666; /* Default Light Mode */
             list-style: none;
             padding: 0;
             margin: 0;
@@ -375,6 +500,12 @@
            body.dark-mode .day.weekend .task-list-preview {
                color: #a0c0e0;
            }
+           body.gray-mode .day .task-list-preview {
+               color: #555555;
+           }
+            body.gray-mode .day.weekend .task-list-preview {
+                color: #555555;
+            }
 
 
         .day .task-list-preview li {
@@ -384,7 +515,7 @@
             margin-bottom: 3px;
             cursor: pointer; /* Indicate task items are also clickable */
             padding: 2px 0;
-            border-bottom: 1px dotted #eee; /* Subtle separator */
+            border-bottom: 1px dotted #eee; /* Default Light Mode */
         }
 
          .day .task-list-preview li:last-child {
@@ -400,6 +531,12 @@
            body.dark-mode .day .task-list-preview li:hover {
                color: #72a0ff; /* Lighter highlight in dark mode */
            }
+           body.gray-mode .day .task-list-preview li {
+               border-bottom-color: #cccccc;
+           }
+            body.gray-mode .day .task-list-preview li:hover {
+                color: #007bff;
+            }
 
 
         /* Modal Styles */
@@ -418,7 +555,7 @@
         }
 
         .modal-content {
-            background-color: #fefefe;
+            background-color: #fefefe; /* Default Light Mode */
             margin: auto;
             padding: 25px;
             border-radius: 10px;
@@ -436,15 +573,24 @@
              color: #e0e0e0;
              box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
          }
+         body.gray-mode .modal-content {
+             background-color: #eeeeee;
+             color: #333333;
+             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+         }
 
 
         .modal-content h3 {
             margin-top: 0;
-            color: #333;
+            color: #333; /* Default Light Mode */
         }
          body.dark-mode .modal-content h3 {
              color: #e0e0e0;
          }
+         body.gray-mode .modal-content h3 {
+             color: #333333;
+         }
+
 
         .modal-task-list {
             list-style: none;
@@ -452,20 +598,24 @@
             margin: 0;
             max-height: 200px; /* Limit height and add scroll */
             overflow-y: auto;
-            border: 1px solid #eee;
+            border: 1px solid #eee; /* Default Light Mode */
             border-radius: 5px;
             padding: 10px;
         }
          body.dark-mode .modal-task-list {
              border-color: #555;
          }
+         body.gray-mode .modal-task-list {
+             border-color: #cccccc;
+         }
+
 
         .modal-task-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 8px 0;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #eee; /* Default Light Mode */
         }
          .modal-task-item:last-child {
              border-bottom: none;
@@ -473,6 +623,10 @@
           body.dark-mode .modal-task-item {
               border-bottom-color: #555;
           }
+          body.gray-mode .modal-task-item {
+              border-bottom-color: #cccccc;
+          }
+
 
         .modal-task-item span {
             flex-grow: 1;
@@ -485,7 +639,42 @@
             cursor: pointer;
              width: 18px; /* Increase checkbox size */
              height: 18px;
-        }
+             /* Custom checkbox appearance */
+             appearance: none;
+             -webkit-appearance: none;
+             -moz-appearance: none;
+             border: 2px solid #007bff; /* Default Light Mode */
+             border-radius: 4px;
+             outline: none;
+             transition: background-color 0.2s ease, border-color 0.2s ease;
+         }
+          .modal-task-item input[type="checkbox"]:checked {
+              background-color: #007bff; /* Default Light Mode */
+              border-color: #007bff; /* Default Light Mode */
+          }
+           .modal-task-item input[type="checkbox"]:checked::after {
+               content: '\2713'; /* Checkmark character */
+               display: block;
+               color: white;
+               font-size: 14px;
+               text-align: center;
+               line-height: 14px;
+           }
+           body.dark-mode .modal-task-item input[type="checkbox"] {
+               border-color: #0056b3;
+           }
+            body.dark-mode .modal-task-item input[type="checkbox"]:checked {
+                background-color: #0056b3;
+                border-color: #0056b3;
+            }
+            body.gray-mode .modal-task-item input[type="checkbox"] {
+                border-color: #007bff;
+            }
+             body.gray-mode .modal-task-item input[type="checkbox"]:checked {
+                 background-color: #007bff;
+                 border-color: #007bff;
+             }
+
 
          .modal-task-item span.completed {
              text-decoration: line-through;
@@ -493,6 +682,9 @@
          }
           body.dark-mode .modal-task-item span.completed {
               color: #999;
+          }
+          body.gray-mode .modal-task-item span.completed {
+              color: #555555;
           }
 
 
@@ -505,12 +697,12 @@
         }
 
         .modal-task-actions .edit-task-button {
-            background-color: #ffc107;
-            color: #333;
-            border: 1px solid #ffc107;
+            background-color: #ffc107; /* Default Light Mode */
+            color: #333; /* Default Light Mode */
+            border: 1px solid #ffc107; /* Default Light Mode */
         }
         .modal-task-actions .edit-task-button:hover {
-            background-color: #e0a800;
+            background-color: #e0a800; /* Default Light Mode */
         }
          body.dark-mode .modal-task-actions .edit-task-button {
              background-color: #d49a00;
@@ -520,15 +712,23 @@
           body.dark-mode .modal-task-actions .edit-task-button:hover {
               background-color: #a07400;
           }
+          body.gray-mode .modal-task-actions .edit-task-button {
+              background-color: #ffc107;
+              color: #333333;
+              border-color: #ffc107;
+          }
+           body.gray-mode .modal-task-actions .edit-task-button:hover {
+               background-color: #e0a800;
+           }
 
 
         .modal-task-actions .delete-task-button {
-            background-color: #dc3545;
-            color: white;
-            border: 1px solid #dc3545;
+            background-color: #dc3545; /* Default Light Mode */
+            color: white; /* Default Light Mode */
+            border: 1px solid #dc3545; /* Default Light Mode */
         }
         .modal-task-actions .delete-task-button:hover {
-            background-color: #c82333;
+            background-color: #c82333; /* Default Light Mode */
         }
          body.dark-mode .modal-task-actions .delete-task-button {
              background-color: #e3342f;
@@ -537,19 +737,31 @@
           body.dark-mode .modal-task-actions .delete-task-button:hover {
                background-color: #cb1b16;
            }
+           body.gray-mode .modal-task-actions .delete-task-button {
+               background-color: #d9534f;
+               color: white;
+               border-color: #d9534f;
+           }
+            body.gray-mode .modal-task-actions .delete-task-button:hover {
+                background-color: #c9302c;
+            }
 
 
         .modal-add-task-form {
             display: flex;
             gap: 10px;
             margin-top: 15px;
-             border-top: 1px solid #eee;
+             border-top: 1px solid #eee; /* Default Light Mode */
              padding-top: 15px;
             flex-wrap: wrap; /* Allow wrapping */
         }
          body.dark-mode .modal-add-task-form {
              border-top-color: #555;
          }
+         body.gray-mode .modal-add-task-form {
+             border-top-color: #cccccc;
+         }
+
 
          .modal-add-task-form .category-select-container {
              display: flex;
@@ -560,10 +772,10 @@
           .modal-add-task-form select {
               padding: 8px;
               border-radius: 5px;
-              border: 1px solid #ccc;
+              border: 1px solid #ccc; /* Default Light Mode */
               font-size: 1rem;
-              background-color: #fff;
-              color: #333;
+              background-color: #fff; /* Default Light Mode */
+              color: #333; /* Default Light Mode */
               transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
               flex-grow: 1; /* Allow select to grow */
           }
@@ -572,14 +784,20 @@
                color: #e0e0e0;
                border-color: #555;
            }
+           body.gray-mode .modal-add-task-form select {
+               background-color: #dddddd;
+               color: #333333;
+               border-color: #bbbbbb;
+           }
+
 
           .modal-add-task-form .add-category-input {
               padding: 8px;
               border-radius: 5px;
-              border: 1px solid #ccc;
+              border: 1px solid #ccc; /* Default Light Mode */
               font-size: 1rem;
-              background-color: #fff;
-              color: #333;
+              background-color: #fff; /* Default Light Mode */
+              color: #333; /* Default Light Mode */
               transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
               width: 100px; /* Fixed width for add category input */
           }
@@ -587,6 +805,11 @@
                background-color: #4a4a4a;
                color: #e0e0e0;
                border-color: #555;
+           }
+           body.gray-mode .modal-add-task-form .add-category-input {
+               background-color: #dddddd;
+               color: #333333;
+               border-color: #bbbbbb;
            }
 
 
@@ -596,8 +819,8 @@
         }
 
         .modal-add-task-form button {
-             background-color: #007bff;
-             color: white;
+             background-color: #007bff; /* Default Light Mode */
+             color: white; /* Default Light Mode */
              border: none;
              padding: 10px 15px;
              border-radius: 5px;
@@ -605,7 +828,7 @@
              transition: background-color 0.3s ease;
         }
          .modal-add-task-form button:hover {
-             background-color: #0056b3;
+             background-color: #0056b3; /* Default Light Mode */
          }
           body.dark-mode .modal-add-task-form button {
               background-color: #007bff;
@@ -613,6 +836,13 @@
            body.dark-mode .modal-add-task-form button:hover {
                background-color: #0056b3;
            }
+           body.gray-mode .modal-add-task-form button {
+               background-color: #007bff;
+           }
+            body.gray-mode .modal-add-task-form button:hover {
+                background-color: #0056b3;
+            }
+
 
         /* Holiday/Leave Checkbox in Modal */
         .modal-holiday-checkbox {
@@ -625,11 +855,45 @@
              cursor: pointer;
               width: 18px; /* Increase checkbox size */
               height: 18px;
+               /* Custom checkbox appearance */
+             appearance: none;
+             -webkit-appearance: none;
+             -moz-appearance: none;
+             border: 2px solid #28a745; /* Default Light Mode */
+             border-radius: 4px;
+             outline: none;
+             transition: background-color 0.2s ease, border-color 0.2s ease;
          }
+          .modal-holiday-checkbox input[type="checkbox"]:checked {
+              background-color: #28a745; /* Default Light Mode */
+              border-color: #28a745; /* Default Light Mode */
+          }
+           .modal-holiday-checkbox input[type="checkbox"]:checked::after {
+               content: '\2713'; /* Checkmark character */
+               display: block;
+               color: white;
+               font-size: 14px;
+               text-align: center;
+               line-height: 14px;
+           }
+            body.dark-mode .modal-holiday-checkbox input[type="checkbox"] {
+                border-color: #38c172;
+            }
+             body.dark-mode .modal-holiday-checkbox input[type="checkbox"]:checked {
+                 background-color: #38c172;
+                 border-color: #38c172;
+             }
+             body.gray-mode .modal-holiday-checkbox input[type="checkbox"] {
+                 border-color: #5cb85c;
+             }
+              body.gray-mode .modal-holiday-checkbox input[type="checkbox"]:checked {
+                  background-color: #5cb85c;
+                  border-color: #5cb85c;
+              }
 
 
         .close-button {
-            color: #aaa;
+            color: #aaa; /* Default Light Mode */
             float: right;
             font-size: 28px;
             font-weight: bold;
@@ -639,7 +903,7 @@
 
         .close-button:hover,
         .close-button:focus {
-            color: #777;
+            color: #777; /* Default Light Mode */
             text-decoration: none;
             cursor: pointer;
         }
@@ -650,6 +914,14 @@
           body.dark-mode .close-button:focus {
               color: #e0e0e0;
           }
+          body.gray-mode .close-button {
+              color: #555555;
+          }
+           body.gray-mode .close-button:hover,
+           body.gray-mode .close-button:focus {
+               color: #333333;
+           }
+
 
         /* Download Button Style */
         #downloadTasksButton {
@@ -672,12 +944,19 @@
            body.dark-mode #downloadTasksButton:hover {
                background-color: #1a9b7a;
            }
+           body.gray-mode #downloadTasksButton {
+               background-color: #6c757d; /* Gray */
+           }
+            body.gray-mode #downloadTasksButton:hover {
+                background-color: #545b62;
+            }
+
 
         /* Month Task View Styles */
         .month-task-view h3 {
             margin-top: 0;
-            color: #333;
-            border-bottom: 2px solid #007bff;
+            color: #333; /* Default Light Mode */
+            border-bottom: 2px solid #007bff; /* Default Light Mode */
             padding-bottom: 5px;
              margin-bottom: 15px;
             display: inline-block; /* Prevent close button from affecting title */
@@ -687,6 +966,11 @@
              color: #e0e0e0;
              border-bottom-color: #007bff;
          }
+         body.gray-mode .month-task-view h3 {
+             color: #333333;
+             border-bottom-color: #007bff;
+         }
+
 
          /* Style for the month view close button */
          .month-task-view .close-button {
@@ -694,12 +978,12 @@
              top: 10px;
              right: 10px;
              font-size: 24px;
-             color: #555;
+             color: #555; /* Default Light Mode */
              cursor: pointer;
              transition: color 0.3s ease;
          }
           .month-task-view .close-button:hover {
-              color: #333;
+              color: #333; /* Default Light Mode */
           }
            body.dark-mode .month-task-view .close-button {
                color: #b0b0b0;
@@ -707,6 +991,12 @@
             body.dark-mode .month-task-view .close-button:hover {
                 color: #e0e0e0;
             }
+            body.gray-mode .month-task-view .close-button {
+                color: #555555;
+            }
+             body.gray-mode .month-task-view .close-button:hover {
+                 color: #333333;
+             }
 
 
         .month-task-list {
@@ -718,11 +1008,15 @@
         .month-task-list .task-date-group {
             margin-bottom: 15px;
             padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #eee; /* Default Light Mode */
         }
          body.dark-mode .month-task-list .task-date-group {
              border-bottom-color: #555;
          }
+         body.gray-mode .month-task-list .task-date-group {
+             border-bottom-color: #cccccc;
+         }
+
          .month-task-list .task-date-group:last-child {
              border-bottom: none;
          }
@@ -731,11 +1025,15 @@
         .month-task-list .task-date {
             font-weight: bold;
             margin-bottom: 5px;
-            color: #555;
+            color: #555; /* Default Light Mode */
         }
          body.dark-mode .month-task-list .task-date {
              color: #b0b0b0;
          }
+         body.gray-mode .month-task-list .task-date {
+             color: #555555;
+         }
+
 
          .month-task-list ul {
              list-style: none; /* Remove default bullets */
@@ -749,13 +1047,16 @@
              display: flex; /* Use flex for layout */
              align-items: center;
              padding: 5px 0;
-             border-bottom: 1px dotted #eee;
+             border-bottom: 1px dotted #eee; /* Default Light Mode */
          }
           .month-task-list li:last-child {
               border-bottom: none;
           }
            body.dark-mode .month-task-list li {
                border-bottom-color: #555;
+           }
+           body.gray-mode .month-task-list li {
+               border-bottom-color: #cccccc;
            }
 
 
@@ -769,7 +1070,42 @@
              cursor: pointer;
               width: 18px; /* Increase checkbox size */
               height: 18px;
+               /* Custom checkbox appearance */
+             appearance: none;
+             -webkit-appearance: none;
+             -moz-appearance: none;
+             border: 2px solid #007bff; /* Default Light Mode */
+             border-radius: 4px;
+             outline: none;
+             transition: background-color 0.2s ease, border-color 0.2s ease;
          }
+          .month-task-list li input[type="checkbox"]:checked {
+              background-color: #007bff; /* Default Light Mode */
+              border-color: #007bff; /* Default Light Mode */
+          }
+           .month-task-list li input[type="checkbox"]:checked::after {
+               content: '\2713'; /* Checkmark character */
+               display: block;
+               color: white;
+               font-size: 14px;
+               text-align: center;
+               line-height: 14px;
+           }
+            body.dark-mode .month-task-list li input[type="checkbox"] {
+                border-color: #0056b3;
+            }
+             body.dark-mode .month-task-list li input[type="checkbox"]:checked {
+                 background-color: #0056b3;
+                 border-color: #0056b3;
+             }
+             body.gray-mode .month-task-list li input[type="checkbox"] {
+                 border-color: #007bff;
+             }
+              body.gray-mode .month-task-list li input[type="checkbox"]:checked {
+                  background-color: #007bff;
+                  border-color: #007bff;
+              }
+
 
           .month-task-list li span.completed {
               text-decoration: line-through;
@@ -777,6 +1113,9 @@
           }
            body.dark-mode .month-task-list li span.completed {
                color: #999;
+           }
+           body.gray-mode .month-task-list li span.completed {
+               color: #555555;
            }
 
 
@@ -788,12 +1127,12 @@
              cursor: pointer;
          }
           .month-task-list li .task-actions .edit-task-button {
-              background-color: #ffc107;
-              color: #333;
-              border: 1px solid #ffc107;
+              background-color: #ffc107; /* Default Light Mode */
+              color: #333; /* Default Light Mode */
+              border: 1px solid #ffc107; /* Default Light Mode */
           }
            .month-task-list li .task-actions .edit-task-button:hover {
-               background-color: #e0a800;
+               background-color: #e0a800; /* Default Light Mode */
            }
             body.dark-mode .month-task-list li .task-actions .edit-task-button {
                 background-color: #d49a00;
@@ -803,15 +1142,23 @@
              body.dark-mode .month-task-list li .task-actions .edit-task-button:hover {
                  background-color: #a07400;
              }
+             body.gray-mode .month-task-list li .task-actions .edit-task-button {
+                 background-color: #ffc107;
+                 color: #333333;
+                 border-color: #ffc107;
+             }
+              body.gray-mode .month-task-list li .task-actions .edit-task-button:hover {
+                  background-color: #e0a800;
+              }
 
 
           .month-task-list li .task-actions .delete-task-button {
-             background-color: #dc3545;
-             color: white;
-             border: 1px solid #dc3545;
+             background-color: #dc3545; /* Default Light Mode */
+             color: white; /* Default Light Mode */
+             border: 1px solid #dc3545; /* Default Light Mode */
           }
            .month-task-list li .task-actions .delete-task-button:hover {
-               background-color: #c82333;
+               background-color: #c82333; /* Default Light Mode */
            }
             body.dark-mode .month-task-list li .task-actions .delete-task-button {
                 background-color: #e3342f;
@@ -820,6 +1167,14 @@
              body.dark-mode .month-task-list li .task-actions .delete-task-button:hover {
                  background-color: #cb1b16;
              }
+             body.gray-mode .month-task-list li .task-actions .delete-task-button {
+                 background-color: #d9534f;
+                 color: white;
+                 border-color: #d9534f;
+             }
+              body.gray-mode .month-task-list li .task-actions .delete-task-button:hover {
+                  background-color: #c9302c;
+              }
 
 
         /* --- Print Styles --- */
@@ -1083,7 +1438,7 @@
                 <button id="prevMonth" aria-label="Previous Month">&lt;</button>
                  <button id="prevYear" aria-label="Previous Year">&lt;&lt;</button> <h2 id="currentMonthYear"></h2>
                  <button id="nextYear" aria-label="Next Year">&gt;&gt;</button> <button id="nextMonth" aria-label="Next Month">&gt;</button>
-                 <button id="darkModeToggle" aria-label="Toggle Dark Mode">Dark Mode</button>
+                 <button id="darkModeToggle" aria-label="Toggle Mode">Light Mode</button>
                  <button id="downloadTasksButton" aria-label="Download Tasks">Download Tasks</button>
                  <button id="toggleMonthViewButton" aria-label="Toggle Month View">Show Month Tasks</button> </div>
             <div class="calendar-grid" id="calendarGrid" role="grid" aria-labelledby="currentMonthYear">
@@ -1189,6 +1544,8 @@
         const tasks = JSON.parse(localStorage.getItem('calendarTasks')) || {};
         const holidays = JSON.parse(localStorage.getItem('calendarHolidays')) || {};
         let categories = JSON.parse(localStorage.getItem('calendarCategories')) || ['General', 'Work', 'Personal']; // Default categories
+        let currentMode = localStorage.getItem('calendarMode') || 'light'; // Load mode preference
+
 
         // Ensure loaded tasks have the new structure if they are old format
         for (const date in tasks) {
@@ -1215,6 +1572,10 @@
 
         function saveCategories() {
              localStorage.setItem('calendarCategories', JSON.stringify(categories));
+        }
+
+        function saveMode() {
+            localStorage.setItem('calendarMode', currentMode);
         }
 
 
@@ -1569,22 +1930,40 @@
             }
         }
 
-        // Function to toggle dark mode
-        function toggleDarkMode() {
-            body.classList.toggle('dark-mode');
-            const isDarkMode = body.classList.contains('dark-mode');
-            localStorage.setItem('darkModeEnabled', isDarkMode); // Save preference
-            darkModeToggle.textContent = isDarkMode ? 'Light Mode' : 'Dark Mode'; // Update button text
+        // Function to toggle mode (Light, Dark, Gray)
+        function toggleMode() {
+            body.classList.remove('light-mode', 'dark-mode', 'gray-mode'); // Remove all mode classes
+
+            if (currentMode === 'light') {
+                currentMode = 'dark';
+                body.classList.add('dark-mode');
+                darkModeToggle.textContent = 'Dark Mode';
+            } else if (currentMode === 'dark') {
+                currentMode = 'gray';
+                body.classList.add('gray-mode');
+                darkModeToggle.textContent = 'Gray Mode';
+            } else { // currentMode is 'gray' or initial load without preference
+                currentMode = 'light';
+                // body.classList.add('light-mode'); // light-mode is the default, no class needed
+                darkModeToggle.textContent = 'Light Mode';
+            }
+
+            saveMode(); // Save mode preference
+            renderCalendar(); // Re-render calendar to apply mode styles
+            renderMonthTasksView(); // Re-render month view to apply mode styles
         }
 
-        // Check for saved dark mode preference on page load
-        function applySavedDarkModePreference() {
-            const savedPreference = localStorage.getItem('darkModeEnabled');
-            if (savedPreference === 'true') {
+        // Apply saved mode preference on page load
+        function applySavedModePreference() {
+            if (currentMode === 'dark') {
                 body.classList.add('dark-mode');
-                darkModeToggle.textContent = 'Light Mode';
+                darkModeToggle.textContent = 'Dark Mode';
+            } else if (currentMode === 'gray') {
+                body.classList.add('gray-mode');
+                darkModeToggle.textContent = 'Gray Mode';
             } else {
-                 darkModeToggle.textContent = 'Dark Mode';
+                // Default is light mode, no class needed
+                darkModeToggle.textContent = 'Light Mode';
             }
         }
 
@@ -1675,7 +2054,7 @@
 
         // Function to handle downloading tasks
         function downloadTasks() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ tasks: tasks, holidays: holidays, categories: categories }, null, 2));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ tasks: tasks, holidays: holidays, categories: categories, mode: currentMode }, null, 2)); // Include mode in download
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
             downloadAnchorNode.setAttribute("download", "calendar_data.json"); // Changed filename
@@ -1794,7 +2173,8 @@
 
 
         // Event listener for dark mode toggle button
-        darkModeToggle.addEventListener('click', toggleDarkMode);
+        darkModeToggle.addEventListener('click', toggleMode);
+
 
         // Event listener for download button
         downloadTasksButton.addEventListener('click', downloadTasks);
@@ -1804,7 +2184,7 @@
 
 
         // Initial setup
-        applySavedDarkModePreference();
+        applySavedModePreference(); // Apply mode preference on load
         applySavedMonthViewPreference(); // Apply month view preference on load
         populateCategorySelects(); // Populate categories on initial load
         renderCalendar();
