@@ -534,7 +534,7 @@
            body.gray-mode .day .task-list-preview li {
                border-bottom-color: #cccccc;
            }
-            body.gray-mode .day .task-list-preview li:hover {
+            body.gray-mode .day.task-list-preview li:hover {
                 color: #007bff;
             }
 
@@ -701,10 +701,10 @@
             color: #333; /* Default Light Mode */
             border: 1px solid #ffc107; /* Default Light Mode */
         }
-        .modal-task-actions .edit-task-button:hover {
-            background-color: #e0a800; /* Default Light Mode */
-        }
-         body.dark-mode .modal-task-actions .edit-task-button {
+         .modal-task-actions .edit-task-button:hover {
+             background-color: #e0a800; /* Default Light Mode */
+         }
+          body.dark-mode .modal-task-actions .edit-task-button {
              background-color: #d49a00;
              border-color: #d49a00;
              color: white;
@@ -727,24 +727,24 @@
             color: white; /* Default Light Mode */
             border: 1px solid #dc3545; /* Default Light Mode */
         }
-        .modal-task-actions .delete-task-button:hover {
-            background-color: #c82333; /* Default Light Mode */
-        }
-         body.dark-mode .modal-task-actions .delete-task-button {
-             background-color: #e3342f;
-             border-color: #e3342f;
+         .modal-task-actions .delete-task-button:hover {
+             background-color: #c82333; /* Default Light Mode */
          }
-          body.dark-mode .modal-task-actions .delete-task-button:hover {
-               background-color: #cb1b16;
-           }
-           body.gray-mode .modal-task-actions .delete-task-button {
-               background-color: #d9534f;
-               color: white;
-               border-color: #d9534f;
-           }
-            body.gray-mode .modal-task-actions .delete-task-button:hover {
-                background-color: #c9302c;
+          body.dark-mode .modal-task-actions .delete-task-button {
+              background-color: #e3342f;
+              border-color: #e3342f;
+          }
+           body.dark-mode .modal-task-actions .delete-task-button:hover {
+                background-color: #cb1b16;
             }
+            body.gray-mode .modal-task-actions .delete-task-button {
+                background-color: #d9534f;
+                color: white;
+                border-color: #d9534f;
+            }
+             body.gray-mode .modal-task-actions .delete-task-button:hover {
+                 background-color: #c9302c;
+             }
 
 
         .modal-add-task-form {
@@ -812,6 +812,26 @@
                border-color: #bbbbbb;
            }
 
+        .modal-add-task-form input[type="time"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc; /* Default Light Mode */
+            font-size: 1rem;
+            background-color: #fff; /* Default Light Mode */
+            color: #333; /* Default Light Mode */
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+         body.dark-mode .modal-add-task-form input[type="time"] {
+             background-color: #4a4a4a;
+             color: #e0e0e0;
+             border-color: #555;
+         }
+          body.gray-mode .modal-add-task-form input[type="time"] {
+              background-color: #dddddd;
+              color: #333333;
+              border-color: #bbbbbb;
+          }
+
 
         .modal-add-task-form input[type="text"] {
             flex-grow: 1;
@@ -864,11 +884,11 @@
              outline: none;
              transition: background-color 0.2s ease, border-color 0.2s ease;
          }
-          .modal-holiday-checkbox input[type="checkbox"]:checked {
+          body .modal-holiday-checkbox input[type="checkbox"]:checked {
               background-color: #28a745; /* Default Light Mode */
               border-color: #28a745; /* Default Light Mode */
           }
-           .modal-holiday-checkbox input[type="checkbox"]:checked::after {
+           body .modal-holiday-checkbox input[type="checkbox"]:checked::after {
                content: '\2713'; /* Checkmark character */
                display: block;
                color: white;
@@ -1079,11 +1099,11 @@
              outline: none;
              transition: background-color 0.2s ease, border-color 0.2s ease;
          }
-          .month-task-list li input[type="checkbox"]:checked {
+          body .month-task-list li input[type="checkbox"]:checked {
               background-color: #007bff; /* Default Light Mode */
               border-color: #007bff; /* Default Light Mode */
           }
-           .month-task-list li input[type="checkbox"]:checked::after {
+           body .month-task-list li input[type="checkbox"]:checked::after {
                content: '\2713'; /* Checkmark character */
                display: block;
                color: white;
@@ -1131,7 +1151,7 @@
               color: #333; /* Default Light Mode */
               border: 1px solid #ffc107; /* Default Light Mode */
           }
-           .month-task-list li .task-actions .edit-task-button:hover {
+           body .month-task-list li .task-actions .edit-task-button:hover {
                background-color: #e0a800; /* Default Light Mode */
            }
             body.dark-mode .month-task-list li .task-actions .edit-task-button {
@@ -1157,7 +1177,7 @@
              color: white; /* Default Light Mode */
              border: 1px solid #dc3545; /* Default Light Mode */
           }
-           .month-task-list li .task-actions .delete-task-button:hover {
+           body .month-task-list li .task-actions .delete-task-button:hover {
                background-color: #c82333; /* Default Light Mode */
            }
             body.dark-mode .month-task-list li .task-actions .delete-task-button {
@@ -1476,6 +1496,7 @@
                       <label for="newTaskCategorySelect" class="sr-only">Select Category</label> <select id="newTaskCategorySelect" aria-label="Select Task Category"></select>
                       <label for="addNewCategoryInput" class="sr-only">Add New Category</label> <input type="text" id="addNewCategoryInput" placeholder="New Category" aria-label="Add New Category">
                  </div>
+                 <label for="newTaskTime" class="sr-only">Task Time</label> <input type="time" id="newTaskTime" aria-label="Task Time">
                  <label for="newTaskDescription" class="sr-only">New Task Description</label> <input type="text" id="newTaskDescription" placeholder="Add New Task" aria-label="Add New Task Description">
                 <button id="addNewTaskButton">Add Task</button>
             </div>
@@ -1489,6 +1510,7 @@
              <span class="close-button" id="closeEditModal" aria-label="Close Edit Modal">&times;</span>
              <h3 id="editTaskModalTitle">Edit Task</h3>
               <label for="editTaskCategorySelect" class="sr-only">Select Category</label> <select id="editTaskCategorySelect" aria-label="Select Task Category"></select>
+              <label for="editTaskTime" class="sr-only">Task Time</label> <input type="time" id="editTaskTime" aria-label="Task Time">
               <label for="editTaskDescription" class="sr-only">Edit Task Description</label> <input type="text" id="editTaskDescription" aria-label="Edit Task Description">
              <div class="modal-buttons">
                  <button id="confirmDeleteTaskButton" class="delete-button">Delete Task</button>
@@ -1514,6 +1536,7 @@
         const newTaskDescriptionInput = document.getElementById('newTaskDescription');
         const newTaskCategorySelect = document.getElementById('newTaskCategorySelect'); // Get new task category select
         const addNewCategoryInput = document.getElementById('addNewCategoryInput'); // Get add new category input
+        const newTaskTimeInput = document.getElementById('newTaskTime'); // Get new task time input
         const addNewTaskButton = document.getElementById('addNewTaskButton');
         const modalDateInput = document.getElementById('modalDate');
         const darkModeToggle = document.getElementById('darkModeToggle');
@@ -1532,6 +1555,7 @@
         const closeEditModalButton = document.getElementById('closeEditModal');
         const editTaskDescriptionInput = document.getElementById('editTaskDescription');
         const editTaskCategorySelect = document.getElementById('editTaskCategorySelect'); // Get edit task category select
+        const editTaskTimeInput = document.getElementById('editTaskTime'); // Get edit task time input
         const confirmSaveTaskButton = document.getElementById('confirmSaveTaskButton');
         const confirmDeleteTaskButton = document.getElementById('confirmDeleteTaskButton');
         const editModalDateInput = document.getElementById('editModalDate');
@@ -1547,13 +1571,17 @@
         let currentMode = localStorage.getItem('calendarMode') || 'light'; // Load mode preference
 
 
-        // Ensure loaded tasks have the new structure if they are old format
+        // Ensure loaded tasks have the new structure (including time) if they are old format
         for (const date in tasks) {
             tasks[date] = tasks[date].map(task => {
                 if (typeof task === 'string') {
-                    return { description: task, category: '', completed: false };
+                    return { description: task, category: '', completed: false, time: '' }; // Add time property
                 }
-                return task; // Assume it's already in the new object format
+                // Ensure time property exists for existing objects
+                if (!task.hasOwnProperty('time')) {
+                     task.time = '';
+                }
+                return task;
             });
         }
 
@@ -1607,6 +1635,15 @@
 
             const tasksForDate = tasks[dateString] || [];
 
+            // Sort tasks by time
+            tasksForDate.sort((a, b) => {
+                 if (!a.time && !b.time) return 0; // Both have no time
+                 if (!a.time) return 1; // a has no time, b has time
+                 if (!b.time) return -1; // b has no time, a has time
+                 return a.time.localeCompare(b.time); // Compare times
+            });
+
+
             if (tasksForDate.length === 0) {
                 const listItem = document.createElement('li');
                 listItem.textContent = 'No tasks for this date.';
@@ -1615,12 +1652,6 @@
                 tasksForDate.forEach((task, index) => {
                     const listItem = document.createElement('li');
                     listItem.classList.add('modal-task-item');
-
-                    const taskSpan = document.createElement('span');
-                    taskSpan.textContent = task.description;
-                    if (task.completed) {
-                        taskSpan.classList.add('completed');
-                    }
 
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
@@ -1633,6 +1664,13 @@
                         renderCalendar(); // Update calendar view
                         renderMonthTasksView(); // Update month view
                     });
+
+                    const taskContent = document.createElement('span');
+                    taskContent.textContent = `${task.time ? task.time + ' - ' : ''}${task.description}`; // Display time if available
+                     if (task.completed) {
+                         taskContent.classList.add('completed');
+                     }
+
 
                     const actionsDiv = document.createElement('div');
                     actionsDiv.classList.add('modal-task-actions');
@@ -1658,7 +1696,7 @@
                      });
 
                     listItem.appendChild(checkbox);
-                    listItem.appendChild(taskSpan);
+                    listItem.appendChild(taskContent); // Append task content span
                     // Optionally display category in modal list
                     if (task.category) {
                         const categorySpan = document.createElement('span');
@@ -1693,11 +1731,13 @@
              newTaskDescriptionInput.value = ''; // Clear new task input
              addNewCategoryInput.value = ''; // Clear add new category input
              newTaskCategorySelect.value = ''; // Reset category dropdown
+             newTaskTimeInput.value = ''; // Clear new task time input
         }
 
          // Function to open the edit task modal
          function openEditTaskModal(dateString, taskIndex, taskObject) {
              editTaskDescriptionInput.value = taskObject.description;
+             editTaskTimeInput.value = taskObject.time || ''; // Populate time input
              populateCategorySelects(); // Populate category dropdown
              editTaskCategorySelect.value = taskObject.category || ''; // Set selected category
              editModalDateInput.value = dateString;
@@ -1735,6 +1775,16 @@
                         dateGroup.appendChild(dateHeader);
 
                         const taskList = document.createElement('ul');
+
+                        // Sort tasks by time for month view as well
+                        tasksForDate.sort((a, b) => {
+                            if (!a.time && !b.time) return 0;
+                            if (!a.time) return 1;
+                            if (!b.time) return -1;
+                            return a.time.localeCompare(b.time);
+                        });
+
+
                         tasksForDate.forEach((task, index) => {
                             const taskItem = document.createElement('li');
 
@@ -1753,11 +1803,12 @@
                                 }
                             });
 
-                            const taskSpan = document.createElement('span');
-                            taskSpan.textContent = task.description;
+                            const taskContent = document.createElement('span');
+                            taskContent.textContent = `${task.time ? task.time + ' - ' : ''}${task.description}`; // Display time if available
                             if (task.completed) {
-                                taskSpan.classList.add('completed');
+                                taskContent.classList.add('completed');
                             }
+
 
                             const actionsDiv = document.createElement('div');
                             actionsDiv.classList.add('task-actions'); // Use a different class name to avoid conflict with modal actions
@@ -1785,7 +1836,7 @@
                              });
 
                             taskItem.appendChild(checkbox);
-                            taskItem.appendChild(taskSpan);
+                            taskItem.appendChild(taskContent); // Append task content span
                              // Optionally display category in month view list
                              if (task.category) {
                                  const categorySpan = document.createElement('span');
@@ -1892,13 +1943,21 @@
                 taskListPreview.classList.add('task-list-preview');
                 day.appendChild(taskListPreview);
 
-                // Display tasks for this date
+                // Display tasks for this date (sorted by time)
                 if (tasksForDate.length > 0) {
+                    // Sort tasks by time for preview
+                    tasksForDate.sort((a, b) => {
+                        if (!a.time && !b.time) return 0;
+                        if (!a.time) return 1;
+                        if (!b.time) return -1;
+                        return a.time.localeCompare(b.time);
+                    });
+
                     // Limit preview to a few tasks
                     const previewTasks = tasksForDate.slice(0, 3); // Show up to 3 tasks
                     previewTasks.forEach((task) => {
                         const taskItem = document.createElement('li');
-                        taskItem.textContent = task.description; // Display description
+                        taskItem.textContent = `${task.time ? task.time + ' - ' : ''}${task.description}`; // Display time if available
                         if (task.completed) {
                             taskItem.classList.add('completed');
                         }
@@ -1962,7 +2021,7 @@
                 body.classList.add('gray-mode');
                 darkModeToggle.textContent = 'Gray Mode';
             } else {
-                // Default is light mode, no class needed
+                /* Default is light mode, no class needed, but explicitly set text */
                 darkModeToggle.textContent = 'Light Mode';
             }
         }
@@ -1970,6 +2029,7 @@
         // Function to handle adding a new task from the modal
         function addNewTaskFromModal() {
             const description = newTaskDescriptionInput.value.trim();
+            const time = newTaskTimeInput.value; // Get time value
             let category = newTaskCategorySelect.value; // Get category from select
 
             // If a new category is typed, use that and add to categories list
@@ -1990,11 +2050,12 @@
                 if (!tasks[date]) {
                     tasks[date] = [];
                 }
-                tasks[date].push({ description: description, category: category, completed: false }); // Save as object
+                tasks[date].push({ description: description, category: category, completed: false, time: time }); // Save as object with time
                 saveTasks(); // Save to localStorage
                 newTaskDescriptionInput.value = ''; // Clear input
                 addNewCategoryInput.value = ''; // Clear add new category input
                 newTaskCategorySelect.value = ''; // Reset category dropdown
+                newTaskTimeInput.value = ''; // Clear new task time input
                 renderModalTasks(date); // Re-render task list in modal
                 renderCalendar(); // Re-render calendar to update highlights
                 renderMonthTasksView(); // Update month view
@@ -2006,6 +2067,7 @@
          // Function to handle saving edited task from the edit modal
          function saveEditedTask() {
              const description = editTaskDescriptionInput.value.trim();
+             const time = editTaskTimeInput.value; // Get time value
              const category = editTaskCategorySelect.value; // Get category from select
              const date = editModalDateInput.value;
              const index = parseInt(editModalTaskIndexInput.value);
@@ -2014,6 +2076,7 @@
                  // Preserve completed status
                  tasks[date][index].description = description;
                  tasks[date][index].category = category;
+                 tasks[date][index].time = time; // Update time
                  saveTasks(); // Save to localStorage
                  editTaskModal.style.display = 'none'; // Close edit modal
                  renderModalTasks(date); // Re-render task list in main modal
