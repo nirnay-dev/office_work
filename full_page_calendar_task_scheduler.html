@@ -3,122 +3,318 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Full-Page Task Calendar</title>
+    <title>Enhanced Task Calendar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* --- Base Styles --- */
+        :root {
+            /* Light Mode Colors */
+            --bg-color: #f4f4f9;
+            --text-color: #333;
+            --app-bg-color: #ffffff;
+            --app-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --header-bg-color: #007bff;
+            --header-text-color: white;
+            --grid-bg-color: #e9ecef;
+            --day-label-bg-color: #dee2e6;
+            --day-label-text-color: #555;
+            --day-bg-color: #ffffff;
+            --day-hover-bg-color: #f8f9fa;
+            --day-text-color: #333;
+            --day-border-color: transparent;
+            --day-shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --today-border-color: #28a745;
+            --today-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+            --has-task-bg-color: #fff3cd;
+            --has-task-border-color: #ffc107;
+            --high-density-border-color: #dc3545;
+            --weekend-bg-color: #cfe2ff;
+            --weekend-text-color: #084298;
+            --weekend-task-bg-color: #b9d3f3;
+            --due-soon-border-color: #ffc107;
+            --due-soon-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+            --holiday-bg-color: #d4edda;
+            --holiday-border-color: #28a745;
+            --holiday-task-bg-color: #c3e6cb;
+            --task-preview-text-color: #666;
+            --task-preview-border-color: #eee;
+            --task-preview-hover-color: #007bff;
+            --modal-bg-color: #fefefe;
+            --modal-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            --modal-text-color: #333;
+            --modal-list-border-color: #eee;
+            --modal-item-border-color: #eee;
+            --modal-input-bg-color: #fff;
+            --modal-input-text-color: #333;
+            --modal-input-border-color: #ccc;
+            --checkbox-border-color: #007bff;
+            --checkbox-checked-bg-color: #007bff;
+            --completed-text-color: #6c757d;
+            --edit-button-bg-color: #ffc107;
+            --edit-button-text-color: #333;
+            --edit-button-border-color: #ffc107;
+            --edit-button-hover-bg-color: #e0a800;
+            --delete-button-bg-color: #dc3545;
+            --delete-button-text-color: white;
+            --delete-button-border-color: #dc3545;
+            --delete-button-hover-bg-color: #c82333;
+            --info-button-bg-color: #17a2b8;
+            --info-button-hover-bg-color: #138496;
+            --close-button-color: #aaa;
+            --close-button-hover-color: #777;
+            --priority-high-color: #dc3545;
+            --priority-medium-color: #ffc107;
+            --priority-low-color: #6c757d;
+
+             /* Print specific */
+             --print-bg-color: #fff;
+             --print-text-color: #000;
+             --print-header-bg-color: #fff;
+             --print-header-text-color: #000;
+             --print-separator-color: #ccc;
+             --print-grid-bg-color: #fff;
+             --print-day-label-bg-color: #eee;
+             --print-day-label-text-color: #333;
+             --print-day-border-color: #ddd;
+             --print-today-border-color: #000;
+             --print-has-task-bg-color: #f0f0f0;
+             --print-has-task-border-color: #ccc;
+             --print-weekend-bg-color: #e0e0e0;
+             --print-weekend-task-bg-color: #d0d0d0;
+             --print-holiday-bg-color: #d4edda;
+             --print-holiday-border-color: #28a745;
+             --print-holiday-task-bg-color: #c3e6cb;
+             --print-task-preview-text-color: #333;
+             --print-completed-text-color: #666;
+        }
+
+        body.dark-mode {
+            --bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --app-bg-color: #2d2d2d;
+            --app-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --header-bg-color: #0056b3;
+            --grid-bg-color: #3a3a3a;
+            --day-label-bg-color: #4a4a4a;
+            --day-label-text-color: #b0b0b0;
+            --day-bg-color: #3a3a3a;
+            --day-hover-bg-color: #4a4a4a;
+            --day-text-color: #e0e0e0;
+            --day-shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.2);
+            --today-border-color: #38c172;
+            --today-shadow: 0 0 10px rgba(56, 193, 114, 0.4);
+            --has-task-bg-color: #4a412a;
+            --has-task-border-color: #d49a00;
+            --high-density-border-color: #e3342f;
+            --weekend-bg-color: #3a4a5a;
+            --weekend-text-color: #a0c0e0;
+            --weekend-task-bg-color: #4a5a6a;
+            --due-soon-border-color: #d49a00;
+            --due-soon-shadow: 0 0 10px rgba(212, 154, 0, 0.6);
+            --holiday-bg-color: #28a745;
+            --holiday-border-color: #38c172;
+            --holiday-task-bg-color: #218838;
+            --task-preview-text-color: #b0b0b0;
+            --task-preview-border-color: #555;
+            --task-preview-hover-color: #72a0ff;
+            --modal-bg-color: #3a3a3a;
+            --modal-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            --modal-text-color: #e0e0e0;
+            --modal-list-border-color: #555;
+            --modal-item-border-color: #555;
+            --modal-input-bg-color: #4a4a4a;
+            --modal-input-text-color: #e0e0e0;
+            --modal-input-border-color: #555;
+            --checkbox-border-color: #0056b3;
+            --checkbox-checked-bg-color: #0056b3;
+            --completed-text-color: #999;
+            --edit-button-bg-color: #d49a00;
+            --edit-button-text-color: white;
+            --edit-button-border-color: #d49a00;
+            --edit-button-hover-bg-color: #a07400;
+            --delete-button-bg-color: #e3342f;
+            --delete-button-border-color: #e3342f;
+            --delete-button-hover-bg-color: #cb1b16;
+            --info-button-bg-color: #20c997;
+            --info-button-hover-bg-color: #1a9b7a;
+            --close-button-color: #b0b0b0;
+            --close-button-hover-color: #e0e0e0;
+        }
+
+        body.gray-mode {
+            --bg-color: #cccccc;
+            --text-color: #333333;
+            --app-bg-color: #eeeeee;
+            --app-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            --header-bg-color: #6c757d;
+            --grid-bg-color: #dddddd;
+            --day-label-bg-color: #cccccc;
+            --day-label-text-color: #555555;
+            --day-bg-color: #f8f8f8;
+            --day-hover-bg-color: #eeeeee;
+            --day-text-color: #333333;
+            --day-shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --today-border-color: #5cb85c;
+            --today-shadow: 0 0 10px rgba(92, 184, 92, 0.3);
+            --has-task-bg-color: #ffeeba;
+            --has-task-border-color: #ffc107;
+            --high-density-border-color: #d9534f;
+            --weekend-bg-color: #dddddd;
+            --weekend-text-color: #555555;
+            --weekend-task-bg-color: #cccccc;
+            --due-soon-border-color: #ffc107;
+            --due-soon-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
+            --holiday-bg-color: #bce8f1;
+            --holiday-border-color: #31b0d5;
+            --holiday-task-bg-color: #a6e1ec;
+            --task-preview-text-color: #555555;
+            --task-preview-border-color: #cccccc;
+            --task-preview-hover-color: #007bff;
+            --modal-bg-color: #eeeeee;
+            --modal-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            --modal-text-color: #333333;
+            --modal-list-border-color: #cccccc;
+            --modal-item-border-color: #cccccc;
+            --modal-input-bg-color: #dddddd;
+            --modal-input-text-color: #333333;
+            --modal-input-border-color: #bbbbbb;
+            --checkbox-border-color: #007bff;
+            --checkbox-checked-bg-color: #007bff;
+            --completed-text-color: #555555;
+            --edit-button-bg-color: #ffc107;
+            --edit-button-text-color: #333333;
+            --edit-button-border-color: #ffc107;
+            --edit-button-hover-bg-color: #e0a800;
+            --delete-button-bg-color: #d9534f;
+            --delete-button-text-color: white;
+            --delete-button-border-color: #d9534f;
+            --delete-button-hover-bg-color: #c9302c;
+            --info-button-bg-color: #6c757d;
+            --info-button-hover-bg-color: #545b62;
+            --close-button-color: #555555;
+            --close-button-hover-color: #333333;
+        }
+
+        /* --- General Styles --- */
         body {
-            font-family: 'Inter', sans-serif; /* Using Inter font */
+            font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f4f4f9; /* Default Light Mode Background */
-            color: #333; /* Default Light Mode Text */
+            background-color: var(--bg-color);
+            color: var(--text-color);
             min-height: 100vh;
-            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for mode changes */
-        }
-
-        /* Dark Mode Styles */
-        body.dark-mode {
-            background-color: #1e1e1e; /* Dark background */
-            color: #e0e0e0; /* Light text */
-        }
-
-        /* Gray Mode Styles */
-        body.gray-mode {
-            background-color: #cccccc; /* Light gray background */
-            color: #333333; /* Dark gray text */
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .main-layout {
-            display: flex; /* Use flexbox for main layout */
+            display: flex;
             width: 100%;
-            max-width: 1200px; /* Increased max width to accommodate side panel */
+            max-width: 1400px; /* Increased max width */
             margin: 20px;
-            gap: 20px; /* Gap between calendar and task view */
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
+        .calendar-container { /* New container for calendar and controls */
+             flex-grow: 1;
+             flex-basis: 600px;
+             display: flex;
+             flex-direction: column;
+             gap: 10px; /* Gap between header/controls and grid */
+        }
+
+        .controls-and-search {
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             padding: 10px 20px;
+             background-color: var(--app-bg-color);
+             border-radius: 8px;
+             box-shadow: var(--app-shadow);
+             flex-wrap: wrap;
+             gap: 10px;
+        }
+
+         .controls-and-search input[type="search"],
+         .controls-and-search select {
+             padding: 8px 12px;
+             border-radius: 5px;
+             border: 1px solid var(--modal-input-border-color);
+             background-color: var(--modal-input-bg-color);
+             color: var(--modal-input-text-color);
+             font-size: 0.9rem;
+         }
+          .controls-and-search button {
+              padding: 8px 12px;
+              font-size: 0.9rem;
+          }
+
+         .filter-controls {
+             display: flex;
+             gap: 10px;
+             align-items: center;
+         }
+
+
         .calendar-app {
-            flex-grow: 1; /* Allow calendar to grow */
-            flex-basis: 600px; /* Minimum width for calendar */
-            background-color: #ffffff; /* Default Light Mode */
-            border-radius: 12px; /* Rounded corners */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            overflow: hidden; /* Ensure shadow is visible */
+            /* flex-grow: 1; Replaced by container */
+            /* flex-basis: 600px; Replaced by container */
+            background-color: var(--app-bg-color);
+            border-radius: 12px;
+            box-shadow: var(--app-shadow);
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        body.dark-mode .calendar-app {
-            background-color: #2d2d2d; /* Darker background for app */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        body.gray-mode .calendar-app {
-            background-color: #eeeeee; /* Slightly lighter gray */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-        }
-
-
         .month-task-view {
-            flex-basis: 350px; /* Minimum width for task view */
-            flex-shrink: 0; /* Prevent shrinking */
-            background-color: #ffffff; /* Default Light Mode */
+            flex-basis: 350px;
+            flex-shrink: 0;
+            background-color: var(--app-bg-color);
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--app-shadow);
             padding: 20px;
-            overflow-y: auto; /* Enable scrolling for tasks */
-            max-height: calc(100vh - 80px); /* Limit height based on viewport */
+            overflow-y: auto;
+            max-height: calc(100vh - 120px); /* Adjusted max height */
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
-            position: relative; /* Needed for absolute positioning of close button */
+            position: relative;
         }
 
-         body.dark-mode .month-task-view {
-             background-color: #2d2d2d;
-             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-         }
+        /* --- General Button Styles --- */
+        button {
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+            border: none;
+            color: var(--header-text-color); /* Default button text color */
+            background-color: var(--header-bg-color); /* Default button background */
+        }
 
-         body.gray-mode .month-task-view {
-             background-color: #eeeeee;
-             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-         }
+        button:hover {
+            opacity: 0.9;
+        }
+        button:active {
+            opacity: 0.7;
+        }
 
-
-         /* --- General Button Styles --- */
-         button {
-             padding: 10px 15px;
-             border-radius: 6px;
-             cursor: pointer;
-             font-size: 1rem;
-             transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
-             border: none; /* Remove default border */
-         }
-
-         button:hover {
-             opacity: 0.9; /* Subtle hover effect */
-         }
-
-         button:active {
-             opacity: 0.7; /* Subtle active effect */
-         }
-
-         /* Style for the task view toggle button */
-         #toggleMonthViewButton {
-             background-color: #17a2b8; /* Info blue */
-             color: white;
-             margin-left: 10px;
-             /* Adjusted padding and font size to match other header buttons */
-             padding: 5px 10px;
-             font-size: 1rem; /* Kept 1rem for readability */
-         }
-          body.dark-mode #toggleMonthViewButton {
-               background-color: #20c997; /* Teal */
-           }
-           body.gray-mode #toggleMonthViewButton {
-               background-color: #6c757d; /* Gray */
-           }
+        /* Style for the task view toggle button */
+        #toggleMonthViewButton, #downloadTasksButton, #importTasksButton {
+            background-color: var(--info-button-bg-color);
+            color: white;
+            margin-left: 10px;
+            padding: 5px 10px;
+            font-size: 1rem;
+        }
+        #toggleMonthViewButton:hover, #downloadTasksButton:hover, #importTasksButton:hover {
+             background-color: var(--info-button-hover-bg-color);
+             opacity: 1; /* Override general hover */
+        }
 
 
         .calendar-header {
@@ -126,567 +322,323 @@
             justify-content: space-between;
             align-items: center;
             padding: 15px 20px;
-            background-color: #007bff; /* Default Light Mode */
-            color: white;
+            background-color: var(--header-bg-color);
+            color: var(--header-text-color);
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
             transition: background-color 0.3s ease;
-            flex-wrap: wrap; /* Allow items to wrap on smaller screens */
-            gap: 10px; /* Gap between header items */
+            flex-wrap: wrap;
+            gap: 10px;
         }
-
-        body.dark-mode .calendar-header {
-            background-color: #0056b3; /* Darker blue header in dark mode */
-        }
-
-        body.gray-mode .calendar-header {
-            background-color: #6c757d; /* Medium gray header */
-        }
-
 
         /* --- Header Navigation Button Styles --- */
         .calendar-header button {
-            background-color: transparent; /* Transparent background */
-            color: white; /* Icon/text color */
-            border: 1px solid transparent; /* Subtle transparent border */
-            padding: 5px 10px; /* Adjusted padding */
-            font-size: 1.5rem; /* Larger font size for icons */
-        }
-
-        .calendar-header button:hover {
-            background-color: rgba(255, 255, 255, 0.2); /* Subtle background on hover */
-            border-color: rgba(255, 255, 255, 0.5); /* Subtle border on hover */
-        }
-
-        /* Dark mode adjustments for navigation buttons */
-        body.dark-mode .calendar-header button {
-            color: #e0e0e0; /* Lighter color in dark mode */
             background-color: transparent;
-            border-color: transparent;
+            color: var(--header-text-color);
+            border: 1px solid transparent;
+            padding: 5px 10px;
+            font-size: 1.5rem;
         }
-
+        .calendar-header button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            opacity: 1; /* Override general hover */
+        }
         body.dark-mode .calendar-header button:hover {
             background-color: rgba(255, 255, 255, 0.1);
             border-color: rgba(255, 255, 255, 0.3);
         }
-
-        /* Gray mode adjustments for navigation buttons */
-         body.gray-mode .calendar-header button {
-             color: #e0e0e0; /* Lighter color in gray mode */
-             background-color: transparent;
-             border-color: transparent;
+         body.gray-mode .calendar-header button:hover {
+             background-color: rgba(255, 255, 255, 0.1);
+             border-color: rgba(255, 255, 255, 0.3);
          }
-          body.gray-mode .calendar-header button:hover {
-              background-color: rgba(255, 255, 255, 0.1);
-              border-color: rgba(255, 255, 255, 0.3);
-          }
-
 
         /* Style for Year Navigation Buttons */
         .calendar-header #prevYear,
         .calendar-header #nextYear {
-             font-size: 1.2rem; /* Slightly smaller font size for year arrows */
-             padding: 5px 8px; /* Adjusted padding */
+            font-size: 1.2rem;
+            padding: 5px 8px;
         }
-         /* --- End Header Navigation Button Styles --- */
-
 
         .calendar-header h2 {
             margin: 0;
             font-size: 1.8rem;
-            flex-grow: 1; /* Allow month/year title to take space */
-            text-align: center; /* Center the title */
+            flex-grow: 1;
+            text-align: center;
         }
+
+        /* Mode Toggle button specific style */
+        #darkModeToggle {
+             background-color: var(--info-button-bg-color); /* Match other info buttons */
+             color: white;
+             font-size: 1rem; /* Standard font size */
+             padding: 5px 10px; /* Standard padding */
+        }
+         #darkModeToggle:hover {
+              background-color: var(--info-button-hover-bg-color); /* Match hover */
+              opacity: 1;
+         }
 
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 1px; /* Small gap between days */
+            gap: 1px;
             padding: 10px;
-            background-color: #e9ecef; /* Default Light Mode */
+            background-color: var(--grid-bg-color);
             transition: background-color 0.3s ease;
         }
-
-         body.dark-mode .calendar-grid {
-             background-color: #3a3a3a; /* Darker background for grid */
-         }
-
-         body.gray-mode .calendar-grid {
-             background-color: #dddddd; /* Lighter gray for grid */
-         }
-
 
         .day-label {
             font-weight: bold;
             text-align: center;
             padding: 10px 0;
-            color: #555; /* Default Light Mode */
-            background-color: #dee2e6; /* Default Light Mode */
+            color: var(--day-label-text-color);
+            background-color: var(--day-label-bg-color);
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-         body.dark-mode .day-label {
-             color: #b0b0b0;
-             background-color: #4a4a4a;
-         }
-         body.gray-mode .day-label {
-             color: #555555;
-             background-color: #cccccc;
-         }
-
-
         .day {
-            min-height: 100px; /* Minimum height for day cells */
+            min-height: 100px;
             padding: 10px;
-            background-color: #ffffff; /* Default Light Mode */
-            border-radius: 4px; /* Rounded corners for days */
-            cursor: pointer; /* Cursor indicates it's interactive */
+            background-color: var(--day-bg-color);
+            border-radius: 4px;
+            cursor: pointer;
             transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease, border-color 0.3s ease;
             position: relative;
-            overflow-y: auto; /* Enable scrolling for tasks */
-            max-height: 150px; /* Max height to prevent excessive growth */
+            overflow-y: auto;
+            max-height: 150px;
             display: flex;
             flex-direction: column;
+            color: var(--day-text-color);
+            border: 1px solid var(--day-border-color); /* Use variable */
+            /* Drag and Drop Styles */
+             border: 2px dashed transparent; /* Placeholder for drop target highlight */
         }
+        .day.drag-over { /* Style when dragging over a day */
+             border-color: var(--header-bg-color); /* Highlight with accent color */
+             background-color: var(--day-hover-bg-color);
+        }
+
 
         .day:hover {
-            background-color: #f8f9fa; /* Default Light Mode */
-            transform: translateY(-2px); /* Slight lift on hover */
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            background-color: var(--day-hover-bg-color);
+            transform: translateY(-2px);
+            box-shadow: var(--day-shadow-hover);
         }
-
-         body.dark-mode .day {
-             background-color: #3a3a3a;
-             color: #e0e0e0;
-             box-shadow: none; /* Remove light shadow in dark mode */
-         }
-         body.dark-mode .day:hover {
-             background-color: #4a4a4a;
-             transform: translateY(-2px);
-             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Darker shadow on hover */
-         }
-
-         body.gray-mode .day {
-             background-color: #f8f8f8; /* Very light gray */
-             color: #333333;
-             box-shadow: none;
-         }
-          body.gray-mode .day:hover {
-              background-color: #eeeeee;
-              transform: translateY(-2px);
-              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          }
-
 
         .day.today {
-            border: 2px solid #28a745; /* Green border for today */
-            box-shadow: 0 0 10px rgba(40, 167, 69, 0.3); /* Green shadow for today */
+            border: 2px solid var(--today-border-color);
+            box-shadow: var(--today-shadow);
         }
-         body.dark-mode .day.today {
-             border-color: #38c172; /* Brighter green for today in dark mode */
-             box-shadow: 0 0 10px rgba(56, 193, 114, 0.4);
-         }
-         body.gray-mode .day.today {
-             border-color: #5cb85c; /* Another green for today in gray mode */
-             box-shadow: 0 0 10px rgba(92, 184, 92, 0.3);
-         }
 
-
-        /* Style for days with tasks */
         .day.has-task {
-            background-color: #fff3cd; /* Default Light Mode */
-            border: 1px solid #ffc107; /* Default Light Mode */
+            background-color: var(--has-task-bg-color);
+            border: 1px solid var(--has-task-border-color);
         }
+        .day.has-task.today { border-color: var(--today-border-color); }
 
-         .day.has-task.today {
-             border-color: #28a745; /* Keep green border for today even if it has tasks */
-         }
-          body.dark-mode .day.has-task {
-              background-color: #4a412a; /* Darker yellow background in dark mode */
-              border-color: #d49a00; /* Darker yellow border */
-          }
-          body.dark-mode .day.has-task.today {
-              border-color: #38c172; /* Keep today's border in dark mode */
-          }
-          body.gray-mode .day.has-task {
-              background-color: #ffeeba; /* Lighter yellow */
-              border-color: #ffc107;
-          }
-           body.gray-mode .day.has-task.today {
-               border-color: #5cb85c;
-           }
-
-
-        /* Style for days with high task density */
         .day.high-density {
-            border-width: 2px; /* Thicker border */
-            border-style: dashed; /* Dashed border */
-            border-color: #dc3545; /* Default Light Mode */
+            border-width: 2px;
+            border-style: dashed;
+            border-color: var(--high-density-border-color);
         }
-         body.dark-mode .day.high-density {
-             border-color: #e3342f; /* Darker red in dark mode */
-         }
-         .day.high-density.today {
-             border-color: #28a745; /* Keep today's border */
-         }
-          body.dark-mode .day.high-density.today {
-              border-color: #38c172;
-          }
-          body.gray-mode .day.high-density {
-              border-color: #d9534f; /* Another red */
-          }
-           body.gray-mode .day.high-density.today {
-               border-color: #5cb85c;
-           }
+        .day.high-density.today { border-color: var(--today-border-color); }
 
-
-        /* Style for weekend days - Adjusted for better visibility */
         .day.weekend {
-            background-color: #cfe2ff; /* Default Light Mode */
-            color: #084298; /* Default Light Mode */
+            background-color: var(--weekend-bg-color);
+            color: var(--weekend-text-color);
         }
+        .day.weekend.today { border-color: var(--today-border-color); }
+        .day.weekend.has-task {
+            background-color: var(--weekend-task-bg-color);
+            border-color: var(--has-task-border-color);
+        }
+        .day.weekend.has-task.today { border-color: var(--today-border-color); }
 
-         .day.weekend.today {
-             border-color: #28a745; /* Keep today's border */
-         }
-         .day.weekend.has-task {
-             background-color: #b9d3f3; /* Slightly darker blue for weekends with tasks */
-             border-color: #ffc107; /* Keep task border */
-         }
-         .day.weekend.has-task.today {
-             border-color: #28a745; /* Keep today's border */
-         }
-
-         body.dark-mode .day.weekend {
-             background-color: #3a4a5a; /* Darker blue background in dark mode */
-             color: #a0c0e0; /* Lighter blue text */
-         }
-          body.dark-mode .day.weekend.today {
-              border-color: #38c172; /* Keep today's border in dark mode */
-          }
-          body.dark-mode .day.weekend.has-task {
-              background-color: #4a5a6a; /* Even darker blue for weekends with tasks in dark mode */
-              border-color: #d49a00; /* Keep task border in dark mode */
-          }
-          body.dark-mode .day.weekend.has-task.today {
-              border-color: #38c172; /* Keep today's border in dark mode */
-          }
-
-          body.gray-mode .day.weekend {
-              background-color: #dddddd; /* Medium gray */
-              color: #555555;
-          }
-           body.gray-mode .day.weekend.today {
-               border-color: #5cb85c;
-           }
-           body.gray-mode .day.weekend.has-task {
-               background-color: #cccccc; /* Darker gray */
-               border-color: #ffc107;
-           }
-            body.gray-mode .day.weekend.has-task.today {
-                border-color: #5cb85c;
-            }
-
-
-        /* Style for days with tasks due soon */
         .day.due-soon {
-            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5); /* Default Light Mode */
-             border-color: #ffc107; /* Default Light Mode */
+            box-shadow: var(--due-soon-shadow);
+            border-color: var(--due-soon-border-color);
         }
-         body.dark-mode .day.due-soon {
-             box-shadow: 0 0 10px rgba(212, 154, 0, 0.6); /* Darker yellow shadow */
-             border-color: #d49a00;
-         }
-         .day.due-soon.today {
-             border-color: #28a745; /* Keep today's border */
-             box-shadow: 0 0 10px rgba(40, 167, 69, 0.3); /* Keep today's shadow */
-         }
-          body.dark-mode .day.due-soon.today {
-              border-color: #38c172;
-              box-shadow: 0 0 10px rgba(56, 193, 114, 0.4);
-          }
-          .day.due-soon.has-task {
-              border-color: #ffc107; /* Keep task border */
-          }
-           body.dark-mode .day.due-soon.has-task {
-               border-color: #d49a00;
-           }
-           body.gray-mode .day.due-soon {
-               box-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
-               border-color: #ffc107;
-           }
-            body.gray-mode .day.due-soon.today {
-                border-color: #5cb85c;
-                box-shadow: 0 0 10px rgba(92, 184, 92, 0.3);
-            }
-             body.gray-mode .day.due-soon.has-task {
-                 border-color: #ffc107;
-             }
+        .day.due-soon.today {
+            border-color: var(--today-border-color);
+            box-shadow: var(--today-shadow);
+        }
+        .day.due-soon.has-task { border-color: var(--due-soon-border-color); }
 
-
-        /* Style for Holiday/Leave days */
         .day.holiday {
-            background-color: #d4edda; /* Default Light Mode */
-            border: 2px dashed #28a745; /* Default Light Mode */
+            background-color: var(--holiday-bg-color);
+            border: 2px dashed var(--holiday-border-color);
         }
-         body.dark-mode .day.holiday {
-             background-color: #28a745; /* Darker green */
-             border-color: #38c172;
-         }
-         .day.holiday.today {
-             border-color: #28a745; /* Keep today's border */
-         }
-          body.dark-mode .day.holiday.today {
-              border-color: #38c172;
-          }
-         .day.holiday.has-task {
-             background-color: #c3e6cb; /* Slightly darker green for holiday with tasks */
-             border-color: #ffc107; /* Keep task border if applicable */
-         }
-          body.dark-mode .day.holiday.has-task {
-              background-color: #218838;
-              border-color: #d49a00;
-          }
-          body.gray-mode .day.holiday {
-              background-color: #bce8f1; /* Light blue */
-              border-color: #31b0d5; /* Blue */
-          }
-           body.gray-mode .day.holiday.today {
-               border-color: #5cb85c;
-           }
-            body.gray-mode .day.holiday.has-task {
-                background-color: #a6e1ec; /* Slightly darker blue */
-                border-color: #ffc107;
-            }
-
+        .day.holiday.today { border-color: var(--today-border-color); }
+        .day.holiday.has-task {
+            background-color: var(--holiday-task-bg-color);
+            border-color: var(--has-task-border-color);
+        }
 
         .day .day-number {
             font-size: 1.2em;
             font-weight: bold;
-            color: #333; /* Default Light Mode */
+            color: var(--day-text-color); /* Adjusted */
             margin-bottom: 5px;
         }
-         .day.weekend .day-number {
-             color: #052c65; /* Even darker text color for weekend day number */
-         }
-          body.dark-mode .day .day-number {
-              color: #e0e0e0;
-          }
-           body.dark-mode .day.weekend .day-number {
-               color: #a0c0e0;
-           }
-           body.gray-mode .day .day-number {
-               color: #333333;
-           }
-            body.gray-mode .day.weekend .day-number {
-                color: #555555;
-            }
+        .day.weekend .day-number { color: var(--weekend-text-color); }
 
 
         .day .task-list-preview {
             font-size: 0.8em;
-            color: #666; /* Default Light Mode */
+            color: var(--task-preview-text-color);
             list-style: none;
             padding: 0;
             margin: 0;
-            flex-grow: 1; /* Allow task list to take available space */
+            flex-grow: 1;
         }
-         .day.weekend .task-list-preview {
-             color: #084298; /* Match weekend text color */
-         }
-          body.dark-mode .day .task-list-preview {
-              color: #b0b0b0;
-          }
-           body.dark-mode .day.weekend .task-list-preview {
-               color: #a0c0e0;
-           }
-           body.gray-mode .day .task-list-preview {
-               color: #555555;
-           }
-            body.gray-mode .day.weekend .task-list-preview {
-                color: #555555;
-            }
-
+        .day.weekend .task-list-preview { color: var(--weekend-text-color); }
 
         .day .task-list-preview li {
-            white-space: nowrap; /* Prevent wrapping */
-            overflow: hidden; /* Hide overflow */
-            text-overflow: ellipsis; /* Add ellipsis for truncated text */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             margin-bottom: 3px;
-            cursor: pointer; /* Indicate task items are also clickable */
-            padding: 2px 0;
-            border-bottom: 1px dotted #eee; /* Default Light Mode */
+            cursor: grab; /* Indicate draggable */
+            padding: 2px 4px; /* Add padding */
+            border-radius: 3px;
+            border-bottom: 1px dotted var(--task-preview-border-color);
+            display: flex; /* For priority icon */
+             align-items: center;
+             gap: 4px;
+             background-color: rgba(0,0,0,0.02); /* Slight background */
+        }
+        .day .task-list-preview li:last-child { border-bottom: none; }
+        .day .task-list-preview li:hover {
+            color: var(--task-preview-hover-color);
+             background-color: rgba(0,0,0,0.05);
+        }
+        .day .task-list-preview li.dragging { /* Style for the item being dragged */
+             opacity: 0.5;
+             background: #ccc;
         }
 
-         .day .task-list-preview li:last-child {
-             border-bottom: none; /* No border on the last item */
-         }
 
-         .day .task-list-preview li:hover {
-             color: #007bff; /* Highlight task on hover */
-         }
-          body.dark-mode .day .task-list-preview li {
-              border-bottom-color: #555; /* Darker separator in dark mode */
-          }
-           body.dark-mode .day .task-list-preview li:hover {
-               color: #72a0ff; /* Lighter highlight in dark mode */
-           }
-           body.gray-mode .day .task-list-preview li {
-               border-bottom-color: #cccccc;
-           }
-            body.gray-mode .day.task-list-preview li:hover {
-                color: #007bff;
-            }
+        /* Priority Indicator */
+        .priority-icon {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 4px; /* Space between icon and text */
+             flex-shrink: 0; /* Prevent shrinking */
+        }
+        .priority-high { background-color: var(--priority-high-color); }
+        .priority-medium { background-color: var(--priority-medium-color); }
+        .priority-low { background-color: var(--priority-low-color); }
 
+        /* Task Recurrence Indicator */
+        .recurrence-icon {
+            font-size: 0.8em;
+            margin-left: 4px;
+            color: #888;
+            cursor: default; /* Indicate it's just an icon */
+        }
+        body.dark-mode .recurrence-icon { color: #aaa; }
 
         /* Modal Styles */
         .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1; /* Sit on top */
+            display: none;
+            position: fixed;
+            z-index: 1000; /* Ensure modal is on top */
             left: 0;
             top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0, 0, 0, 0.5); /* Black with opacity */
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6); /* Darker overlay */
             justify-content: center;
             align-items: center;
         }
 
         .modal-content {
-            background-color: #fefefe; /* Default Light Mode */
+            background-color: var(--modal-bg-color);
+            color: var(--modal-text-color);
             margin: auto;
             padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--modal-shadow);
             width: 90%;
-            max-width: 500px; /* Increased max width for task list */
+            max-width: 550px; /* Slightly wider */
             display: flex;
             flex-direction: column;
             gap: 15px;
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-         body.dark-mode .modal-content {
-             background-color: #3a3a3a;
-             color: #e0e0e0;
-             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-         }
-         body.gray-mode .modal-content {
-             background-color: #eeeeee;
-             color: #333333;
-             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-         }
-
-
         .modal-content h3 {
             margin-top: 0;
-            color: #333; /* Default Light Mode */
+            color: var(--modal-text-color);
         }
-         body.dark-mode .modal-content h3 {
-             color: #e0e0e0;
-         }
-         body.gray-mode .modal-content h3 {
-             color: #333333;
-         }
-
 
         .modal-task-list {
             list-style: none;
             padding: 0;
             margin: 0;
-            max-height: 200px; /* Limit height and add scroll */
+            max-height: 250px; /* Increased height */
             overflow-y: auto;
-            border: 1px solid #eee; /* Default Light Mode */
+            border: 1px solid var(--modal-list-border-color);
             border-radius: 5px;
             padding: 10px;
         }
-         body.dark-mode .modal-task-list {
-             border-color: #555;
-         }
-         body.gray-mode .modal-task-list {
-             border-color: #cccccc;
-         }
-
 
         .modal-task-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 8px 0;
-            border-bottom: 1px solid #eee; /* Default Light Mode */
+            border-bottom: 1px solid var(--modal-item-border-color);
         }
-         .modal-task-item:last-child {
-             border-bottom: none;
-         }
-          body.dark-mode .modal-task-item {
-              border-bottom-color: #555;
-          }
-          body.gray-mode .modal-task-item {
-              border-bottom-color: #cccccc;
-          }
-
+        .modal-task-item:last-child { border-bottom: none; }
 
         .modal-task-item span {
             flex-grow: 1;
             margin-right: 10px;
-            word-break: break-word; /* Allow long words to break */
+            word-break: break-word;
+            display: flex; /* Align items within span */
+             align-items: center;
+             gap: 5px;
         }
 
         .modal-task-item input[type="checkbox"] {
             margin-right: 10px;
             cursor: pointer;
-             width: 18px; /* Increase checkbox size */
-             height: 18px;
-             /* Custom checkbox appearance */
-             appearance: none;
-             -webkit-appearance: none;
-             -moz-appearance: none;
-             border: 2px solid #007bff; /* Default Light Mode */
-             border-radius: 4px;
-             outline: none;
-             transition: background-color 0.2s ease, border-color 0.2s ease;
+            width: 18px;
+            height: 18px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            border: 2px solid var(--checkbox-border-color);
+            border-radius: 4px;
+            outline: none;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+             flex-shrink: 0; /* Prevent shrinking */
+        }
+        .modal-task-item input[type="checkbox"]:checked {
+            background-color: var(--checkbox-checked-bg-color);
+            border-color: var(--checkbox-checked-bg-color);
+        }
+        .modal-task-item input[type="checkbox"]:checked::after {
+            content: '\2713';
+            display: block;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            line-height: 14px;
+        }
+
+        .modal-task-item span.completed {
+            text-decoration: line-through;
+            color: var(--completed-text-color);
+        }
+         .modal-task-item span.completed .priority-icon {
+             opacity: 0.5; /* Dim priority icon */
          }
-          .modal-task-item input[type="checkbox"]:checked {
-              background-color: #007bff; /* Default Light Mode */
-              border-color: #007bff; /* Default Light Mode */
-          }
-           .modal-task-item input[type="checkbox"]:checked::after {
-               content: '\2713'; /* Checkmark character */
-               display: block;
-               color: white;
-               font-size: 14px;
-               text-align: center;
-               line-height: 14px;
-           }
-           body.dark-mode .modal-task-item input[type="checkbox"] {
-               border-color: #0056b3;
-           }
-            body.dark-mode .modal-task-item input[type="checkbox"]:checked {
-                background-color: #0056b3;
-                border-color: #0056b3;
-            }
-            body.gray-mode .modal-task-item input[type="checkbox"] {
-                border-color: #007bff;
-            }
-             body.gray-mode .modal-task-item input[type="checkbox"]:checked {
-                 background-color: #007bff;
-                 border-color: #007bff;
-             }
-
-
-         .modal-task-item span.completed {
-             text-decoration: line-through;
-             color: #6c757d; /* Muted color for completed tasks */
-         }
-          body.dark-mode .modal-task-item span.completed {
-              color: #999;
-          }
-          body.gray-mode .modal-task-item span.completed {
-              color: #555555;
-          }
-
 
         .modal-task-actions button {
             padding: 4px 8px;
@@ -697,326 +649,180 @@
         }
 
         .modal-task-actions .edit-task-button {
-            background-color: #ffc107; /* Default Light Mode */
-            color: #333; /* Default Light Mode */
-            border: 1px solid #ffc107; /* Default Light Mode */
+            background-color: var(--edit-button-bg-color);
+            color: var(--edit-button-text-color);
+            border: 1px solid var(--edit-button-border-color);
         }
-         .modal-task-actions .edit-task-button:hover {
-             background-color: #e0a800; /* Default Light Mode */
-         }
-          body.dark-mode .modal-task-actions .edit-task-button {
-             background-color: #d49a00;
-             border-color: #d49a00;
-             color: white;
-         }
-          body.dark-mode .modal-task-actions .edit-task-button:hover {
-              background-color: #a07400;
-          }
-          body.gray-mode .modal-task-actions .edit-task-button {
-              background-color: #ffc107;
-              color: #333333;
-              border-color: #ffc107;
-          }
-           body.gray-mode .modal-task-actions .edit-task-button:hover {
-               background-color: #e0a800;
-           }
-
+        .modal-task-actions .edit-task-button:hover {
+            background-color: var(--edit-button-hover-bg-color);
+        }
 
         .modal-task-actions .delete-task-button {
-            background-color: #dc3545; /* Default Light Mode */
-            color: white; /* Default Light Mode */
-            border: 1px solid #dc3545; /* Default Light Mode */
+            background-color: var(--delete-button-bg-color);
+            color: var(--delete-button-text-color);
+            border: 1px solid var(--delete-button-border-color);
         }
-         .modal-task-actions .delete-task-button:hover {
-             background-color: #c82333; /* Default Light Mode */
-         }
-          body.dark-mode .modal-task-actions .delete-task-button {
-              background-color: #e3342f;
-              border-color: #e3342f;
-          }
-           body.dark-mode .modal-task-actions .delete-task-button:hover {
-                background-color: #cb1b16;
-            }
-            body.gray-mode .modal-task-actions .delete-task-button {
-                background-color: #d9534f;
-                color: white;
-                border-color: #d9534f;
-            }
-             body.gray-mode .modal-task-actions .delete-task-button:hover {
-                 background-color: #c9302c;
-             }
+        .modal-task-actions .delete-task-button:hover {
+            background-color: var(--delete-button-hover-bg-color);
+        }
 
-
-        .modal-add-task-form {
-            display: flex;
+        .modal-add-task-form, .edit-task-form-fields { /* Added class for edit modal fields */
+            display: grid; /* Use grid for better layout */
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsive columns */
             gap: 10px;
             margin-top: 15px;
-             border-top: 1px solid #eee; /* Default Light Mode */
-             padding-top: 15px;
-            flex-wrap: wrap; /* Allow wrapping */
+            border-top: 1px solid var(--modal-list-border-color);
+            padding-top: 15px;
         }
-         body.dark-mode .modal-add-task-form {
-             border-top-color: #555;
+
+         .modal-add-task-form .form-field,
+         .edit-task-form-fields .form-field { /* Wrapper for label and input */
+              display: flex;
+              flex-direction: column;
+              gap: 5px;
          }
-         body.gray-mode .modal-add-task-form {
-             border-top-color: #cccccc;
+
+         .modal-add-task-form label,
+         .edit-task-form-fields label { /* Style labels */
+              font-size: 0.9rem;
+              font-weight: 500;
+              color: var(--modal-text-color); /* Use modal text color */
+              opacity: 0.9;
          }
 
-
-         .modal-add-task-form .category-select-container {
-             display: flex;
-             align-items: center;
-             gap: 5px;
-             flex-basis: 100%; /* Take full width on small screens */
-         }
-          .modal-add-task-form select {
-              padding: 8px;
-              border-radius: 5px;
-              border: 1px solid #ccc; /* Default Light Mode */
-              font-size: 1rem;
-              background-color: #fff; /* Default Light Mode */
-              color: #333; /* Default Light Mode */
-              transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-              flex-grow: 1; /* Allow select to grow */
-          }
-           body.dark-mode .modal-add-task-form select {
-               background-color: #4a4a4a;
-               color: #e0e0e0;
-               border-color: #555;
-           }
-           body.gray-mode .modal-add-task-form select {
-               background-color: #dddddd;
-               color: #333333;
-               border-color: #bbbbbb;
-           }
-
-
-          .modal-add-task-form .add-category-input {
-              padding: 8px;
-              border-radius: 5px;
-              border: 1px solid #ccc; /* Default Light Mode */
-              font-size: 1rem;
-              background-color: #fff; /* Default Light Mode */
-              color: #333; /* Default Light Mode */
-              transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-              width: 100px; /* Fixed width for add category input */
-          }
-           body.dark-mode .modal-add-task-form .add-category-input {
-               background-color: #4a4a4a;
-               color: #e0e0e0;
-               border-color: #555;
-           }
-           body.gray-mode .modal-add-task-form .add-category-input {
-               background-color: #dddddd;
-               color: #333333;
-               border-color: #bbbbbb;
-           }
-
-        .modal-add-task-form input[type="time"] {
+        .modal-add-task-form input[type="text"],
+        .modal-add-task-form input[type="time"],
+        .modal-add-task-form select,
+        .edit-task-form-fields input[type="text"], /* Style edit fields */
+        .edit-task-form-fields input[type="time"],
+        .edit-task-form-fields select {
             padding: 8px;
             border-radius: 5px;
-            border: 1px solid #ccc; /* Default Light Mode */
+            border: 1px solid var(--modal-input-border-color);
             font-size: 1rem;
-            background-color: #fff; /* Default Light Mode */
-            color: #333; /* Default Light Mode */
+            background-color: var(--modal-input-bg-color);
+            color: var(--modal-input-text-color);
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            width: 100%; /* Take full width of grid cell */
+             box-sizing: border-box; /* Include padding and border in width */
         }
-         body.dark-mode .modal-add-task-form input[type="time"] {
-             background-color: #4a4a4a;
-             color: #e0e0e0;
-             border-color: #555;
+
+         /* Specific field spanning */
+         .modal-add-task-form .description-field,
+         .edit-task-form-fields .description-field {
+              grid-column: 1 / -1; /* Make description span full width */
          }
-          body.gray-mode .modal-add-task-form input[type="time"] {
-              background-color: #dddddd;
-              color: #333333;
-              border-color: #bbbbbb;
+          .modal-add-task-form .button-field {
+              grid-column: 1 / -1; /* Make button span full width */
+              margin-top: 10px; /* Add space before button */
           }
 
 
-        .modal-add-task-form input[type="text"] {
-            flex-grow: 1;
-            width: auto; /* Override previous width */
+        .modal-add-task-form button,
+        .edit-task-modal-buttons button { /* Style add and edit buttons */
+            background-color: var(--header-bg-color); /* Use header color */
+            color: var(--header-text-color);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%; /* Full width button */
+             box-sizing: border-box;
+        }
+        .modal-add-task-form button:hover,
+        .edit-task-modal-buttons button:hover {
+            opacity: 0.9;
         }
 
-        .modal-add-task-form button {
-             background-color: #007bff; /* Default Light Mode */
-             color: white; /* Default Light Mode */
-             border: none;
-             padding: 10px 15px;
-             border-radius: 5px;
-             cursor: pointer;
-             transition: background-color 0.3s ease;
-        }
-         .modal-add-task-form button:hover {
-             background-color: #0056b3; /* Default Light Mode */
+         /* Style Delete button in Edit Modal differently */
+         #confirmDeleteTaskButton {
+             background-color: var(--delete-button-bg-color);
          }
-          body.dark-mode .modal-add-task-form button {
-              background-color: #007bff;
+          #confirmDeleteTaskButton:hover {
+              background-color: var(--delete-button-hover-bg-color);
           }
-           body.dark-mode .modal-add-task-form button:hover {
-               background-color: #0056b3;
-           }
-           body.gray-mode .modal-add-task-form button {
-               background-color: #007bff;
-           }
-            body.gray-mode .modal-add-task-form button:hover {
-                background-color: #0056b3;
-            }
 
 
         /* Holiday/Leave Checkbox in Modal */
         .modal-holiday-checkbox {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px; /* Increased gap */
             margin-bottom: 10px;
         }
-         .modal-holiday-checkbox input[type="checkbox"] {
-             cursor: pointer;
-              width: 18px; /* Increase checkbox size */
-              height: 18px;
-               /* Custom checkbox appearance */
-             appearance: none;
-             -webkit-appearance: none;
-             -moz-appearance: none;
-             border: 2px solid #28a745; /* Default Light Mode */
-             border-radius: 4px;
-             outline: none;
-             transition: background-color 0.2s ease, border-color 0.2s ease;
+        .modal-holiday-checkbox input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            border: 2px solid var(--today-border-color); /* Use green */
+            border-radius: 4px;
+            outline: none;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+             flex-shrink: 0;
+        }
+        .modal-holiday-checkbox input[type="checkbox"]:checked {
+            background-color: var(--today-border-color);
+            border-color: var(--today-border-color);
+        }
+        .modal-holiday-checkbox input[type="checkbox"]:checked::after {
+            content: '\2713';
+            display: block;
+            color: white; /* Checkmark color */
+             font-size: 14px;
+             text-align: center;
+             line-height: 14px;
+        }
+         body.dark-mode .modal-holiday-checkbox input[type="checkbox"] {
+             border-color: var(--today-border-color);
          }
-          body .modal-holiday-checkbox input[type="checkbox"]:checked {
-              background-color: #28a745; /* Default Light Mode */
-              border-color: #28a745; /* Default Light Mode */
+          body.dark-mode .modal-holiday-checkbox input[type="checkbox"]:checked {
+              background-color: var(--today-border-color);
+              border-color: var(--today-border-color);
           }
-           body .modal-holiday-checkbox input[type="checkbox"]:checked::after {
-               content: '\2713'; /* Checkmark character */
-               display: block;
-               color: white;
-               font-size: 14px;
-               text-align: center;
-               line-height: 14px;
-           }
-            body.dark-mode .modal-holiday-checkbox input[type="checkbox"] {
-                border-color: #38c172;
-            }
-             body.dark-mode .modal-holiday-checkbox input[type="checkbox"]:checked {
-                 background-color: #38c172;
-                 border-color: #38c172;
-             }
-             body.gray-mode .modal-holiday-checkbox input[type="checkbox"] {
-                 border-color: #5cb85c;
-             }
-              body.gray-mode .modal-holiday-checkbox input[type="checkbox"]:checked {
-                  background-color: #5cb85c;
-                  border-color: #5cb85c;
-              }
 
 
         .close-button {
-            color: #aaa; /* Default Light Mode */
-            float: right;
+            color: var(--close-button-color);
+            position: absolute; /* Position relative to parent */
+             top: 10px;
+             right: 15px;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
             transition: color 0.3s ease;
+            line-height: 1; /* Prevent extra height */
+            padding: 0; /* Remove padding if any */
         }
-
         .close-button:hover,
         .close-button:focus {
-            color: #777; /* Default Light Mode */
+            color: var(--close-button-hover-color);
             text-decoration: none;
-            cursor: pointer;
         }
-         body.dark-mode .close-button {
-             color: #b0b0b0;
-         }
-          body.dark-mode .close-button:hover,
-          body.dark-mode .close-button:focus {
-              color: #e0e0e0;
-          }
-          body.gray-mode .close-button {
-              color: #555555;
-          }
-           body.gray-mode .close-button:hover,
-           body.gray-mode .close-button:focus {
-               color: #333333;
-           }
-
-
-        /* Download Button Style */
-        #downloadTasksButton {
-             background-color: #17a2b8; /* Info blue */
-             color: white;
-             border: none;
-             padding: 10px 15px;
-             border-radius: 6px;
-             cursor: pointer;
-             font-size: 1rem;
-             transition: background-color 0.3s ease;
-             margin-left: 10px; /* Space from other header items */
-        }
-         #downloadTasksButton:hover {
-             background-color: #138496;
-         }
-          body.dark-mode #downloadTasksButton {
-              background-color: #20c997; /* Teal */
-          }
-           body.dark-mode #downloadTasksButton:hover {
-               background-color: #1a9b7a;
-           }
-           body.gray-mode #downloadTasksButton {
-               background-color: #6c757d; /* Gray */
-           }
-            body.gray-mode #downloadTasksButton:hover {
-                background-color: #545b62;
-            }
 
 
         /* Month Task View Styles */
         .month-task-view h3 {
             margin-top: 0;
-            color: #333; /* Default Light Mode */
-            border-bottom: 2px solid #007bff; /* Default Light Mode */
+            color: var(--text-color); /* Use general text color */
+            border-bottom: 2px solid var(--header-bg-color);
             padding-bottom: 5px;
-             margin-bottom: 15px;
-            display: inline-block; /* Prevent close button from affecting title */
-            margin-right: 20px; /* Space for close button */
+            margin-bottom: 15px;
+            display: inline-block;
+            margin-right: 30px; /* Space for close button */
         }
-         body.dark-mode .month-task-view h3 {
-             color: #e0e0e0;
-             border-bottom-color: #007bff;
-         }
-         body.gray-mode .month-task-view h3 {
-             color: #333333;
-             border-bottom-color: #007bff;
-         }
 
-
-         /* Style for the month view close button */
-         .month-task-view .close-button {
-             position: absolute;
-             top: 10px;
-             right: 10px;
-             font-size: 24px;
-             color: #555; /* Default Light Mode */
-             cursor: pointer;
-             transition: color 0.3s ease;
-         }
-          .month-task-view .close-button:hover {
-              color: #333; /* Default Light Mode */
+        /* Style for the month view close button */
+        .month-task-view .close-button {
+            /* Uses general close-button styles, already positioned absolutely */
+             color: var(--close-button-color); /* Ensure correct color inheritance */
+        }
+        .month-task-view .close-button:hover {
+              color: var(--close-button-hover-color);
           }
-           body.dark-mode .month-task-view .close-button {
-               color: #b0b0b0;
-           }
-            body.dark-mode .month-task-view .close-button:hover {
-                color: #e0e0e0;
-            }
-            body.gray-mode .month-task-view .close-button {
-                color: #555555;
-            }
-             body.gray-mode .month-task-view .close-button:hover {
-                 color: #333333;
-             }
 
 
         .month-task-list {
@@ -1028,173 +834,107 @@
         .month-task-list .task-date-group {
             margin-bottom: 15px;
             padding-bottom: 10px;
-            border-bottom: 1px solid #eee; /* Default Light Mode */
+            border-bottom: 1px solid var(--modal-list-border-color); /* Use modal border */
         }
-         body.dark-mode .month-task-list .task-date-group {
-             border-bottom-color: #555;
-         }
-         body.gray-mode .month-task-list .task-date-group {
-             border-bottom-color: #cccccc;
-         }
-
-         .month-task-list .task-date-group:last-child {
-             border-bottom: none;
-         }
-
+        .month-task-list .task-date-group:last-child { border-bottom: none; }
 
         .month-task-list .task-date {
             font-weight: bold;
             margin-bottom: 5px;
-            color: #555; /* Default Light Mode */
+            color: var(--text-color);
+             opacity: 0.8; /* Slightly dimmer date */
         }
-         body.dark-mode .month-task-list .task-date {
-             color: #b0b0b0;
-         }
-         body.gray-mode .month-task-list .task-date {
-             color: #555555;
-         }
 
+        .month-task-list ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
 
-         .month-task-list ul {
-             list-style: none; /* Remove default bullets */
-             padding-left: 0; /* Remove default padding */
-             margin: 0;
-         }
+        .month-task-list li {
+            margin-bottom: 5px;
+            word-break: break-word;
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px dotted var(--task-preview-border-color);
+             gap: 8px; /* Gap between elements */
+        }
+        .month-task-list li:last-child { border-bottom: none; }
 
-         .month-task-list li {
-             margin-bottom: 5px;
-             word-break: break-word;
-             display: flex; /* Use flex for layout */
+        .month-task-list li span {
+            flex-grow: 1;
+            margin-right: 10px; /* Space before actions */
+            display: flex; /* Align icon and text */
              align-items: center;
-             padding: 5px 0;
-             border-bottom: 1px dotted #eee; /* Default Light Mode */
+             gap: 5px;
+        }
+
+        .month-task-list li input[type="checkbox"] {
+            margin-right: 0; /* Remove margin, use gap */
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            border: 2px solid var(--checkbox-border-color);
+            border-radius: 4px;
+            outline: none;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            flex-shrink: 0;
+        }
+        .month-task-list li input[type="checkbox"]:checked {
+            background-color: var(--checkbox-checked-bg-color);
+            border-color: var(--checkbox-checked-bg-color);
+        }
+        .month-task-list li input[type="checkbox"]:checked::after {
+            content: '\2713';
+            display: block;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            line-height: 14px;
+        }
+
+        .month-task-list li span.completed {
+            text-decoration: line-through;
+            color: var(--completed-text-color);
+        }
+         .month-task-list li span.completed .priority-icon {
+              opacity: 0.5;
+          }
+
+        .month-task-list li .task-actions {
+             display: flex; /* Align buttons */
+             gap: 5px; /* Space between buttons */
+             flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .month-task-list li .task-actions button {
+            padding: 3px 6px;
+            font-size: 0.7rem;
+            /* margin-left: 5px; Remove margin, use gap */
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .month-task-list li .task-actions .edit-task-button {
+            background-color: var(--edit-button-bg-color);
+            color: var(--edit-button-text-color);
+            border: 1px solid var(--edit-button-border-color);
+        }
+         .month-task-list li .task-actions .edit-task-button:hover {
+             background-color: var(--edit-button-hover-bg-color);
          }
-          .month-task-list li:last-child {
-              border-bottom: none;
+
+        .month-task-list li .task-actions .delete-task-button {
+            background-color: var(--delete-button-bg-color);
+            color: var(--delete-button-text-color);
+            border: 1px solid var(--delete-button-border-color);
+        }
+         .month-task-list li .task-actions .delete-task-button:hover {
+              background-color: var(--delete-button-hover-bg-color);
           }
-           body.dark-mode .month-task-list li {
-               border-bottom-color: #555;
-           }
-           body.gray-mode .month-task-list li {
-               border-bottom-color: #cccccc;
-           }
-
-
-         .month-task-list li span {
-             flex-grow: 1; /* Allow task description to take space */
-             margin-right: 10px;
-         }
-
-         .month-task-list li input[type="checkbox"] {
-             margin-right: 10px;
-             cursor: pointer;
-              width: 18px; /* Increase checkbox size */
-              height: 18px;
-               /* Custom checkbox appearance */
-             appearance: none;
-             -webkit-appearance: none;
-             -moz-appearance: none;
-             border: 2px solid #007bff; /* Default Light Mode */
-             border-radius: 4px;
-             outline: none;
-             transition: background-color 0.2s ease, border-color 0.2s ease;
-         }
-          body .month-task-list li input[type="checkbox"]:checked {
-              background-color: #007bff; /* Default Light Mode */
-              border-color: #007bff; /* Default Light Mode */
-          }
-           body .month-task-list li input[type="checkbox"]:checked::after {
-               content: '\2713'; /* Checkmark character */
-               display: block;
-               color: white;
-               font-size: 14px;
-               text-align: center;
-               line-height: 14px;
-           }
-            body.dark-mode .month-task-list li input[type="checkbox"] {
-                border-color: #0056b3;
-            }
-             body.dark-mode .month-task-list li input[type="checkbox"]:checked {
-                 background-color: #0056b3;
-                 border-color: #0056b3;
-             }
-             body.gray-mode .month-task-list li input[type="checkbox"] {
-                 border-color: #007bff;
-             }
-              body.gray-mode .month-task-list li input[type="checkbox"]:checked {
-                  background-color: #007bff;
-                  border-color: #007bff;
-              }
-
-
-          .month-task-list li span.completed {
-              text-decoration: line-through;
-              color: #6c757d; /* Muted color for completed tasks */
-          }
-           body.dark-mode .month-task-list li span.completed {
-               color: #999;
-           }
-           body.gray-mode .month-task-list li span.completed {
-               color: #555555;
-           }
-
-
-         .month-task-list li .task-actions button {
-             padding: 3px 6px;
-             font-size: 0.7rem;
-             margin-left: 5px;
-             border-radius: 3px;
-             cursor: pointer;
-         }
-          .month-task-list li .task-actions .edit-task-button {
-              background-color: #ffc107; /* Default Light Mode */
-              color: #333; /* Default Light Mode */
-              border: 1px solid #ffc107; /* Default Light Mode */
-          }
-           body .month-task-list li .task-actions .edit-task-button:hover {
-               background-color: #e0a800; /* Default Light Mode */
-           }
-            body.dark-mode .month-task-list li .task-actions .edit-task-button {
-                background-color: #d49a00;
-                border-color: #d49a00;
-                color: white;
-            }
-             body.dark-mode .month-task-list li .task-actions .edit-task-button:hover {
-                 background-color: #a07400;
-             }
-             body.gray-mode .month-task-list li .task-actions .edit-task-button {
-                 background-color: #ffc107;
-                 color: #333333;
-                 border-color: #ffc107;
-             }
-              body.gray-mode .month-task-list li .task-actions .edit-task-button:hover {
-                  background-color: #e0a800;
-              }
-
-
-          .month-task-list li .task-actions .delete-task-button {
-             background-color: #dc3545; /* Default Light Mode */
-             color: white; /* Default Light Mode */
-             border: 1px solid #dc3545; /* Default Light Mode */
-          }
-           body .month-task-list li .task-actions .delete-task-button:hover {
-               background-color: #c82333; /* Default Light Mode */
-           }
-            body.dark-mode .month-task-list li .task-actions .delete-task-button {
-                background-color: #e3342f;
-                border-color: #e3342f;
-            }
-             body.dark-mode .month-task-list li .task-actions .delete-task-button:hover {
-                 background-color: #cb1b16;
-             }
-             body.gray-mode .month-task-list li .task-actions .delete-task-button {
-                 background-color: #d9534f;
-                 color: white;
-                 border-color: #d9534f;
-             }
-              body.gray-mode .month-task-list li .task-actions .delete-task-button:hover {
-                  background-color: #c9302c;
-              }
 
 
         /* --- Print Styles --- */
@@ -1202,1057 +942,416 @@
             body {
                 margin: 0;
                 padding: 0;
-                background-color: #fff; /* White background for printing */
-                color: #000; /* Black text for printing */
+                background-color: var(--print-bg-color);
+                color: var(--print-text-color);
+                 font-size: 10pt; /* Adjust base font size for print */
             }
-
-            .main-layout {
-                flex-direction: column; /* Stack for printing */
-                gap: 0;
-                margin: 0;
-            }
-
-            .calendar-app {
-                margin: 0; /* Remove margin */
-                box-shadow: none; /* Remove shadow */
-                border-radius: 0; /* Remove border radius */
-                max-width: none; /* Allow to take full width */
-                width: 100%; /* Ensure full width */
-                flex-basis: auto; /* Reset flex basis */
-            }
-
-            .month-task-view {
-                 display: block !important; /* Ensure month view is visible in print */
-                 flex-basis: auto; /* Reset flex basis */
-                 max-height: none; /* Remove max height */
-                 box-shadow: none;
-                 border-radius: 0;
-                 padding: 20px 0; /* Adjust padding for print */
-                 border-top: 1px solid #ccc; /* Add separator */
-                 position: static; /* Remove absolute positioning for print */
-            }
-
-             .month-task-view .close-button {
-                 display: none; /* Hide the close button in print */
-             }
-
-
-            .calendar-header {
-                background-color: #fff; /* White background for header */
-                color: #000; /* Black text for header */
-                border-bottom: 1px solid #ccc; /* Add a separator */
-                print-color-adjust: exact; /* Ensure colors are printed */
-                -webkit-print-color-adjust: exact; /* Safari */
-            }
-
+             /* Hide non-essential UI */
              .calendar-header button,
              .calendar-header select,
              #darkModeToggle,
              #downloadTasksButton,
-             #toggleMonthViewButton /* Hide the toggle button in print */
-              {
-                 display: none; /* Hide buttons and dropdown in print */
+             #importTasksButton,
+             #toggleMonthViewButton,
+             .controls-and-search, /* Hide search/filter controls */
+             .modal, /* Hide modals */
+             .close-button { /* Hide close buttons */
+                 display: none !important;
              }
 
-             .calendar-grid {
-                 gap: 0.5px; /* Reduce gap slightly */
-                 background-color: #fff; /* White background for grid */
+            .main-layout {
+                flex-direction: column;
+                gap: 0;
+                margin: 0;
+                 max-width: 100%; /* Use full width */
+            }
+
+             .calendar-container { /* Adjust container */
+                  flex-basis: auto;
+                  gap: 0;
              }
 
-             .day-label {
-                 background-color: #eee; /* Light grey background for labels */
-                 color: #333;
-                 print-color-adjust: exact;
-                 -webkit-print-color-adjust: exact;
+            .calendar-app {
+                margin: 0;
+                box-shadow: none;
+                border-radius: 0;
+                max-width: none;
+                width: 100%;
+                flex-basis: auto;
+                 border: 1px solid var(--print-separator-color); /* Add border */
+            }
+
+            .month-task-view {
+                display: block !important;
+                flex-basis: auto;
+                max-height: none;
+                box-shadow: none;
+                border-radius: 0;
+                padding: 15px 0; /* Adjust padding */
+                 border-top: 1px solid var(--print-separator-color);
+                 position: static;
+                 page-break-before: auto; /* Allow page break before if needed */
+            }
+
+            .calendar-header {
+                background-color: var(--print-header-bg-color);
+                color: var(--print-header-text-color);
+                border-bottom: 1px solid var(--print-separator-color);
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+                 padding: 10px 15px; /* Adjust padding */
+            }
+             .calendar-header h2 {
+                 font-size: 1.5rem; /* Adjust title size */
+                 text-align: left; /* Align left for print */
              }
 
-             .day {
-                 min-height: 120px; /* Increase min height for better task display */
-                 overflow: visible; /* Allow tasks to overflow for printing */
-                 max-height: none; /* Remove max height constraint */
-                 border: 1px solid #ddd; /* Add borders for clarity */
-                 border-radius: 0; /* Remove rounded corners */
-                 box-shadow: none; /* Remove shadows */
-                 padding: 8px; /* Adjust padding */
-             }
+            .calendar-grid {
+                gap: 0; /* Remove gap */
+                background-color: var(--print-grid-bg-color);
+                 padding: 5px; /* Reduce padding */
+            }
 
-             .day.today {
-                 border-color: #000; /* Black border for today in print */
+            .day-label {
+                background-color: var(--print-day-label-bg-color);
+                color: var(--print-day-label-text-color);
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+                 padding: 5px 0; /* Adjust padding */
+                 font-size: 0.9em;
+                 border: 0.5px solid var(--print-separator-color); /* Fine lines */
+            }
+
+            .day {
+                 min-height: 90px; /* Adjust min height */
+                 overflow: hidden; /* Hide overflow in print for cleaner look */
+                 max-height: none;
+                 border: 0.5px solid var(--print-day-border-color); /* Fine lines */
+                 border-radius: 0;
                  box-shadow: none;
-             }
+                 padding: 5px;
+                 page-break-inside: avoid; /* Try to keep day contents together */
+            }
 
-             .day.has-task {
-                 background-color: #f0f0f0; /* Light grey for days with tasks */
-                 border-color: #ccc;
+            .day.today { border-color: var(--print-today-border-color); }
+
+            .day.has-task {
+                 background-color: var(--print-has-task-bg-color);
+                 border-color: var(--print-has-task-border-color);
                  print-color-adjust: exact;
                  -webkit-print-color-adjust: exact;
-             }
-             .day.has-task.today {
-                  border-color: #000;
-             }
+            }
+            .day.has-task.today { border-color: var(--print-today-border-color); }
 
+            .day.weekend {
+                background-color: var(--print-weekend-bg-color);
+                color: var(--print-text-color);
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            .day.weekend .day-number { color: var(--print-text-color); }
+            .day.weekend.has-task { background-color: var(--print-weekend-task-bg-color); border-color: var(--print-has-task-border-color); }
+            .day.weekend.has-task.today { border-color: var(--print-today-border-color); }
 
-             /* Gray out weekend days in print */
-             .day.weekend {
-                 background-color: #e0e0e0; /* A noticeable gray background */
-                 color: #000; /* Keep text black for readability */
-                 print-color-adjust: exact;
-                 -webkit-print-color-adjust: exact;
+            .day.holiday {
+                background-color: var(--print-holiday-bg-color);
+                border: 1px dashed var(--print-holiday-border-color);
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+             .day.holiday.today { border-color: var(--print-today-border-color); }
+             .day.holiday.has-task { background-color: var(--print-holiday-task-bg-color); border-color: var(--print-has-task-border-color); }
+
+            .day .day-number { color: var(--print-text-color); font-size: 1.1em; }
+
+            .day .task-list-preview {
+                color: var(--print-task-preview-text-color);
+                white-space: normal; /* Allow wrapping */
+                 overflow: hidden; /* Clip overflow */
+                 text-overflow: clip;
+                 font-size: 0.75em; /* Smaller task font */
+            }
+            .day .task-list-preview li {
+                 border-bottom: none;
+                 margin-bottom: 1px;
+                 cursor: default; /* No grab cursor */
+                 padding: 1px 0; /* Reduce padding */
+                 background-color: transparent; /* No background */
+            }
+             .day .task-list-preview li.completed {
+                 text-decoration: line-through;
+                 color: var(--print-completed-text-color);
              }
-              .day.weekend .day-number {
-                  color: #000; /* Keep day number black */
+              .day .task-list-preview .priority-icon,
+              .day .task-list-preview .recurrence-icon {
+                  display: none; /* Hide icons in day preview for simplicity */
               }
-              .day.weekend.has-task {
-                  background-color: #d0d0d0; /* Slightly darker gray for weekends with tasks */
-                  border-color: #ccc;
-                  print-color-adjust: exact;
-                  -webkit-print-color-adjust: exact;
-              }
-               .day.weekend.has-task.today {
-                   border-color: #000; /* Keep today's border black */
-               }
 
-             /* Print styles for Holiday/Leave days */
-             .day.holiday {
-                 background-color: #d4edda; /* Light green background */
-                 border: 2px dashed #28a745; /* Green dashed border */
-                 print-color-adjust: exact;
-                 -webkit-print-color-adjust: exact;
-             }
-              .day.holiday.today {
-                  border-color: #000; /* Black border for today */
-              }
-               .day.holiday.has-task {
-                   background-color: #c3e6cb; /* Slightly darker green for holiday with tasks */
-                   border-color: #ccc; /* Lighter border */
-               }
-                .day.holiday.has-task.today {
-                    border-color: #000;
-                }
-
-
-             .day .day-number {
-                 color: #000; /* Black day number */
-             }
-
-             .day .task-list-preview {
-                 color: #333; /* Darker task text */
-                 white-space: normal; /* Allow task text to wrap */
-                 overflow: visible; /* Ensure all tasks are visible */
-                 text-overflow: clip; /* No ellipsis in print */
-             }
-
-             .day .task-list-preview li {
-                 border-bottom: none; /* Remove separators in print */
-                 margin-bottom: 2px; /* Small margin between tasks */
-             }
-
-             .modal {
-                 display: none !important; /* Hide modals completely in print */
-             }
-
-             /* Print styles for the month task view */
-             .month-task-view h3 {
-                 border-bottom-color: #000; /* Black border for header */
-                 color: #000;
-             }
-             .month-task-list .task-date-group {
-                 border-bottom-color: #ccc; /* Lighter border */
-             }
-             .month-task-list .task-date {
-                 color: #333; /* Darker date text */
-             }
-             .month-task-list ul {
-                 list-style: disc; /* Keep bullet points */
-             }
-             .month-task-list li {
-                 color: #000; /* Black task text */
-             }
-              .month-task-list li span.completed {
-                  text-decoration: line-through;
-                  color: #666; /* Muted color for completed tasks in print */
-              }
-               .month-task-list li input[type="checkbox"],
-               .month-task-list li .task-actions {
-                   display: none; /* Hide checkboxes and actions in print */
-               }
+            /* Month Task View Print Styles */
+            .month-task-view h3 {
+                border-bottom-color: var(--print-text-color);
+                color: var(--print-text-color);
+                 font-size: 1.2rem;
+            }
+            .month-task-list .task-date-group { border-bottom-color: var(--print-separator-color); }
+            .month-task-list .task-date { color: var(--print-text-color); opacity: 1; }
+            .month-task-list ul { list-style: none; padding-left: 0; } /* No bullets */
+            .month-task-list li {
+                 color: var(--print-text-color);
+                 border-bottom: none; /* No dotted lines */
+                 margin-bottom: 2px;
+                 font-size: 0.9em;
+            }
+            .month-task-list li span.completed { color: var(--print-completed-text-color); }
+            .month-task-list li input[type="checkbox"],
+            .month-task-list li .task-actions,
+            .month-task-list li .priority-icon, /* Hide icons/actions */
+            .month-task-list li .recurrence-icon {
+                display: none;
+            }
         }
         /* --- End Print Styles --- */
 
 
         /* Responsive adjustments */
-        @media (max-width: 992px) { /* Adjust breakpoint for stacking */
+        @media (max-width: 1100px) { /* Adjust breakpoint */
             .main-layout {
-                flex-direction: column; /* Stack calendar and task view */
+                flex-direction: column;
                 gap: 20px;
             }
-             .calendar-app {
-                 flex-basis: auto; /* Reset flex basis */
-             }
+            .calendar-container, .month-task-view {
+                flex-basis: auto;
+            }
             .month-task-view {
-                 flex-basis: auto; /* Reset flex basis */
-                 max-height: 400px; /* Limit height when stacked */
+                max-height: 400px;
             }
         }
 
         @media (max-width: 768px) {
-            .calendar-grid {
-                grid-template-columns: repeat(7, 1fr); /* Keep 7 columns on smaller screens */
-                gap: 0.5px;
-            }
-            .day {
-                 min-height: 80px; /* Reduce min height on smaller screens */
-                 padding: 5px;
-            }
-             .day .day-number {
-                 font-size: 1em;
-             }
-             .day .task-list-preview {
-                 font-size: 0.7em;
-             }
-            .calendar-header h2 {
-                font-size: 1.4rem;
-            }
-             .calendar-header button {
-                 padding: 8px 12px;
-                 font-size: 0.9rem;
-             }
-             .modal-content {
-                 padding: 15px;
-             }
-             .modal-buttons {
-                 flex-direction: column; /* Stack buttons on small screens */
-                 gap: 5px;
-             }
-             .modal-buttons button {
-                 width: 100%; /* Full width buttons */
-             }
-             .calendar-header {
-                 flex-direction: column; /* Stack header items on very small screens */
-                 align-items: flex-start;
-             }
-             .calendar-header h2,
-             #darkModeToggle,
-             #downloadTasksButton,
-             #toggleMonthViewButton,
-             #prevYear, /* Add year buttons */
-             #nextYear {
-                 margin-bottom: 5px;
-             }
-             .modal-add-task-form {
+            .calendar-grid { gap: 0.5px; }
+            .day { min-height: 80px; padding: 5px; }
+            .day .day-number { font-size: 1em; }
+            .day .task-list-preview { font-size: 0.7em; }
+            .calendar-header h2 { font-size: 1.4rem; }
+            .calendar-header button { padding: 8px 12px; font-size: 0.9rem; }
+            .modal-content { padding: 15px; max-width: 95%; } /* Adjust modal width */
+            .modal-buttons { flex-direction: column; gap: 5px; }
+            .modal-buttons button { width: 100%; }
+            .calendar-header { flex-direction: column; align-items: flex-start; }
+             .calendar-header h2, #darkModeToggle, #downloadTasksButton, #importTasksButton, #toggleMonthViewButton, #prevYear, #nextYear { margin-bottom: 5px; }
+
+             .controls-and-search {
                  flex-direction: column;
-                 gap: 5px;
+                 align-items: stretch; /* Stretch items full width */
              }
-             .modal-add-task-form input[type="text"] {
-                 width: calc(100% - 20px); /* Adjust width for stacked layout */
-             }
+              .controls-and-search input,
+              .controls-and-search select,
+              .controls-and-search button {
+                  width: 100%; /* Full width on small screens */
+                  box-sizing: border-box;
+              }
+               .filter-controls {
+                   flex-direction: column; /* Stack filters */
+                   width: 100%;
+               }
+        }
+         @media (max-width: 480px) {
+              .day { min-height: 70px; }
+              .day .day-number { font-size: 0.9em; }
+              .day .task-list-preview { display: none; } /* Hide preview on very small screens */
+              .calendar-header h2 { font-size: 1.2rem; }
+              .modal-add-task-form, .edit-task-form-fields {
+                  grid-template-columns: 1fr; /* Single column layout in modal form */
+              }
+               .modal-add-task-form .button-field { margin-top: 5px; }
+         }
+
+        /* Accessibility: Hide visually but keep for screen readers */
+        .sr-only {
+             position: absolute;
+             width: 1px;
+             height: 1px;
+             padding: 0;
+             margin: -1px;
+             overflow: hidden;
+             clip: rect(0, 0, 0, 0);
+             white-space: nowrap;
+             border-width: 0;
         }
     </style>
-     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <div class="main-layout">
-        <div class="calendar-app">
+        <div class="calendar-container">
             <div class="calendar-header">
                 <button id="prevMonth" aria-label="Previous Month">&lt;</button>
-                 <button id="prevYear" aria-label="Previous Year">&lt;&lt;</button> <h2 id="currentMonthYear"></h2>
-                 <button id="nextYear" aria-label="Next Year">&gt;&gt;</button> <button id="nextMonth" aria-label="Next Month">&gt;</button>
-                 <button id="darkModeToggle" aria-label="Toggle Mode">Light Mode</button>
-                 <button id="downloadTasksButton" aria-label="Download Tasks">Download Tasks</button>
-                 <button id="toggleMonthViewButton" aria-label="Toggle Month View">Show Month Tasks</button> </div>
-            <div class="calendar-grid" id="calendarGrid" role="grid" aria-labelledby="currentMonthYear">
-                <div class="day-label" role="columnheader">Sun</div>
-                <div class="day-label" role="columnheader">Mon</div>
-                <div class="day-label" role="columnheader">Tue</div>
-                <div class="day-label" role="columnheader">Wed</div>
-                <div class="day-label" role="columnheader">Thu</div>
-                <div class="day-label" role="columnheader">Fri</div>
-                <div class="day-label" role="columnheader">Sat</div>
-                </div>
+                <button id="prevYear" aria-label="Previous Year">&lt;&lt;</button>
+                <h2 id="currentMonthYear"></h2>
+                <button id="nextYear" aria-label="Next Year">&gt;&gt;</button>
+                <button id="nextMonth" aria-label="Next Month">&gt;</button>
+                <button id="darkModeToggle" aria-label="Toggle Mode">Light Mode</button>
+                <button id="downloadTasksButton" aria-label="Download Tasks">Download</button>
+                 <input type="file" id="importFile" accept=".json" style="display: none;"> <button id="importTasksButton" aria-label="Import Tasks">Import</button> <button id="toggleMonthViewButton" aria-label="Toggle Month View">Show Month Tasks</button>
+             </div>
+
+             <div class="controls-and-search">
+                  <input type="search" id="searchInput" placeholder="Search tasks..." aria-label="Search Tasks">
+                  <div class="filter-controls">
+                      <label for="filterCategory" class="sr-only">Filter by Category</label>
+                      <select id="filterCategory" aria-label="Filter by Category">
+                          <option value="all">All Categories</option>
+                          </select>
+                      <label for="filterCompletion" class="sr-only">Filter by Completion</label>
+                      <select id="filterCompletion" aria-label="Filter by Completion Status">
+                          <option value="all">All Status</option>
+                          <option value="incomplete">Incomplete</option>
+                          <option value="completed">Completed</option>
+                      </select>
+                       <label for="hideCompletedToggle" class="sr-only">Hide Completed</label>
+                       <button id="hideCompletedToggle" aria-pressed="false">Hide Completed</button>
+                  </div>
+             </div>
+
+
+            <div class="calendar-app">
+                 <div class="calendar-grid" id="calendarGrid" role="grid" aria-labelledby="currentMonthYear">
+                     <div class="day-label" role="columnheader">Sun</div>
+                     <div class="day-label" role="columnheader">Mon</div>
+                     <div class="day-label" role="columnheader">Tue</div>
+                     <div class="day-label" role="columnheader">Wed</div>
+                     <div class="day-label" role="columnheader">Thu</div>
+                     <div class="day-label" role="columnheader">Fri</div>
+                     <div class="day-label" role="columnheader">Sat</div>
+                     </div>
+            </div>
         </div>
 
+
         <div class="month-task-view" id="monthTaskView">
-            <span class="close-button" id="closeMonthView" aria-label="Close Month View">&times;</span> <h3>Tasks for <span id="monthTaskViewMonthYear"></span></h3>
+            <span class="close-button" id="closeMonthView" aria-label="Close Month View">&times;</span>
+            <h3>Tasks for <span id="monthTaskViewMonthYear"></span></h3>
             <div id="monthTaskListContainer">
                 </div>
         </div>
     </div>
 
+    <!-- Task Modal -->
     <div id="taskModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal-content">
             <span class="close-button" aria-label="Close Modal">&times;</span>
-            <h3 id="modalTitle"></h3>
+            <h3 id="modalTitle">Tasks for Date</h3>
 
             <div class="modal-holiday-checkbox">
-                 <input type="checkbox" id="isHolidayCheckbox" aria-label="Mark as Holiday or Leave">
-                 <label for="isHolidayCheckbox">Mark as Holiday/Leave</label>
+                <input type="checkbox" id="isHolidayCheckbox" aria-label="Mark as Holiday or Leave">
+                <label for="isHolidayCheckbox">Mark as Holiday/Leave</label>
             </div>
 
             <ul id="modalTaskList" class="modal-task-list">
-                </ul>
-            <div class="modal-add-task-form">
-                 <div class="category-select-container">
-                      <label for="newTaskCategorySelect" class="sr-only">Select Category</label> <select id="newTaskCategorySelect" aria-label="Select Task Category"></select>
-                      <label for="addNewCategoryInput" class="sr-only">Add New Category</label> <input type="text" id="addNewCategoryInput" placeholder="New Category" aria-label="Add New Category">
+                <!-- Tasks will be populated here -->
+            </ul>
+
+            <form class="modal-add-task-form" id="addTaskForm">
+                 <div class="form-field description-field">
+                     <label for="newTaskDescription">Task Description</label>
+                     <input type="text" id="newTaskDescription" placeholder="Add New Task" aria-label="Add New Task Description" required>
                  </div>
-                 <label for="newTaskTime" class="sr-only">Task Time</label> <input type="time" id="newTaskTime" aria-label="Task Time">
-                 <label for="newTaskDescription" class="sr-only">New Task Description</label> <input type="text" id="newTaskDescription" placeholder="Add New Task" aria-label="Add New Task Description">
-                <button id="addNewTaskButton">Add Task</button>
-            </div>
-             <input type="hidden" id="modalDate">
-             <input type="hidden" id="editingTaskIndex">
+                 <div class="form-field">
+                     <label for="newTaskTime">Time (Optional)</label>
+                     <input type="time" id="newTaskTime" aria-label="Task Time">
+                 </div>
+                 <div class="form-field">
+                     <label for="newTaskCategorySelect">Category</label>
+                     <select id="newTaskCategorySelect" aria-label="Select Task Category"></select>
+                 </div>
+                 <div class="form-field">
+                      <label for="addNewCategoryInput">Or New Category</label>
+                      <input type="text" id="addNewCategoryInput" placeholder="New Category" aria-label="Add New Category">
+                 </div>
+                  <div class="form-field">
+                       <label for="newTaskPriority">Priority</label>
+                       <select id="newTaskPriority" aria-label="Select Task Priority">
+                           <option value="low">Low</option>
+                           <option value="medium" selected>Medium</option>
+                           <option value="high">High</option>
+                       </select>
+                  </div>
+                   <div class="form-field">
+                        <label for="newTaskRecurrence">Recurring</label>
+                        <select id="newTaskRecurrence" aria-label="Select Task Recurrence">
+                            <option value="none" selected>None</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <!-- <option value="yearly">Yearly</option> --> </select>
+                   </div>
+                   <div class="form-field button-field">
+                       <button type="submit" id="addNewTaskButton">Add Task</button>
+                   </div>
+            </form>
+            <input type="hidden" id="modalDate">
         </div>
     </div>
 
-     <div id="editTaskModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="editTaskModalTitle">
-         <div class="modal-content">
-             <span class="close-button" id="closeEditModal" aria-label="Close Edit Modal">&times;</span>
-             <h3 id="editTaskModalTitle">Edit Task</h3>
-              <label for="editTaskCategorySelect" class="sr-only">Select Category</label> <select id="editTaskCategorySelect" aria-label="Select Task Category"></select>
-              <label for="editTaskTime" class="sr-only">Task Time</label> <input type="time" id="editTaskTime" aria-label="Task Time">
-              <label for="editTaskDescription" class="sr-only">Edit Task Description</label> <input type="text" id="editTaskDescription" aria-label="Edit Task Description">
-             <div class="modal-buttons">
-                 <button id="confirmDeleteTaskButton" class="delete-button">Delete Task</button>
+    <!-- Edit Task Modal -->
+    <div id="editTaskModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="editTaskModalTitle">
+        <div class="modal-content">
+            <span class="close-button" id="closeEditModal" aria-label="Close Edit Modal">&times;</span>
+            <h3 id="editTaskModalTitle">Edit Task</h3>
+
+            <div class="edit-task-form-fields">
+                 <div class="form-field description-field">
+                     <label for="editTaskDescription">Task Description</label>
+                     <input type="text" id="editTaskDescription" aria-label="Edit Task Description" required>
+                 </div>
+                 <div class="form-field">
+                     <label for="editTaskTime">Time</label>
+                     <input type="time" id="editTaskTime" aria-label="Task Time">
+                 </div>
+                 <div class="form-field">
+                     <label for="editTaskCategorySelect">Category</label>
+                     <select id="editTaskCategorySelect" aria-label="Select Task Category"></select>
+                 </div>
+                 <div class="form-field">
+                     <label for="editTaskPriority">Priority</label>
+                     <select id="editTaskPriority" aria-label="Select Task Priority">
+                         <option value="low">Low</option>
+                         <option value="medium">Medium</option>
+                         <option value="high">High</option>
+                     </select>
+                 </div>
+                 <div class="form-field">
+                      <label for="editTaskRecurrence">Recurring</label>
+                      <select id="editTaskRecurrence" aria-label="Select Task Recurrence">
+                          <option value="none">None</option>
+                          <option value="daily">Daily</option>
+                          <option value="weekly">Weekly</option>
+                          <option value="monthly">Monthly</option>
+                          <!-- <option value="yearly">Yearly</option> --> </select>
+                 </div>
+                  <div class="form-field">
+                       <label for="editTaskCompleted">Status</label>
+                       <select id="editTaskCompleted" aria-label="Task Status">
+                            <option value="false">Incomplete</option>
+                            <option value="true">Completed</option>
+                       </select>
+                  </div>
+            </div>
+
+            <div class="edit-task-modal-buttons">
                  <button id="confirmSaveTaskButton" class="save-button">Save Changes</button>
-             </div>
-              <input type="hidden" id="editModalDate">
-              <input type="hidden" id="editModalTaskIndex">
-         </div>
-     </div>
-
-
-    <script>
-        const calendarGrid = document.getElementById('calendarGrid');
-        const currentMonthYear = document.getElementById('currentMonthYear');
-        const prevMonthButton = document.getElementById('prevMonth');
-        const nextMonthButton = document.getElementById('nextMonth');
-        const prevYearButton = document.getElementById('prevYear'); // Get prev year button
-        const nextYearButton = document.getElementById('nextYear'); // Get next year button
-        const taskModal = document.getElementById('taskModal');
-        const closeButton = taskModal.querySelector('.close-button'); // Get close button specific to taskModal
-        const modalTitleHeader = document.getElementById('modalTitle');
-        const modalTaskList = document.getElementById('modalTaskList');
-        const newTaskDescriptionInput = document.getElementById('newTaskDescription');
-        const newTaskCategorySelect = document.getElementById('newTaskCategorySelect'); // Get new task category select
-        const addNewCategoryInput = document.getElementById('addNewCategoryInput'); // Get add new category input
-        const newTaskTimeInput = document.getElementById('newTaskTime'); // Get new task time input
-        const addNewTaskButton = document.getElementById('addNewTaskButton');
-        const modalDateInput = document.getElementById('modalDate');
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const body = document.body;
-        const downloadTasksButton = document.getElementById('downloadTasksButton');
-        const monthTaskView = document.getElementById('monthTaskView');
-        const toggleMonthViewButton = document.getElementById('toggleMonthViewButton');
-        const monthTaskViewMonthYear = document.getElementById('monthTaskViewMonthYear');
-        const monthTaskListContainer = document.getElementById('monthTaskListContainer');
-        const closeMonthViewButton = document.getElementById('closeMonthView'); // Get month view close button
-        const isHolidayCheckbox = document.getElementById('isHolidayCheckbox'); // Get holiday checkbox
-
-
-        // Edit Task Modal elements
-        const editTaskModal = document.getElementById('editTaskModal');
-        const closeEditModalButton = document.getElementById('closeEditModal');
-        const editTaskDescriptionInput = document.getElementById('editTaskDescription');
-        const editTaskCategorySelect = document.getElementById('editTaskCategorySelect'); // Get edit task category select
-        const editTaskTimeInput = document.getElementById('editTaskTime'); // Get edit task time input
-        const confirmSaveTaskButton = document.getElementById('confirmSaveTaskButton');
-        const confirmDeleteTaskButton = document.getElementById('confirmDeleteTaskButton');
-        const editModalDateInput = document.getElementById('editModalDate');
-        const editModalTaskIndexInput = document.getElementById('editModalTaskIndex');
-
-
-        let currentDate = new Date();
-
-        // Load data from localStorage
-        const tasks = JSON.parse(localStorage.getItem('calendarTasks')) || {};
-        const holidays = JSON.parse(localStorage.getItem('calendarHolidays')) || {};
-        let categories = JSON.parse(localStorage.getItem('calendarCategories')) || ['General', 'Work', 'Personal']; // Default categories
-        let currentMode = localStorage.getItem('calendarMode') || 'light'; // Load mode preference
-
-
-        // Ensure loaded tasks have the new structure (including time) if they are old format
-        for (const date in tasks) {
-            tasks[date] = tasks[date].map(task => {
-                if (typeof task === 'string') {
-                    return { description: task, category: '', completed: false, time: '' }; // Add time property
-                }
-                // Ensure time property exists for existing objects
-                if (!task.hasOwnProperty('time')) {
-                     task.time = '';
-                }
-                return task;
-            });
-        }
-
-        // Load month view visibility preference
-        let isMonthViewVisible = localStorage.getItem('monthViewVisible') === 'true';
-
-
-        // Function to save data to localStorage
-        function saveTasks() {
-            localStorage.setItem('calendarTasks', JSON.stringify(tasks));
-        }
-
-        function saveHolidays() {
-            localStorage.setItem('calendarHolidays', JSON.stringify(holidays));
-        }
-
-        function saveCategories() {
-             localStorage.setItem('calendarCategories', JSON.stringify(categories));
-        }
-
-        function saveMode() {
-            localStorage.setItem('calendarMode', currentMode);
-        }
-
-
-        // Function to populate category dropdowns
-        function populateCategorySelects() {
-            newTaskCategorySelect.innerHTML = '';
-            editTaskCategorySelect.innerHTML = '';
-
-            // Add a default empty option
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select Category';
-            newTaskCategorySelect.appendChild(defaultOption.cloneNode(true));
-            editTaskCategorySelect.appendChild(defaultOption.cloneNode(true));
-
-
-            categories.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category;
-                option.textContent = category;
-                newTaskCategorySelect.appendChild(option.cloneNode(true));
-                editTaskCategorySelect.appendChild(option.cloneNode(true));
-            });
-        }
-
-        // Function to render tasks in the main task modal
-        function renderModalTasks(dateString) {
-            modalTaskList.innerHTML = ''; // Clear existing tasks
-
-            const tasksForDate = tasks[dateString] || [];
-
-            // Sort tasks by time
-            tasksForDate.sort((a, b) => {
-                 if (!a.time && !b.time) return 0; // Both have no time
-                 if (!a.time) return 1; // a has no time, b has time
-                 if (!b.time) return -1; // b has no time, a has time
-                 return a.time.localeCompare(b.time); // Compare times
-            });
-
-
-            if (tasksForDate.length === 0) {
-                const listItem = document.createElement('li');
-                listItem.textContent = 'No tasks for this date.';
-                modalTaskList.appendChild(listItem);
-            } else {
-                tasksForDate.forEach((task, index) => {
-                    const listItem = document.createElement('li');
-                    listItem.classList.add('modal-task-item');
-
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.checked = task.completed;
-                    checkbox.setAttribute('aria-label', 'Mark task as complete'); // Accessibility
-                    checkbox.addEventListener('change', () => {
-                        tasks[dateString][index].completed = checkbox.checked;
-                        saveTasks();
-                        renderModalTasks(dateString); // Re-render modal tasks
-                        renderCalendar(); // Update calendar view
-                        renderMonthTasksView(); // Update month view
-                    });
-
-                    const taskContent = document.createElement('span');
-                    taskContent.textContent = `${task.time ? task.time + ' - ' : ''}${task.description}`; // Display time if available
-                     if (task.completed) {
-                         taskContent.classList.add('completed');
-                     }
-
-
-                    const actionsDiv = document.createElement('div');
-                    actionsDiv.classList.add('modal-task-actions');
-
-                    const editButton = document.createElement('button');
-                    editButton.classList.add('edit-task-button');
-                    editButton.textContent = 'Edit';
-                    editButton.dataset.index = index; // Store index
-                    editButton.setAttribute('aria-label', `Edit task: ${task.description}`); // Accessibility
-                    editButton.addEventListener('click', () => {
-                         openEditTaskModal(dateString, index, tasks[dateString][index]);
-                    });
-
-                    const deleteButton = document.createElement('button');
-                    deleteButton.classList.add('delete-task-button');
-                    deleteButton.textContent = 'Delete';
-                    deleteButton.dataset.index = index; // Store index
-                    deleteButton.setAttribute('aria-label', `Delete task: ${task.description}`); // Accessibility
-                     deleteButton.addEventListener('click', () => {
-                         if (confirm('Are you sure you want to delete this task?')) {
-                             deleteTask(dateString, index);
-                         }
-                     });
-
-                    listItem.appendChild(checkbox);
-                    listItem.appendChild(taskContent); // Append task content span
-                    // Optionally display category in modal list
-                    if (task.category) {
-                        const categorySpan = document.createElement('span');
-                        categorySpan.textContent = `[${task.category}]`;
-                        categorySpan.style.fontSize = '0.9em';
-                        categorySpan.style.color = '#666';
-                        categorySpan.style.marginLeft = '5px';
-                        listItem.appendChild(categorySpan);
-                    }
-                    actionsDiv.appendChild(editButton);
-                    actionsDiv.appendChild(deleteButton);
-                    listItem.appendChild(actionsDiv);
-
-                    modalTaskList.appendChild(listItem);
-                });
-            }
-        }
-
-
-        // Function to open the main task modal (Day View)
-        function openTaskModal(dateString) {
-            modalTitleHeader.textContent = `Tasks for: ${dateString}`;
-            modalDateInput.value = dateString;
-
-            // Set holiday checkbox state
-            isHolidayCheckbox.checked = !!holidays[dateString];
-
-            renderModalTasks(dateString); // Render tasks for the selected date
-            populateCategorySelects(); // Populate category dropdown
-
-            taskModal.style.display = 'flex';
-             newTaskDescriptionInput.value = ''; // Clear new task input
-             addNewCategoryInput.value = ''; // Clear add new category input
-             newTaskCategorySelect.value = ''; // Reset category dropdown
-             newTaskTimeInput.value = ''; // Clear new task time input
-        }
-
-         // Function to open the edit task modal
-         function openEditTaskModal(dateString, taskIndex, taskObject) {
-             editTaskDescriptionInput.value = taskObject.description;
-             editTaskTimeInput.value = taskObject.time || ''; // Populate time input
-             populateCategorySelects(); // Populate category dropdown
-             editTaskCategorySelect.value = taskObject.category || ''; // Set selected category
-             editModalDateInput.value = dateString;
-             editModalTaskIndexInput.value = taskIndex;
-             editTaskModal.style.display = 'flex';
-         }
-
-        // Function to render the month's tasks in the side view
-        function renderMonthTasksView() {
-            monthTaskListContainer.innerHTML = ''; // Clear existing tasks
-
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            monthTaskViewMonthYear.textContent = `${new Date(year, month).toLocaleString('default', { month: 'long' })} ${year}`;
-
-            const datesWithTasks = Object.keys(tasks).filter(dateString => {
-                const [taskYear, taskMonth] = dateString.split('-').map(Number);
-                return taskYear === year && taskMonth === month + 1; // Month is 0-indexed in JS Date, 1-indexed in dateString
-            }).sort(); // Sort dates chronologically
-
-            if (datesWithTasks.length === 0) {
-                const noTasksMessage = document.createElement('p');
-                noTasksMessage.textContent = 'No tasks scheduled for this month.';
-                monthTaskListContainer.appendChild(noTasksMessage);
-            } else {
-                datesWithTasks.forEach(dateString => {
-                    const tasksForDate = tasks[dateString];
-                    if (tasksForDate && tasksForDate.length > 0) {
-                        const dateGroup = document.createElement('div');
-                        dateGroup.classList.add('task-date-group');
-
-                        const dateHeader = document.createElement('div');
-                        dateHeader.classList.add('task-date');
-                        dateHeader.textContent = dateString; // Display the full date
-                        dateGroup.appendChild(dateHeader);
-
-                        const taskList = document.createElement('ul');
-
-                        // Sort tasks by time for month view as well
-                        tasksForDate.sort((a, b) => {
-                            if (!a.time && !b.time) return 0;
-                            if (!a.time) return 1;
-                            if (!b.time) return -1;
-                            return a.time.localeCompare(b.time);
-                        });
-
-
-                        tasksForDate.forEach((task, index) => {
-                            const taskItem = document.createElement('li');
-
-                            const checkbox = document.createElement('input');
-                            checkbox.type = 'checkbox';
-                            checkbox.checked = task.completed;
-                            checkbox.setAttribute('aria-label', 'Mark task as complete'); // Accessibility
-                            checkbox.addEventListener('change', () => {
-                                tasks[dateString][index].completed = checkbox.checked;
-                                saveTasks();
-                                renderCalendar(); // Update calendar view
-                                renderMonthTasksView(); // Update month view
-                                // If task modal is open for this date, re-render it too
-                                if (taskModal.style.display === 'flex' && modalDateInput.value === dateString) {
-                                    renderModalTasks(dateString);
-                                }
-                            });
-
-                            const taskContent = document.createElement('span');
-                            taskContent.textContent = `${task.time ? task.time + ' - ' : ''}${task.description}`; // Display time if available
-                            if (task.completed) {
-                                taskContent.classList.add('completed');
-                            }
-
-
-                            const actionsDiv = document.createElement('div');
-                            actionsDiv.classList.add('task-actions'); // Use a different class name to avoid conflict with modal actions
-
-                            const editButton = document.createElement('button');
-                            editButton.classList.add('edit-task-button');
-                            editButton.textContent = 'Edit';
-                            editButton.dataset.index = index;
-                            editButton.dataset.date = dateString;
-                             editButton.setAttribute('aria-label', `Edit task: ${task.description}`); // Accessibility
-                            editButton.addEventListener('click', () => {
-                                openEditTaskModal(dateString, index, tasks[dateString][index]);
-                            });
-
-                            const deleteButton = document.createElement('button');
-                            deleteButton.classList.add('delete-task-button');
-                            deleteButton.textContent = 'Delete';
-                            deleteButton.dataset.index = index;
-                             deleteButton.dataset.date = dateString;
-                             deleteButton.setAttribute('aria-label', `Delete task: ${task.description}`); // Accessibility
-                             deleteButton.addEventListener('click', () => {
-                                 if (confirm('Are you sure you want to delete this task?')) {
-                                     deleteTask(dateString, index);
-                                 }
-                             });
-
-                            taskItem.appendChild(checkbox);
-                            taskItem.appendChild(taskContent); // Append task content span
-                             // Optionally display category in month view list
-                             if (task.category) {
-                                 const categorySpan = document.createElement('span');
-                                 categorySpan.textContent = `[${task.category}]`;
-                                 categorySpan.style.fontSize = '0.9em';
-                                 categorySpan.style.color = '#666';
-                                 categorySpan.style.marginLeft = '5px';
-                                 taskItem.appendChild(categorySpan);
-                             }
-                            actionsDiv.appendChild(editButton);
-                            actionsDiv.appendChild(deleteButton);
-                            taskItem.appendChild(actionsDiv);
-
-                            taskList.appendChild(taskItem);
-                        });
-                        dateGroup.appendChild(taskList);
-                        monthTaskListContainer.appendChild(dateGroup);
-                    }
-                });
-            }
-        }
-
-
-        // Function to render the calendar
-        function renderCalendar() {
-            // Clear previous days, but keep day labels
-            const dayLabels = calendarGrid.querySelectorAll('.day-label');
-            calendarGrid.innerHTML = '';
-            dayLabels.forEach(label => calendarGrid.appendChild(label));
-
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const firstDayOfMonth = new Date(year, month, 1);
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const startingDayOfWeek = firstDayOfMonth.getDay(); // 0 for Sunday, 6 for Saturday
-
-            currentMonthYear.textContent = `${new Date(year, month).toLocaleString('default', { month: 'long' })} ${year}`; // Display Month and Year
-
-
-            // Add empty divs for days before the first day of the month
-            for (let i = 0; i < startingDayOfWeek; i++) {
-                const emptyDay = document.createElement('div');
-                calendarGrid.appendChild(emptyDay);
-            }
-
-            // Add days of the month
-            for (let i = 1; i <= daysInMonth; i++) {
-                const day = document.createElement('div');
-                day.classList.add('day');
-                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                day.dataset.date = dateString;
-                day.setAttribute('role', 'gridcell'); // Accessibility
-
-                // Determine the day of the week for the current day number
-                const dayOfWeek = new Date(year, month, i).getDay(); // 0 for Sunday, 6 for Saturday
-
-                // Add weekend class if it's Saturday or Sunday
-                if (dayOfWeek === 0 || dayOfWeek === 6) {
-                    day.classList.add('weekend');
-                }
-
-                // Check if it's a holiday/leave
-                if (holidays[dateString]) {
-                    day.classList.add('holiday');
-                }
-
-
-                // Check for tasks and add 'has-task' class
-                const tasksForDate = tasks[dateString] || [];
-                if (tasksForDate.length > 0) {
-                     day.classList.add('has-task'); // Add class to highlight days with tasks
-
-                     // Check for high task density
-                     if (tasksForDate.length > 5) { // Threshold for high density
-                          day.classList.add('high-density');
-                     }
-
-                     // Check for tasks due soon (within the next 7 days)
-                     const today = new Date();
-                     today.setHours(0, 0, 0, 0);
-                     const taskDate = new Date(dateString);
-                     taskDate.setHours(0, 0, 0, 0);
-                     const timeDiff = taskDate.getTime() - today.getTime();
-                     const dayDiff = timeDiff / (1000 * 3600 * 24);
-
-                     if (dayDiff >= 0 && dayDiff <= 7) { // Tasks due today or in the next 7 days
-                         // Check if at least one task is not completed
-                         const hasIncompleteTaskDueSoon = tasksForDate.some(task => !task.completed);
-                         if (hasIncompleteTaskDueSoon) {
-                              day.classList.add('due-soon');
-                         }
-                     }
-                }
-
-
-                // Add day number
-                const dayNumber = document.createElement('div');
-                dayNumber.classList.add('day-number');
-                dayNumber.textContent = i;
-                day.appendChild(dayNumber);
-
-                // Add task list preview
-                const taskListPreview = document.createElement('ul');
-                taskListPreview.classList.add('task-list-preview');
-                day.appendChild(taskListPreview);
-
-                // Display tasks for this date (sorted by time)
-                if (tasksForDate.length > 0) {
-                    // Sort tasks by time for preview
-                    tasksForDate.sort((a, b) => {
-                        if (!a.time && !b.time) return 0;
-                        if (!a.time) return 1;
-                        if (!b.time) return -1;
-                        return a.time.localeCompare(b.time);
-                    });
-
-                    // Limit preview to a few tasks
-                    const previewTasks = tasksForDate.slice(0, 3); // Show up to 3 tasks
-                    previewTasks.forEach((task) => {
-                        const taskItem = document.createElement('li');
-                        taskItem.textContent = `${task.time ? task.time + ' - ' : ''}${task.description}`; // Display time if available
-                        if (task.completed) {
-                            taskItem.classList.add('completed');
-                        }
-                        taskListPreview.appendChild(taskItem);
-                    });
-                    if (tasksForDate.length > 3) {
-                         const moreItem = document.createElement('li');
-                         moreItem.textContent = `+${tasksForDate.length - 3} more...`;
-                         taskListPreview.appendChild(moreItem);
-                    }
-                }
-
-                // Highlight today
-                const today = new Date();
-                if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) {
-                    day.classList.add('today');
-                }
-
-                /* Removed individual task click listeners from day cells
-                   Tasks are now managed via the modal opened by clicking the day
-                */
-
-                // Add click listener to open the main task modal
-                day.addEventListener('click', () => {
-                    openTaskModal(dateString);
-                });
-
-                calendarGrid.appendChild(day);
-            }
-        }
-
-        // Function to toggle mode (Light, Dark, Gray)
-        function toggleMode() {
-            body.classList.remove('light-mode', 'dark-mode', 'gray-mode'); // Remove all mode classes
-
-            if (currentMode === 'light') {
-                currentMode = 'dark';
-                body.classList.add('dark-mode');
-                darkModeToggle.textContent = 'Dark Mode';
-            } else if (currentMode === 'dark') {
-                currentMode = 'gray';
-                body.classList.add('gray-mode');
-                darkModeToggle.textContent = 'Gray Mode';
-            } else { // currentMode is 'gray' or initial load without preference
-                currentMode = 'light';
-                // body.classList.add('light-mode'); // light-mode is the default, no class needed
-                darkModeToggle.textContent = 'Light Mode';
-            }
-
-            saveMode(); // Save mode preference
-            renderCalendar(); // Re-render calendar to apply mode styles
-            renderMonthTasksView(); // Re-render month view to apply mode styles
-        }
-
-        // Apply saved mode preference on page load
-        function applySavedModePreference() {
-            if (currentMode === 'dark') {
-                body.classList.add('dark-mode');
-                darkModeToggle.textContent = 'Dark Mode';
-            } else if (currentMode === 'gray') {
-                body.classList.add('gray-mode');
-                darkModeToggle.textContent = 'Gray Mode';
-            } else {
-                /* Default is light mode, no class needed, but explicitly set text */
-                darkModeToggle.textContent = 'Light Mode';
-            }
-        }
-
-        // Function to handle adding a new task from the modal
-        function addNewTaskFromModal() {
-            const description = newTaskDescriptionInput.value.trim();
-            const time = newTaskTimeInput.value; // Get time value
-            let category = newTaskCategorySelect.value; // Get category from select
-
-            // If a new category is typed, use that and add to categories list
-            const newCategory = addNewCategoryInput.value.trim();
-            if (newCategory) {
-                 category = newCategory;
-                 if (!categories.includes(category)) {
-                      categories.push(category);
-                      saveCategories();
-                      populateCategorySelects(); // Update dropdowns
-                 }
-            }
-
-
-            const date = modalDateInput.value;
-
-            if (description && date) {
-                if (!tasks[date]) {
-                    tasks[date] = [];
-                }
-                tasks[date].push({ description: description, category: category, completed: false, time: time }); // Save as object with time
-                saveTasks(); // Save to localStorage
-                newTaskDescriptionInput.value = ''; // Clear input
-                addNewCategoryInput.value = ''; // Clear add new category input
-                newTaskCategorySelect.value = ''; // Reset category dropdown
-                newTaskTimeInput.value = ''; // Clear new task time input
-                renderModalTasks(date); // Re-render task list in modal
-                renderCalendar(); // Re-render calendar to update highlights
-                renderMonthTasksView(); // Update month view
-            } else {
-                alert('Please enter a task description.');
-            }
-        }
-
-         // Function to handle saving edited task from the edit modal
-         function saveEditedTask() {
-             const description = editTaskDescriptionInput.value.trim();
-             const time = editTaskTimeInput.value; // Get time value
-             const category = editTaskCategorySelect.value; // Get category from select
-             const date = editModalDateInput.value;
-             const index = parseInt(editModalTaskIndexInput.value);
-
-             if (description && date && !isNaN(index) && tasks[date] && tasks[date][index] !== undefined) {
-                 // Preserve completed status
-                 tasks[date][index].description = description;
-                 tasks[date][index].category = category;
-                 tasks[date][index].time = time; // Update time
-                 saveTasks(); // Save to localStorage
-                 editTaskModal.style.display = 'none'; // Close edit modal
-                 renderModalTasks(date); // Re-render task list in main modal
-                 renderCalendar(); // Re-render calendar
-                 renderMonthTasksView(); // Update month view
-             } else if (!description) {
-                 alert('Please enter a task description.');
-             } else {
-                 console.error("Error saving task: Invalid data or index.");
-                 alert("Could not save task. Please try again.");
-             }
-         }
-
-        // Function to handle deleting task
-        function deleteTask(date, index) {
-             if (date && !isNaN(index) && tasks[date] && tasks[date][index] !== undefined) {
-                 tasks[date].splice(index, 1); // Remove the task
-
-                 if (tasks[date].length === 0) {
-                     delete tasks[date]; // Remove date key if no tasks left
-                 }
-
-                 saveTasks(); // Save to localStorage
-                 // Check which modal is open and re-render accordingly
-                 if (taskModal.style.display === 'flex' && modalDateInput.value === date) {
-                      renderModalTasks(date); // Re-render task list in main modal
-                 }
-                 if (editTaskModal.style.display === 'flex' && editModalDateInput.value === date && parseInt(editModalTaskIndexInput.value) === index) {
-                      editTaskModal.style.display = 'none'; // Close edit modal if the deleted task was being edited
-                 }
-                 renderCalendar(); // Re-render calendar
-                 renderMonthTasksView(); // Update month view
-             } else {
-                 console.error("Error deleting task: Invalid data or index.");
-                 alert("Could not delete task. Please try again.");
-             }
-        }
-
-        // Function to handle downloading tasks
-        function downloadTasks() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ tasks: tasks, holidays: holidays, categories: categories, mode: currentMode }, null, 2)); // Include mode in download
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "calendar_data.json"); // Changed filename
-            document.body.appendChild(downloadAnchorNode); // Required for Firefox
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        }
-
-        // Function to toggle month task view visibility
-        function toggleMonthView() {
-            isMonthViewVisible = !isMonthViewVisible;
-            monthTaskView.style.display = isMonthViewVisible ? 'block' : 'none';
-            toggleMonthViewButton.textContent = isMonthViewVisible ? 'Hide Month Tasks' : 'Show Month Tasks';
-            localStorage.setItem('monthViewVisible', isMonthViewVisible); // Save preference
-        }
-
-        // Apply saved month view visibility preference on page load
-        function applySavedMonthViewPreference() {
-             monthTaskView.style.display = isMonthViewVisible ? 'block' : 'none';
-             toggleMonthViewButton.textContent = isMonthViewVisible ? 'Hide Month Tasks' : 'Show Month Tasks';
-        }
-
-        // Function to navigate year
-        function navigateYear(delta) {
-            currentDate.setFullYear(currentDate.getFullYear() + delta);
-            renderCalendar();
-            renderMonthTasksView();
-        }
-
-        // Event listener for holiday checkbox change
-        isHolidayCheckbox.addEventListener('change', () => {
-             const dateString = modalDateInput.value;
-             if (isHolidayCheckbox.checked) {
-                 holidays[dateString] = true;
-             } else {
-                 delete holidays[dateString];
-             }
-             saveHolidays();
-             renderCalendar(); // Re-render calendar to show holiday status
-        });
-
-
-        // Event listeners for calendar navigation
-        prevMonthButton.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            renderCalendar();
-            renderMonthTasksView(); // Update month view when month changes
-        });
-
-        nextMonthButton.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar();
-            renderMonthTasksView(); // Update month view when month changes
-        });
-
-        // Event listeners for year navigation buttons
-        prevYearButton.addEventListener('click', () => navigateYear(-1));
-        nextYearButton.addEventListener('click', () => navigateYear(1));
-
-
-        // Event listener to close main task modal
-        closeButton.addEventListener('click', () => {
-            taskModal.style.display = 'none';
-        });
-
-         // Event listener to close edit task modal
-         closeEditModalButton.addEventListener('click', () => {
-             editTaskModal.style.display = 'none';
-         });
-
-         // Event listener to close month view panel
-         closeMonthViewButton.addEventListener('click', () => {
-             toggleMonthView(); // Use the toggle function to hide and update state/button text
-         });
-
-
-        // Close modals when clicking outside of them
-        window.addEventListener('click', (event) => {
-            if (event.target === taskModal) {
-                taskModal.style.display = 'none';
-            }
-            if (event.target === editTaskModal) {
-                 editTaskModal.style.display = 'none';
-            }
-        });
-
-        // Event listener for adding a new task from the modal
-        addNewTaskButton.addEventListener('click', addNewTaskFromModal);
-
-         // Event listener for clicking edit/delete buttons within the modal task list
-         modalTaskList.addEventListener('click', (event) => {
-             const target = event.target;
-             if (target.classList.contains('edit-task-button')) {
-                 const index = parseInt(target.dataset.index);
-                 const date = modalDateInput.value;
-                 openEditTaskModal(date, index, tasks[date][index]); // Pass the task object
-             } else if (target.classList.contains('delete-task-button')) {
-                  const index = parseInt(target.dataset.index);
-                  const date = modalDateInput.value;
-                  if (confirm('Are you sure you want to delete this task?')) {
-                       deleteTask(date, index);
-                  }
-             }
-         });
-
-
-        // Event listeners for buttons in the edit task modal
-        confirmSaveTaskButton.addEventListener('click', saveEditedTask);
-        confirmDeleteTaskButton.addEventListener('click', () => {
-             const date = editModalDateInput.value;
-             const index = parseInt(editModalTaskIndexInput.value);
-             if (confirm('Are you sure you want to delete this task?')) {
-                  deleteTask(date, index);
-             }
-        });
-
-
-        // Event listener for dark mode toggle button
-        darkModeToggle.addEventListener('click', toggleMode);
-
-
-        // Event listener for download button
-        downloadTasksButton.addEventListener('click', downloadTasks);
-
-        // Event listener for month view toggle button
-        toggleMonthViewButton.addEventListener('click', toggleMonthView);
-
-
-        // Initial setup
-        applySavedModePreference(); // Apply mode preference on load
-        applySavedMonthViewPreference(); // Apply month view preference on load
-        populateCategorySelects(); // Populate categories on initial load
-        renderCalendar();
-        renderMonthTasksView(); // Initial render of month view
-
-    </script>
+                 <button id="confirmDeleteTaskButton" class="delete-button">Delete Task</button>
+                 <button id="confirmDeleteRecurringTaskButton" class="delete-button" style="display: none;">Delete This Occurrence</button>
+                 <button id="confirmDeleteAllRecurringTaskButton" class="delete-button" style="display: none;">Delete All Recurring</button>
+            </div>
+
+             <input type="hidden" id="editModalDate">
+             <input type="hidden" id="editModalTaskIndex">
+             <input type="hidden" id="editModalIsRecurringInstance">
+        </div>
+    </div>
+
+
+    <script src="script.js" defer></script>
 </body>
 </html>
