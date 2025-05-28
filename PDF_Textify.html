@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Text Extractor & Copier</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #0056b3;
+            margin-bottom: 25px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input[type="file"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .loading-message {
+            text-align: center;
+            margin-top: 15px;
+            font-style: italic;
+            color: #666;
+            min-height: 20px; /* Reserve space to prevent layout shift */
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+            line-height: 1.5;
+            min-height: 300px;
+            resize: vertical;
+            box-sizing: border-box; /* Include padding in width */
+            margin-top: 20px;
+        }
+        .controls {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PDF Text Extractor & Copier</h1>
+
+        <div class="input-group">
+            <label for="pdfFileInput">Select PDF File:</label>
+            <input type="file" id="pdfFileInput" accept=".pdf">
+            <button id="processPdfButton" disabled>Extract Text</button>
+        </div>
+
+        <div id="loadingMessage" class="loading-message" style="display: none;">
+            Processing PDF... This might take a while for scanned documents.
+        </div>
+
+        <textarea id="extractedText" readonly placeholder="Extracted text will appear here..."></textarea>
+
+        <div class="controls">
+            <button id="copyButton" style="display: none;">Copy All Text</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.269/pdf.min.mjs" type="module"></script>
+    <script type="module">
+        // Import pdfjsLib from the loaded module
+        import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.269/pdf.min.mjs';
+
+        // Set worker path for PDF.js - THIS IS CRUCIAL
+        // It points to the pdf.worker.min.mjs file.
+        // Using CDN for simplicity here.
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.269/pdf.worker.min.mjs';
+
+        // Now you can use pdfjsLib safely below this point
+        const pdfFileInput = document.getElementById('pdfFileInput');
+        const processPdfButton = document.getElementById('processPdfButton');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const extractedTextarea = document.getElementById('extractedText');
+        const copyButton = document.getElementById('copyButton');
+
+        let pdfFile = null;
+        let tesseractWorker = null; // Tesseract.js worker instance
+
+        // --- Event Listeners ---
+
+        pdfFileInput.addEventListener('change', (event) => {
+            pdfFile = event.target.files[0];
+            if (pdfFile) {
+                processPdfButton.disabled = false;
+            } else {
+                processPdfButton.disabled = true;
+            }
+            extractedTextarea.value = ''; // Clear previous text
+            copyButton.style.display = 'none';
+        });
+
+        processPdfButton.addEventListener('click', async () => {
+            if (!pdfFile) {
+                alert('Please select a PDF file first.');
+                return;
+            }
+
+            loadingMessage.style.display = 'block';
+            loadingMessage.innerText = 'Initializing...'; // Initial message
+            extractedTextarea.value = '';
+            copyButton.style.display = 'none';
+            processPdfButton.disabled = true; // Disable button during processing
+
+            try {
+                const extractedContent = await extractTextFromPdf(pdfFile);
+                extractedTextarea.value = extractedContent;
+                if (extractedContent.trim().length > 0) {
+                    copyButton.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error processing PDF:', error);
+                extractedTextarea.value = `Error: Could not process PDF.\n\n${error.message || error}`;
+                alert(`An error occurred: ${error.message || 'Unknown error. Check console for details.'}`);
+            } finally {
+                loadingMessage.style.display = 'none';
+                processPdfButton.disabled = false;
+            }
+        });
+
+        copyButton.addEventListener('click', () => {
+            if (extractedTextarea.value) {
+                navigator.clipboard.writeText(extractedTextarea.value)
+                    .then(() => {
+                        alert('Text copied to clipboard!');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy text: ', err);
+                        alert('Failed to copy text. Please select and copy manually.');
+                        // Fallback for older browsers or if writeText fails
+                        extractedTextarea.select();
+                        document.execCommand('copy');
+                    });
+            }
+        });
+
+        // --- Core PDF Processing Functions ---
+
+        async function extractTextFromPdf(file) {
+            const fileReader = new FileReader();
+            fileReader.readAsArrayBuffer(file);
+
+            return new Promise((resolve, reject) => {
+                fileReader.onload = async () => {
+                    const typedarray = new Uint8Array(fileReader.result);
+                    try {
+                        loadingMessage.innerText = 'Loading PDF...';
+                        const pdfDocument = await pdfjsLib.getDocument({ data: typedarray }).promise;
+                        let fullText = []; // Use an array to collect text, then join
+
+                        for (let i = 1; i <= pdfDocument.numPages; i++) {
+                            loadingMessage.innerText = `Processing page ${i} of ${pdfDocument.numPages}...`;
+                            const page = await pdfDocument.getPage(i);
+                            const textContent = await page.getTextContent();
+                            const pageText = textContent.items.map(item => item.str).join(' ');
+
+                            if (pageText.trim().length > 0) {
+                                // If PDF.js extracts text, use it directly
+                                fullText.push(pageText);
+                                console.log(`Page ${i}: Extracted text directly.`);
+                            } else {
+                                // If no text is extracted, it's likely an image-based page, perform OCR
+                                console.warn(`Page ${i}: No selectable text found. Attempting OCR...`);
+                                const ocrText = await performOcrOnPage(page);
+                                fullText.push(ocrText);
+                            }
+                            // Add a separator between pages for readability, only if not the last page
+                            if (i < pdfDocument.numPages) {
+                                fullText.push('\n\n--- End of Page ' + i + ' ---\n\n');
+                            }
+                        }
+                        resolve(fullText.join('').trim());
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                fileReader.onerror = reject;
+            });
+        }
+
+        // Tesseract.js library for OCR (loaded via CDN before this script block)
+        // Its global Tesseract object will be available.
+        // We'll define the worker initialization and OCR function here.
+
+        async function initializeTesseractWorker() {
+            if (!tesseractWorker) {
+                loadingMessage.innerText = 'Initializing OCR engine (downloading language data if first time)...';
+                // Initialize Tesseract worker. 'eng' for English language data.
+                // This will download language files (~5-15MB) on first run and cache them.
+                tesseractWorker = await Tesseract.createWorker('eng', 1, {
+                    // Logger to show progress in the loading message
+                    logger: m => {
+                        if (m.status === 'downloading') {
+                            loadingMessage.innerText = `Downloading OCR data: ${m.progress ? Math.round(m.progress * 100) + '%' : ''}`;
+                        } else if (m.status === 'recognizing') {
+                            loadingMessage.innerText = `OCR Progress: ${Math.round(m.progress * 100)}%`;
+                        } else {
+                            loadingMessage.innerText = `OCR Status: ${m.status}`;
+                        }
+                    }
+                });
+            }
+        }
+
+        async function performOcrOnPage(pdfPage) {
+            await initializeTesseractWorker(); // Ensure worker is initialized
+
+            // Determine rendering scale for OCR. Higher scale = better accuracy, slower processing.
+            // A scale of 2.0 or 3.0 is often good for OCR.
+            const scale = 2.0;
+            const viewport = pdfPage.getViewport({ scale: scale });
+
+            // Create a temporary canvas element to render the PDF page as an image
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            // Render PDF page into canvas context
+            const renderContext = {
+                canvasContext: context,
+                viewport: viewport
+            };
+            await pdfPage.render(renderContext).promise;
+
+            // Perform OCR on the canvas image
+            // We pass the canvas directly to Tesseract.js
+            const { data: { text } } = await tesseractWorker.recognize(canvas);
+
+            // Clean up the temporary canvas from the DOM
+            canvas.remove();
+
+            return text || ''; // Return extracted text, or empty string if nothing found
+        }
+    </script>
+</body>
+</html>
