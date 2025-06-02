@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 25px;
+        }
+        .input-group {
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            max-width: 400px; /* Limit input width */
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #cc0000;
+        }
+        .video-container {
+            margin-top: 30px;
+            /* Aspect ratio 16:9 for responsive video */
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio (height / width = 9 / 16 = 0.5625) */
+            height: 0;
+            overflow: hidden;
+            background-color: #000; /* Background while loading */
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        #error-message {
+            color: red;
+            margin-top: 15px;
+            display: none; /* Hidden by default */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simple YouTube Video Player</h1>
+        <div class="input-group">
+            <input type="text" id="youtubeLink" placeholder="Paste YouTube link here (e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ)">
+            <button onclick="loadVideo()">Play Video</button>
+        </div>
+        <p id="error-message">Please enter a valid YouTube video URL.</p>
+        <div class="video-container">
+            <iframe id="videoFrame"
+                    src=""
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+
+    <script>
+        function getYouTubeVideoId(url) {
+            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+            const match = url.match(regex);
+            return (match && match[1]) ? match[1] : null;
+        }
+
+        function loadVideo() {
+            const youtubeLinkInput = document.getElementById('youtubeLink');
+            const videoFrame = document.getElementById('videoFrame');
+            const errorMessage = document.getElementById('error-message');
+            const link = youtubeLinkInput.value.trim();
+
+            if (link === '') {
+                errorMessage.textContent = 'Please paste a YouTube link.';
+                errorMessage.style.display = 'block';
+                videoFrame.src = ''; // Clear existing video
+                return;
+            }
+
+            const videoId = getYouTubeVideoId(link);
+
+            if (videoId) {
+                // Using youtube.com for embeds, which includes ads.
+                // If you wanted to use the privacy-enhanced mode (which does NOT remove ads, but limits tracking),
+                // you would change the domain to "www.youtube-nocookie.com".
+                videoFrame.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&rel=0&modestbranding=1`;
+                errorMessage.style.display = 'none'; // Hide error if successful
+            } else {
+                errorMessage.textContent = 'Invalid YouTube URL. Please make sure it\'s a direct video link.';
+                errorMessage.style.display = 'block';
+                videoFrame.src = ''; // Clear existing video
+            }
+        }
+    </script>
+</body>
+</html>
