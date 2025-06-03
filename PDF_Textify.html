@@ -100,16 +100,21 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.269/pdf.min.mjs" type="module"></script>
+    <script src="https://unpkg.com/tesseract.js@5.0.3/dist/tesseract.min.js"></script>
+
     <script type="module">
         // Import pdfjsLib from the loaded module
         import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.269/pdf.min.mjs';
+        
+        // Tesseract.js is loaded as a regular script, so it creates a global 'Tesseract' object.
+        // We can then destructure createWorker from the global Tesseract object.
+        const { createWorker } = window.Tesseract; 
 
         // Set worker path for PDF.js - THIS IS CRUCIAL
         // It points to the pdf.worker.min.mjs file.
-        // Using CDN for simplicity here.
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.269/pdf.worker.min.mjs';
 
-        // Now you can use pdfjsLib safely below this point
+        // Get DOM elements
         const pdfFileInput = document.getElementById('pdfFileInput');
         const processPdfButton = document.getElementById('processPdfButton');
         const loadingMessage = document.getElementById('loadingMessage');
@@ -220,24 +225,20 @@
             });
         }
 
-        // Tesseract.js library for OCR (loaded via CDN before this script block)
-        // Its global Tesseract object will be available.
-        // We'll define the worker initialization and OCR function here.
-
         async function initializeTesseractWorker() {
             if (!tesseractWorker) {
                 loadingMessage.innerText = 'Initializing OCR engine (downloading language data if first time)...';
                 // Initialize Tesseract worker. 'eng' for English language data.
                 // This will download language files (~5-15MB) on first run and cache them.
-                tesseractWorker = await Tesseract.createWorker('eng', 1, {
+                tesseractWorker = await createWorker('eng', 1, { 
                     // Logger to show progress in the loading message
                     logger: m => {
                         if (m.status === 'downloading') {
                             loadingMessage.innerText = `Downloading OCR data: ${m.progress ? Math.round(m.progress * 100) + '%' : ''}`;
                         } else if (m.status === 'recognizing') {
                             loadingMessage.innerText = `OCR Progress: ${Math.round(m.progress * 100)}%`;
-                        } else {
-                            loadingMessage.innerText = `OCR Status: ${m.status}`;
+                        } else if (m.status === 'initializing') {
+                            loadingMessage.innerText = `OCR Status: ${m.status}...`;
                         }
                     }
                 });
