@@ -15,6 +15,8 @@
             color: #333; /* Light mode text color */
             transition: background-color 0.3s, color 0.3s;
             position: relative; /* Needed for fixed dark mode toggle */
+            min-height: 100vh; /* Ensure body takes full viewport height */
+            box-sizing: border-box; /* Include padding in element's total width and height */
         }
         /* Dark mode styles */
         body.dark-mode {
@@ -31,6 +33,7 @@
             /* max-width will be controlled by JavaScript based on slider */
             text-align: center;
             transition: background-color 0.3s, box-shadow 0.3s, max-width 0.3s ease-out; /* Add max-width transition */
+            margin-top: 20px; /* Space from slider */
         }
         /* Dark mode container */
         body.dark-mode .container {
@@ -80,13 +83,18 @@
             border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, opacity 0.3s ease;
             display: flex; /* Allow content inside button to be flexed */
             align-items: center; /* Vertically align content */
             justify-content: center; /* Horizontally align content */
         }
-        button:hover {
+        button:hover:not(:disabled) { /* Hover effect only if not disabled */
             background-color: #cc0000;
+        }
+        button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+            opacity: 0.7;
         }
 
         /* Dark mode toggle button specific styles */
@@ -109,10 +117,22 @@
         }
 
         #darkModeToggle svg {
-            width: 24px; /* Size of the SVG icon */
-            height: 24px;
+            width: 28px; /* Slightly larger for better visibility */
+            height: 28px;
             fill: currentColor; /* Inherit color from parent (button's color) */
+            /* Add stroke for outlines as seen in your provided images */
+            stroke: black; /* Outline for the icon */
+            stroke-width: 1px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
+        body.dark-mode #darkModeToggle #sunIcon {
+            stroke: #333; /* Darker outline for sun in dark mode if needed */
+        }
+        body.dark-mode #darkModeToggle #moonIcon {
+            stroke: #333; /* Darker outline for moon in dark mode if needed */
+        }
+
 
         /*
            *** IMPORTANT FOR RESPONSIVE IFRAME SIZE ***
@@ -129,20 +149,35 @@
             background-color: #000;
         }
         .video-container iframe {
-            position: absolute; /* Position the iframe to fill the container */
+            position: absolute;
             top: 0;
             left: 0;
-            width: 100%; /* Make iframe fill the container's width */
-            height: 100%; /* Make iframe fill the container's height */
+            width: 100%;
+            height: 100%;
             border: none;
         }
+
+        /* Improved Error Message Styling */
         #error-message {
-            color: red;
+            color: #cc0000; /* Darker red for text */
+            background-color: #ffe6e6; /* Light red background */
+            border: 1px solid #ffb3b3; /* Red border */
+            padding: 10px 15px;
             margin-top: 15px;
-            display: none;
+            border-radius: 5px;
+            display: none; /* Hidden by default */
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        /* Optional: Add a subtle loading indicator */
-        .video-container.loading::after {
+        /* Dark mode error message */
+        body.dark-mode #error-message {
+            background-color: #4a0000;
+            color: #ffcccc;
+            border-color: #ff6666;
+        }
+
+        /* Loading Indicator Styling */
+        .video-container.loading::before { /* Use ::before for the loading text */
             content: "Loading video...";
             position: absolute;
             top: 50%;
@@ -150,12 +185,49 @@
             transform: translate(-50%, -50%);
             color: white;
             font-size: 1.2em;
+            z-index: 1; /* Ensure text is above potential spinner */
         }
+        .video-container.loading::after { /* Use ::after for the spinner */
+            content: '';
+            position: absolute;
+            top: calc(50% + 20px); /* Position below text */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #ff0000; /* YouTube red */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 1;
+        }
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        .video-container.loading iframe {
+            visibility: hidden; /* Hide iframe while loading */
+        }
+
 
         /* Slider specific styles */
         .slider-group {
-            margin-bottom: 20px;
+            margin-bottom: 10px; /* Reduced margin */
             text-align: center;
+            width: 100%;
+            max-width: 600px; /* Adjusted max-width for slider group */
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .slider-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        /* Style for displaying current slider value */
+        #currentSliderValue {
+            margin-left: 5px;
+            font-weight: normal;
         }
 
         #iframeSizeSlider {
@@ -205,32 +277,66 @@
             background: #ff4d4d;
         }
 
+        /* Responsiveness Breakpoints */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.5em;
+                margin-bottom: 15px;
+            }
+            .input-group {
+                flex-direction: column; /* Stack input and button */
+                gap: 5px;
+            }
+            input[type="text"] {
+                max-width: 100%; /* Allow input to take full width */
+            }
+            button {
+                width: 100%; /* Make button full width */
+            }
+            #darkModeToggle {
+                width: 40px;
+                height: 40px;
+                top: 10px;
+                right: 10px;
+            }
+            #darkModeToggle svg {
+                width: 20px;
+                height: 20px;
+            }
+            .slider-group {
+                padding: 5px;
+            }
+        }
     </style>
 </head>
 <body>
-    <button id="darkModeToggle" onclick="toggleDarkMode()">
-        <!-- Eye icon for Light Mode (represents the current state is light mode, so shows "dark mode" eye as option) -->
-        <!-- This eye icon is intentionally a simple representation. You can replace its path (d="..." ) with a more detailed "open eye" or "normal eye" SVG. -->
-        <svg id="darkModeIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zM12 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+    <button id="darkModeToggle">
+        <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFC107" stroke="black" stroke-width="1.5">
+            <path d="M12 2.5c-4.667 0-8.5 3.833-8.5 8.5s3.833 8.5 8.5 8.5a8.5 8.5 0 008.5-8.5c0-4.667-3.833-8.5-8.5-8.5zM12 21.5c-5.25 0-9.5-4.25-9.5-9.5S6.75 2.5 12 2.5s9.5 4.25 9.5 9.5-4.25 9.5-9.5 9.5z"/>
         </svg>
-        <!-- Eye icon for Dark Mode (represents the current state is dark mode, so shows "light mode" eye as option) -->
-        <!-- This eye icon is intentionally a simple representation. You can replace its path (d="..." ) with a more detailed "closed eye" or "crossed out eye" SVG. -->
-        <svg id="lightModeIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
-            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+
+        <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFD700" stroke="black" stroke-width="1.5" style="display: none;">
+            <path d="M12 2.5a.5.5 0 01.5.5v1a.5.5 0 01-1 0V3a.5.5 0 01.5-.5zM12 19.5a.5.5 0 01.5.5v1a.5.5 0 01-1 0v-1a.5.5 0 01.5-.5zM19.5 11.5h1a.5.5 0 010 1h-1a.5.5 0 010-1zM3.5 11.5h1a.5.5 0 010 1h-1a.5.5 0 010-1zM17.653 6.347a.5.5 0 01-.354-.854l.707-.707a.5.5 0 11.707.707l-.707.707a.5.5 0 01-.353.147zM5.646 18.354a.5.5 0 01-.353-.147l-.707-.707a.5.5 0 01.707-.707l.707.707a.5.5 0 01-.354.854zM18.354 18.354a.5.5 0 01-.854-.353l.707-.707a.5.5 0 01.707.707l-.707.707a.5.5 0 01-.147.353zM6.347 5.646a.5.5 0 01-.707-.707l.707-.707a.5.5 0 01.707.707l-.707.707a.5.5 0 01-.001.001z"/>
+            <circle cx="12" cy="12" r="5" fill="#FFC107" stroke="black" stroke-width="1.5"/>
         </svg>
     </button>
 
     <div class="slider-group">
-        <label for="iframeSizeSlider">Adjust Video Player Size:</label>
-        <input type="range" id="iframeSizeSlider" min="300" max="1000" value="700" oninput="updateIframeSize(this.value)">
+        <label for="iframeSizeSlider">Adjust Video Player Size: <span id="currentSliderValue">700px</span></label>
+        <input type="range" id="iframeSizeSlider" min="300" max="1000" value="700">
     </div>
 
     <div class="container" id="videoPlayerContainer">
         <h1>Simple YouTube Video Player</h1>
         <div class="input-group">
             <input type="text" id="youtubeLink" placeholder="Paste YouTube link here (e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ)">
-            <button onclick="loadVideo()">Play Video</button>
+            <button id="playButton" disabled>Play Video</button>
         </div>
         <p id="error-message">Please enter a valid YouTube video URL.</p>
         <div class="video-container">
@@ -243,6 +349,20 @@
     </div>
 
     <script>
+        // DOM element references (cached for efficiency)
+        const body = document.body;
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+        const youtubeLinkInput = document.getElementById('youtubeLink');
+        const playButton = document.getElementById('playButton');
+        const videoFrame = document.getElementById('videoFrame');
+        const errorMessage = document.getElementById('error-message');
+        const videoContainer = document.querySelector('.video-container');
+        const iframeSizeSlider = document.getElementById('iframeSizeSlider');
+        const currentSliderValueSpan = document.getElementById('currentSliderValue');
+        const videoPlayerContainer = document.getElementById('videoPlayerContainer'); // The .container div
+
         /**
          * Extracts the YouTube video ID from a given YouTube URL.
          * Supports various YouTube URL formats.
@@ -250,104 +370,144 @@
          * @returns {string|null} The video ID if found, otherwise null.
          */
         function getYouTubeVideoId(url) {
-            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+            // Updated regex to more robustly capture video IDs from various YouTube URL formats
+            const regex = /(?:https?:\/\/(?:www\.)?youtube\.com\/(?:watch\?v=|embed\/|v\/|)([a-zA-Z0-9_-]{11})(?:\S+)?|https?:\/\/youtu\.be\/([a-zA-Z0-9_-]{11}))/;
             const match = url.match(regex);
-            return (match && match[1]) ? match[1] : null;
+            return (match && (match[1] || match[2])) ? (match[1] || match[2]) : null;
         }
 
         /**
          * Loads a YouTube video into the iframe based on the provided URL.
          */
         function loadVideo() {
-            const youtubeLinkInput = document.getElementById('youtubeLink');
-            const videoFrame = document.getElementById('videoFrame');
-            const errorMessage = document.getElementById('error-message');
-            const videoContainer = document.querySelector('.video-container');
-
             const link = youtubeLinkInput.value.trim();
 
             errorMessage.style.display = 'none';
             errorMessage.textContent = '';
+            videoContainer.classList.remove('loading'); // Ensure loading state is reset
 
             if (link === '') {
                 errorMessage.textContent = 'Please paste a YouTube link.';
                 errorMessage.style.display = 'block';
                 videoFrame.src = '';
-                videoContainer.classList.remove('loading');
+                videoFrame.style.visibility = 'hidden'; // Ensure iframe is hidden when empty
                 return;
             }
 
             const videoId = getYouTubeVideoId(link);
 
             if (videoId) {
-                videoContainer.classList.add('loading');
+                videoContainer.classList.add('loading'); // Show loading indicator
+                videoFrame.style.visibility = 'hidden'; // Hide iframe until loaded
                 // Using www.youtube.com/embed/ for standard embeds.
                 // For privacy-enhanced mode, you would use 'https://www.youtube-nocookie.com/embed/'
+                // Note: Always use HTTPS for embeds where possible.
                 videoFrame.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&rel=0&modestbranding=1`;
 
-                videoFrame.onload = () => {
+                // Set a timeout to clear loading if it takes too long or fails
+                const loadingTimeout = setTimeout(() => {
                     videoContainer.classList.remove('loading');
+                    errorMessage.textContent = 'Video took too long to load or failed. Please check the URL or your internet connection.';
+                    errorMessage.style.display = 'block';
+                    videoFrame.src = ''; // Clear src to stop further attempts
+                    videoFrame.style.visibility = 'hidden';
+                }, 10000); // 10 seconds timeout
+
+                videoFrame.onload = () => {
+                    clearTimeout(loadingTimeout); // Clear timeout on successful load
+                    videoContainer.classList.remove('loading');
+                    videoFrame.style.visibility = 'visible'; // Make iframe visible after loading
+                };
+                 videoFrame.onerror = () => { // Catch errors if iframe fails to load
+                    clearTimeout(loadingTimeout);
+                    videoContainer.classList.remove('loading');
+                    errorMessage.textContent = 'Failed to load video. Ensure the URL is correct and the video is embeddable.';
+                    errorMessage.style.display = 'block';
+                    videoFrame.src = ''; // Clear src
+                    videoFrame.style.visibility = 'hidden';
                 };
 
+
             } else {
-                errorMessage.textContent = 'Invalid YouTube URL. Please make sure it\'s a direct video link (e.g., from youtube.com or youtu.be).';
+                errorMessage.textContent = 'Invalid YouTube URL. Please make sure it\'s a direct video link (e.g., https://www.youtube.com/watch?v=...).';
                 errorMessage.style.display = 'block';
-                videoFrame.src = '';
-                videoContainer.classList.remove('loading');
+                videoFrame.src = ''; // Clear existing video
+                videoFrame.style.visibility = 'hidden'; // Ensure iframe is hidden
             }
         }
 
         /**
          * Toggles dark mode on and off.
-         * Stores the preference in localStorage and switches the displayed icon (flipped logic).
+         * Stores the preference in localStorage and switches the displayed icon (standard logic).
          */
         function toggleDarkMode() {
-            const body = document.body;
-            const darkModeIcon = document.getElementById('darkModeIcon'); // This icon suggests switching TO dark mode
-            const lightModeIcon = document.getElementById('lightModeIcon'); // This icon suggests switching TO light mode
-
             body.classList.toggle('dark-mode');
 
             if (body.classList.contains('dark-mode')) {
                 localStorage.setItem('darkMode', 'enabled');
-                darkModeIcon.style.display = 'none'; // Hide the "switch to dark" icon
-                lightModeIcon.style.display = 'inline-block'; // Show the "switch to light" icon
+                moonIcon.style.display = 'none'; // Hide moon (current is dark, so button changes to sun)
+                sunIcon.style.display = 'inline-block'; // Show sun
             } else {
                 localStorage.setItem('darkMode', 'disabled');
-                darkModeIcon.style.display = 'inline-block'; // Show the "switch to dark" icon
-                lightModeIcon.style.display = 'none'; // Hide the "switch to light" icon
+                moonIcon.style.display = 'inline-block'; // Show moon (current is light, so button changes to moon)
+                sunIcon.style.display = 'none'; // Hide sun
             }
         }
 
         /**
          * Updates the max-width of the video player container based on the slider value.
+         * Also updates the displayed value next to the slider.
          * @param {string} sliderValue - The current value of the slider.
          */
         function updateIframeSize(sliderValue) {
-            const videoPlayerContainer = document.getElementById('videoPlayerContainer');
             videoPlayerContainer.style.maxWidth = `${sliderValue}px`;
+            currentSliderValueSpan.textContent = `${sliderValue}px`;
         }
 
-        // Apply dark mode based on saved preference and set initial icon (flipped logic) when the page loads
-        // Also initialize the iframe size based on the slider's default value.
-        document.addEventListener('DOMContentLoaded', () => {
-            const body = document.body;
-            const darkModeIcon = document.getElementById('darkModeIcon');
-            const lightModeIcon = document.getElementById('lightModeIcon');
-            const iframeSizeSlider = document.getElementById('iframeSizeSlider');
+        /**
+         * Enables/disables the Play Video button based on input field content.
+         */
+        function togglePlayButtonState() {
+            playButton.disabled = youtubeLinkInput.value.trim() === '';
+        }
 
+        // --- Event Listeners and Initial Setup ---
+
+        // Dark mode toggle button click
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+
+        // Play button click
+        playButton.addEventListener('click', loadVideo);
+
+        // Input field change/input for button state
+        youtubeLinkInput.addEventListener('input', togglePlayButtonState);
+
+        // Slider input event to update iframe size and display value
+        iframeSizeSlider.addEventListener('input', (event) => {
+            updateIframeSize(event.target.value);
+        });
+
+
+        // On page load
+        document.addEventListener('DOMContentLoaded', () => {
             // Initialize dark mode
             if (localStorage.getItem('darkMode') === 'enabled') {
                 body.classList.add('dark-mode');
-                darkModeIcon.style.display = 'none';
-                lightModeIcon.style.display = 'inline-block';
+                moonIcon.style.display = 'none';
+                sunIcon.style.display = 'inline-block';
             } else {
-                darkModeIcon.style.display = 'inline-block';
-                lightModeIcon.style.display = 'none';
+                moonIcon.style.display = 'inline-block';
+                sunIcon.style.display = 'none';
             }
 
             // Initialize iframe size based on the slider's default value
             updateIframeSize(iframeSizeSlider.value);
+
+            // Initialize play button state
+            togglePlayButtonState();
+
+            // Ensure iframe is hidden on initial load until a video is played
+            videoFrame.style.visibility = 'hidden';
         });
     </script>
 </body>
