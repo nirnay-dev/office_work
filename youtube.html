@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Video Player</title>
+    <title>Simple YouTube Video Player</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -23,6 +23,57 @@
             background-color: #222; /* Dark mode background */
             color: #eee; /* Dark mode text color */
         }
+
+        /* User Guide specific styles */
+        .user-guide {
+            background-color: #e0ffe0; /* Light green background for visibility */
+            border: 1px solid #aaddaa;
+            padding: 20px;
+            margin-top: 30px; /* Added margin-top to separate from player */
+            border-radius: 8px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: left; /* Align text to the left within the guide */
+        }
+        .user-guide h2 {
+            color: #2e8b57; /* Dark green for heading */
+            margin-top: 0;
+            border-bottom: 1px solid #c0e0c0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .user-guide h3 {
+            color: #4682b4; /* Steel blue for subheadings */
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .user-guide ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            padding-left: 0;
+        }
+        .user-guide li {
+            margin-bottom: 8px;
+        }
+        .user-guide p {
+            margin-bottom: 10px;
+        }
+        /* Dark mode for user guide */
+        body.dark-mode .user-guide {
+            background-color: #1a1a1a;
+            border-color: #444;
+            color: #eee;
+        }
+        body.dark-mode .user-guide h2 {
+            color: #90ee90;
+            border-color: #444;
+        }
+        body.dark-mode .user-guide h3 {
+            color: #87ceeb;
+        }
+
 
         .container {
             background-color: white; /* Light mode container background */
@@ -160,6 +211,17 @@
             border: none;
         }
 
+        /* Style for instructions below the video frame */
+        .video-instructions {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #666; /* Default color for light mode */
+            text-align: center;
+        }
+        body.dark-mode .video-instructions {
+            color: #bbb; /* Lighter color for dark mode */
+        }
+
         /* Improved Error Message Styling */
         #error-message {
             color: #cc0000; /* Darker red for text */
@@ -285,6 +347,11 @@
             body {
                 padding: 10px;
             }
+            .user-guide {
+                padding: 15px;
+                margin-bottom: 20px;
+                margin-top: 20px; /* Adjust margin for mobile */
+            }
             .container {
                 padding: 15px;
             }
@@ -321,19 +388,19 @@
 <body>
     <button id="darkModeToggle">
         <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="#FFD700" stroke="#333" stroke-width="1.5"/>
         </svg>
 
         <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;">
-            <circle cx="12" cy="12" r="5"/>
-            <line x1="12" y1="1" x2="12" y2="3"/>
-            <line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/>
-            <line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            <circle cx="12" cy="12" r="5" fill="#FFD700" stroke="#333" stroke-width="1.5"/>
+            <line x1="12" y1="1" x2="12" y2="3" stroke="#333" stroke-width="1.5"/>
+            <line x1="12" y1="21" x2="12" y2="23" stroke="#333" stroke-width="1.5"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="#333" stroke-width="1.5"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="#333" stroke-width="1.5"/>
+            <line x1="1" y1="12" x2="3" y2="12" stroke="#333" stroke-width="1.5"/>
+            <line x1="21" y1="12" x2="23" y2="12" stroke="#333" stroke-width="1.5"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="#333" stroke-width="1.5"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="#333" stroke-width="1.5"/>
         </svg>
     </button>
 
@@ -344,11 +411,14 @@
 
     <div class="container" id="videoPlayerContainer">
         <h1>Simple YouTube Video Player</h1>
+        
         <div class="input-group">
             <input type="text" id="youtubeLink" placeholder="Paste YouTube link here (e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ)">
             <button id="playButton" disabled>Play Video</button>
         </div>
+        
         <p id="error-message">Please enter a valid YouTube video URL.</p>
+        
         <div class="video-container">
             <iframe id="videoFrame"
                     src=""
@@ -356,6 +426,50 @@
                     allowfullscreen>
             </iframe>
         </div>
+
+        <div class="video-instructions">
+            <p><strong>Tip:</strong> If the video isn't playing or appears blank, try pasting a new link and clicking 'Play Video' again.</p>
+        </div>
+    </div>
+
+    <div class="user-guide">
+        <h2>Welcome to the Simple YouTube Video Player!</h2>
+        <p>This guide will help you understand and use this single-file web application.</p>
+
+        <h3>How to Use:</h3>
+        <ul>
+            <li><strong>Open this `youtube.html` file in your web browser.</strong>
+                <br>(You can simply double-click it, or drag it into your browser tab).</li>
+            <li><strong>Paste a YouTube Link:</strong>
+                <ul>
+                    <li>Find a YouTube video you want to watch.</li>
+                    <li>Copy its URL from your browser's address bar (e.g., `https://www.youtube.com/watch?v=dQw4w9WgXcQ` or `https://youtu.be/dQw4w9WgXcQ`).</li>
+                    <li>Paste this link into the text box labeled "Paste YouTube link here".</li>
+                </ul>
+            </li>
+            <li><strong>Play the Video:</strong>
+                <ul>
+                    <li>Click the "Play Video" button. The video should load and start playing below the input field.</li>
+                </ul>
+            </li>
+            <li><strong>Adjust Player Size:</strong>
+                <ul>
+                    <li>Use the slider labeled "Adjust Video Player Size" to dynamically change how wide the video player appears on your screen.</li>
+                </ul>
+            </li>
+            <li><strong>Toggle Dark Mode:</strong>
+                <ul>
+                    <li>In the top-right corner, you'll see a circular button with a moon or sun icon. Click this button to switch between light and dark themes. Your theme preference will be saved for your next visit!</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>Troubleshooting:</h3>
+        <ul>
+            <li><strong>"Invalid YouTube URL" error:</strong> Ensure you've copied the full and correct URL for a YouTube video. It supports regular `watch?v=` links and `youtu.be` shortened links.</li>
+            <li><strong>"Video took too long to load" error:</strong> Check your internet connection. Sometimes, videos might be restricted from embedding by their uploader.</li>
+            <li><strong>Player not responding:</strong> Try refreshing the page (F5 or Ctrl+R/Cmd+R).</li>
+        </ul>
     </div>
 
     <script>
@@ -371,7 +485,7 @@
         const videoContainer = document.querySelector('.video-container');
         const iframeSizeSlider = document.getElementById('iframeSizeSlider');
         const currentSliderValueSpan = document.getElementById('currentSliderValue');
-        const videoPlayerContainer = document.getElementById('videoPlayerContainer'); // The .container div
+        const videoPlayerContainer = document.getElementById('videoPlayerContainer');
 
         /**
          * Extracts the YouTube video ID from a given YouTube URL.
@@ -380,7 +494,6 @@
          * @returns {string|null} The video ID if found, otherwise null.
          */
         function getYouTubeVideoId(url) {
-            // Updated regex to more robustly capture video IDs from various YouTube URL formats
             const regex = /(?:https?:\/\/(?:www\.)?youtube\.com\/(?:watch\?v=|embed\/|v\/|)([a-zA-Z0-9_-]{11})(?:\S+)?|https?:\/\/youtu\.be\/([a-zA-Z0-9_-]{11}))/;
             const match = url.match(regex);
             return (match && (match[1] || match[2])) ? (match[1] || match[2]) : null;
@@ -394,46 +507,42 @@
 
             errorMessage.style.display = 'none';
             errorMessage.textContent = '';
-            videoContainer.classList.remove('loading'); // Ensure loading state is reset
+            videoContainer.classList.remove('loading');
 
             if (link === '') {
                 errorMessage.textContent = 'Please paste a YouTube link.';
                 errorMessage.style.display = 'block';
                 videoFrame.src = '';
-                videoFrame.style.visibility = 'hidden'; // Ensure iframe is hidden when empty
+                videoFrame.style.visibility = 'hidden';
                 return;
             }
 
             const videoId = getYouTubeVideoId(link);
 
             if (videoId) {
-                videoContainer.classList.add('loading'); // Show loading indicator
-                videoFrame.style.visibility = 'hidden'; // Hide iframe until loaded
-                // Using www.youtube.com/embed/ for standard embeds.
-                // For privacy-enhanced mode, you would use 'https://www.youtube-nocookie.com/embed/'
-                // Note: Always use HTTPS for embeds where possible.
+                videoContainer.classList.add('loading');
+                videoFrame.style.visibility = 'hidden';
                 videoFrame.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&rel=0&modestbranding=1`;
 
-                // Set a timeout to clear loading if it takes too long or fails
                 const loadingTimeout = setTimeout(() => {
                     videoContainer.classList.remove('loading');
                     errorMessage.textContent = 'Video took too long to load or failed. Please check the URL or your internet connection.';
                     errorMessage.style.display = 'block';
-                    videoFrame.src = ''; // Clear src to stop further attempts
+                    videoFrame.src = '';
                     videoFrame.style.visibility = 'hidden';
-                }, 10000); // 10 seconds timeout
+                }, 10000);
 
                 videoFrame.onload = () => {
-                    clearTimeout(loadingTimeout); // Clear timeout on successful load
+                    clearTimeout(loadingTimeout);
                     videoContainer.classList.remove('loading');
-                    videoFrame.style.visibility = 'visible'; // Make iframe visible after loading
+                    videoFrame.style.visibility = 'visible';
                 };
-                 videoFrame.onerror = () => { // Catch errors if iframe fails to load
+                 videoFrame.onerror = () => {
                     clearTimeout(loadingTimeout);
                     videoContainer.classList.remove('loading');
                     errorMessage.textContent = 'Failed to load video. Ensure the URL is correct and the video is embeddable.';
                     errorMessage.style.display = 'block';
-                    videoFrame.src = ''; // Clear src
+                    videoFrame.src = '';
                     videoFrame.style.visibility = 'hidden';
                 };
 
@@ -441,26 +550,26 @@
             } else {
                 errorMessage.textContent = 'Invalid YouTube URL. Please make sure it\'s a direct video link (e.g., https://www.youtube.com/watch?v=...).';
                 errorMessage.style.display = 'block';
-                videoFrame.src = ''; // Clear existing video
-                videoFrame.style.visibility = 'hidden'; // Ensure iframe is hidden
+                videoFrame.src = '';
+                videoFrame.style.visibility = 'hidden';
             }
         }
 
         /**
          * Toggles dark mode on and off.
-         * Stores the preference in localStorage and switches the displayed icon (standard logic).
+         * Stores the preference in localStorage and switches the displayed icon.
          */
         function toggleDarkMode() {
             body.classList.toggle('dark-mode');
 
             if (body.classList.contains('dark-mode')) {
                 localStorage.setItem('darkMode', 'enabled');
-                moonIcon.style.display = 'none'; // Hide moon (current is dark, so button changes to sun)
-                sunIcon.style.display = 'inline-block'; // Show sun
+                moonIcon.style.display = 'none';
+                sunIcon.style.display = 'inline-block';
             } else {
                 localStorage.setItem('darkMode', 'disabled');
-                moonIcon.style.display = 'inline-block'; // Show moon (current is light, so button changes to moon)
-                sunIcon.style.display = 'none'; // Hide sun
+                moonIcon.style.display = 'inline-block';
+                sunIcon.style.display = 'none';
             }
         }
 
@@ -518,6 +627,9 @@
 
             // Ensure iframe is hidden on initial load until a video is played
             videoFrame.style.visibility = 'hidden';
+
+            // Focus the YouTube link input field when the page loads
+            youtubeLinkInput.focus();
         });
     </script>
 </body>
