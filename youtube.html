@@ -100,7 +100,7 @@
         /* Dark mode toggle button specific styles */
         #darkModeToggle {
             background-color: #666;
-            color: white; /* This will be the fill color for the SVG */
+            color: white; /* This will be the fill color for the SVG if current color is used */
             width: 50px; /* Fixed width for a square button */
             height: 50px; /* Fixed height for a square button */
             padding: 0; /* Remove padding to make icon fill the button */
@@ -119,18 +119,21 @@
         #darkModeToggle svg {
             width: 28px; /* Slightly larger for better visibility */
             height: 28px;
-            fill: currentColor; /* Inherit color from parent (button's color) */
-            /* Add stroke for outlines as seen in your provided images */
-            stroke: black; /* Outline for the icon */
-            stroke-width: 1px;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+            /* Default fill for icons, can be overridden per icon */
         }
-        body.dark-mode #darkModeToggle #sunIcon {
-            stroke: #333; /* Darker outline for sun in dark mode if needed */
+
+        /* Specific styles for moon icon (visible in light mode, suggests dark mode) */
+        #moonIcon {
+            fill: #FFD700; /* Yellow fill as in your image for the moon */
+            stroke: #333; /* Dark outline for visibility on light button/background */
+            stroke-width: 1.5px;
         }
-        body.dark-mode #darkModeToggle #moonIcon {
-            stroke: #333; /* Darker outline for moon in dark mode if needed */
+
+        /* Specific styles for sun icon (visible in dark mode, suggests light mode) */
+        #sunIcon {
+            fill: #FFD700; /* Yellow fill for the sun */
+            stroke: #333; /* Dark outline for visibility on dark button/background */
+            stroke-width: 1.5px;
         }
 
 
@@ -317,13 +320,20 @@
 </head>
 <body>
     <button id="darkModeToggle">
-        <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFC107" stroke="black" stroke-width="1.5">
-            <path d="M12 2.5c-4.667 0-8.5 3.833-8.5 8.5s3.833 8.5 8.5 8.5a8.5 8.5 0 008.5-8.5c0-4.667-3.833-8.5-8.5-8.5zM12 21.5c-5.25 0-9.5-4.25-9.5-9.5S6.75 2.5 12 2.5s9.5 4.25 9.5 9.5-4.25 9.5-9.5 9.5z"/>
+        <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
         </svg>
 
-        <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFD700" stroke="black" stroke-width="1.5" style="display: none;">
-            <path d="M12 2.5a.5.5 0 01.5.5v1a.5.5 0 01-1 0V3a.5.5 0 01.5-.5zM12 19.5a.5.5 0 01.5.5v1a.5.5 0 01-1 0v-1a.5.5 0 01.5-.5zM19.5 11.5h1a.5.5 0 010 1h-1a.5.5 0 010-1zM3.5 11.5h1a.5.5 0 010 1h-1a.5.5 0 010-1zM17.653 6.347a.5.5 0 01-.354-.854l.707-.707a.5.5 0 11.707.707l-.707.707a.5.5 0 01-.353.147zM5.646 18.354a.5.5 0 01-.353-.147l-.707-.707a.5.5 0 01.707-.707l.707.707a.5.5 0 01-.354.854zM18.354 18.354a.5.5 0 01-.854-.353l.707-.707a.5.5 0 01.707.707l-.707.707a.5.5 0 01-.147.353zM6.347 5.646a.5.5 0 01-.707-.707l.707-.707a.5.5 0 01.707.707l-.707.707a.5.5 0 01-.001.001z"/>
-            <circle cx="12" cy="12" r="5" fill="#FFC107" stroke="black" stroke-width="1.5"/>
+        <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
         </svg>
     </button>
 
