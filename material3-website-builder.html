@@ -97,6 +97,7 @@
             align-items: center;
             padding: 0 24px;
             gap: 16px;
+            overflow-x: auto;
         }
 
         .toolbar-btn {
@@ -108,6 +109,10 @@
             cursor: pointer;
             font-weight: 500;
             transition: all 0.2s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .toolbar-btn:hover {
@@ -130,17 +135,22 @@
             min-height: 100%;
             padding: 20px;
         }
+        
+        #canvasContent.is-empty .drop-zone {
+            display: flex;
+        }
 
         .drop-zone {
             min-height: 200px;
             border: 2px dashed #e0e0e0;
             border-radius: 8px;
-            display: flex;
             align-items: center;
             justify-content: center;
             color: #666;
             font-size: 16px;
             transition: all 0.2s ease;
+            display: none;
+            margin-bottom: 16px;
         }
 
         .drop-zone.drag-over {
@@ -151,7 +161,7 @@
 
         /* Properties Panel */
         .properties-panel {
-            width: 280px;
+            width: 320px;
             background: #ffffff;
             border-left: 1px solid #e0e0e0;
             padding: 16px;
@@ -239,9 +249,6 @@
             justify-content: center;
             cursor: pointer;
             box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-            position: fixed;
-            bottom: 16px;
-            right: 16px;
         }
 
         .m3-top-app-bar {
@@ -285,11 +292,23 @@
             min-height: 40px;
             border: 2px solid transparent;
             border-radius: 4px;
+            transition: border-color 0.2s ease, background-color 0.2s ease; /* Exclude opacity */
+            cursor: pointer;
+        }
+        .dropped-component.dragging {
+            opacity: 0.4;
+        }
+
+        .drop-placeholder {
+            height: 4px;
+            background-color: #1976d2;
+            border-radius: 2px;
+            margin: 12px 0;
             transition: all 0.2s ease;
         }
 
         .dropped-component:hover {
-            border-color: #1976d2;
+            border-color: #a9cff8;
         }
 
         .dropped-component.selected {
@@ -299,15 +318,16 @@
 
         .component-controls {
             position: absolute;
-            top: -30px;
-            right: 0;
+            top: -28px;
+            right: -2px;
             background: #1976d2;
             border-radius: 4px;
             padding: 4px;
             display: none;
+            gap: 4px;
+            z-index: 10;
         }
 
-        .dropped-component:hover .component-controls,
         .dropped-component.selected .component-controls {
             display: flex;
         }
@@ -319,10 +339,16 @@
             cursor: pointer;
             padding: 4px;
             border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .control-btn:hover {
             background: rgba(255,255,255,0.2);
+        }
+        .drag-handle {
+            cursor: move;
         }
 
         .property-group {
@@ -338,12 +364,43 @@
             text-transform: uppercase;
         }
 
-        .property-input {
+        .property-input, .property-select, .property-textarea, .property-number {
             width: 100%;
             padding: 8px;
             border: 1px solid #e0e0e0;
             border-radius: 4px;
             font-size: 14px;
+            background: white;
+        }
+        
+        .property-select {
+            cursor: pointer;
+        }
+
+        .property-color {
+            width: 100%;
+            height: 40px;
+            padding: 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .property-range {
+            width: 100%;
+            margin: 8px 0;
+        }
+
+        .range-display {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .property-textarea {
+            min-height: 80px;
+            resize: vertical;
         }
 
         .export-code {
@@ -367,6 +424,8 @@
             max-width: 800px;
             max-height: 80%;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
         .export-modal textarea {
@@ -377,6 +436,7 @@
             border: 1px solid #e0e0e0;
             border-radius: 4px;
             padding: 16px;
+            resize: vertical;
         }
     </style>
 </head>
@@ -446,26 +506,30 @@
         <!-- Canvas Area -->
         <div class="canvas-area">
             <div class="canvas-toolbar">
-                <button class="toolbar-btn" onclick="clearCanvas()">
+                <button class="toolbar-btn" id="loadBtn">
+                    <span class="material-icons">folder_open</span>
+                    Load
+                </button>
+                 <button class="toolbar-btn" id="saveBtn">
+                    <span class="material-icons">save</span>
+                    Save
+                </button>
+                <button class="toolbar-btn" id="clearBtn">
                     <span class="material-icons">clear</span>
                     Clear
                 </button>
-                <button class="toolbar-btn" onclick="previewSite()">
+                <button class="toolbar-btn" id="previewBtn">
                     <span class="material-icons">preview</span>
                     Preview
                 </button>
-                <button class="toolbar-btn" onclick="exportCode()">
+                <button class="toolbar-btn" id="exportBtn">
                     <span class="material-icons">code</span>
                     Export Code
-                </button>
-                <button class="toolbar-btn" onclick="saveTemplate()">
-                    <span class="material-icons">save</span>
-                    Save
                 </button>
             </div>
             
             <div class="canvas" id="canvas">
-                <div class="canvas-content" id="canvasContent">
+                <div class="canvas-content is-empty" id="canvasContent">
                     <div class="drop-zone" id="dropZone">
                         Drop components here to start building your website
                     </div>
@@ -490,543 +554,429 @@
             <h3 style="margin-bottom: 16px;">Export HTML Code</h3>
             <textarea id="exportedCode" readonly></textarea>
             <div style="margin-top: 16px; text-align: right;">
-                <button class="m3-button outlined" onclick="copyCode()">Copy Code</button>
-                <button class="m3-button filled" onclick="closeExport()">Close</button>
+                <button class="m3-button outlined" id="copyCodeBtn">Copy Code</button>
+                <button class="m3-button filled" id="closeExportBtn">Close</button>
             </div>
         </div>
     </div>
 
     <script>
-        let selectedComponent = null;
-        let componentCounter = 0;
-        let websiteComponents = [];
+        document.addEventListener('DOMContentLoaded', () => {
 
-        // Component templates
-        const componentTemplates = {
-            button: {
-                html: '<button class="m3-button filled">Button Text</button>',
-                properties: {
-                    text: 'Button Text',
-                    type: 'filled',
-                    color: '#1976d2'
-                }
-            },
-            fab: {
-                html: '<button class="m3-fab"><span class="material-icons">add</span></button>',
-                properties: {
-                    icon: 'add',
-                    color: '#1976d2'
-                }
-            },
-            textfield: {
-                html: '<input class="m3-text-field" placeholder="Enter text here" />',
-                properties: {
-                    placeholder: 'Enter text here',
-                    type: 'text'
-                }
-            },
-            chip: {
-                html: '<span class="m3-chip">Chip Text</span>',
-                properties: {
-                    text: 'Chip Text'
-                }
-            },
-            card: {
-                html: '<div class="m3-card"><h3>Card Title</h3><p>Card content goes here...</p></div>',
-                properties: {
-                    title: 'Card Title',
-                    content: 'Card content goes here...'
-                }
-            },
-            appbar: {
-                html: '<div class="m3-top-app-bar"><h1>App Title</h1></div>',
-                properties: {
-                    title: 'App Title',
-                    color: '#1976d2'
-                }
-            },
-            navigation: {
-                html: '<div class="m3-navigation-rail"><div class="nav-item"><span class="material-icons">home</span></div><div class="nav-item"><span class="material-icons">search</span></div><div class="nav-item"><span class="material-icons">favorite</span></div></div>',
-                properties: {
-                    items: 'home,search,favorite'
-                }
-            },
-            text: {
-                html: '<p>Sample text content</p>',
-                properties: {
-                    content: 'Sample text content',
-                    size: '16px',
-                    color: '#000000'
-                }
-            },
-            image: {
-                html: '<img src="https://via.placeholder.com/300x200" alt="Placeholder" style="max-width: 100%; border-radius: 8px;" />',
-                properties: {
-                    src: 'https://via.placeholder.com/300x200',
-                    alt: 'Placeholder'
-                }
-            },
-            divider: {
-                html: '<hr style="border: none; height: 1px; background: #e0e0e0; margin: 16px 0;" />',
-                properties: {
-                    color: '#e0e0e0',
-                    thickness: '1px'
-                }
-            }
-        };
+            let selectedComponentId = null;
+            let componentCounter = 0;
+            let websiteComponents = []; // Array to store component data objects
 
-        // Initialize drag and drop
-        function initializeDragDrop() {
             const componentItems = document.querySelectorAll('.component-item');
-            const dropZone = document.getElementById('dropZone');
             const canvasContent = document.getElementById('canvasContent');
+            const propertiesContent = document.getElementById('propertiesContent');
+            const exportModal = document.getElementById('exportModal');
 
+            // --- COMPONENT TEMPLATES ---
+            const componentTemplates = {
+                button: {
+                    html: (props) => `<button class="m3-button">${props.text.value}</button>`,
+                    properties: { text: { value: 'Button Text', type: 'text', label: 'Button Text' }, style: { value: 'filled', type: 'select', label: 'Button Style', options: ['filled', 'outlined', 'text'] }, backgroundColor: { value: '#1976d2', type: 'color', label: 'Background Color' }, textColor: { value: '#ffffff', type: 'color', label: 'Text Color' }, borderRadius: { value: 20, type: 'range', label: 'Border Radius', min: 0, max: 50, unit: 'px' }, fontSize: { value: 14, type: 'select', label: 'Font Size', options: [12, 14, 16, 18, 20, 24], unit: 'px' }, fontWeight: { value: 500, type: 'select', label: 'Font Weight', options: [300, 400, 500, 700] }, padding: { value: '10px 24px', type: 'text', label: 'Padding (e.g., 10px 24px)'}, alignment: { value: 'flex-start', type: 'select', label: 'Alignment', options: {'Left': 'flex-start', 'Center': 'center', 'Right': 'flex-end'} } }
+                },
+                fab: {
+                    html: (props) => `<button class="m3-fab"><span class="material-icons">${props.icon.value}</span></button>`,
+                    properties: { icon: { value: 'add', type: 'select', label: 'Icon', options: ['add', 'edit', 'favorite', 'home', 'search', 'settings', 'star', 'close', 'menu', 'arrow_back', 'share', 'bookmark', 'check', 'delete'] }, backgroundColor: { value: '#1976d2', type: 'color', label: 'Background Color' }, iconColor: { value: '#ffffff', type: 'color', label: 'Icon Color' }, size: { value: 56, type: 'select', label: 'Size', options: [40, 48, 56, 64], unit: 'px' }, borderRadius: { value: 16, type: 'range', label: 'Border Radius', min: 0, max: 28, unit: 'px' }, elevation: { value: '0 3px 5px rgba(0,0,0,0.2)', type: 'select', label: 'Shadow', options: {'None': 'none', 'Low': '0 1px 3px rgba(0,0,0,0.12)', 'Medium': '0 3px 5px rgba(0,0,0,0.2)', 'High': '0 6px 10px rgba(0,0,0,0.25)'} } }
+                },
+                textfield: {
+                    html: (props) => `<input class="m3-text-field" type="${props.inputType.value}" placeholder="${props.placeholder.value}" />`,
+                    properties: { placeholder: { value: 'Enter text here', type: 'text', label: 'Placeholder Text' }, inputType: { value: 'text', type: 'select', label: 'Input Type', options: ['text', 'email', 'password', 'number', 'tel', 'url', 'search'] }, width: { value: '100%', type: 'select', label: 'Width', options: ['100%', '75%', '50%', '25%'] }, fontSize: { value: 16, type: 'select', label: 'Font Size', options: [12, 14, 16, 18, 20], unit: 'px' }, borderColor: { value: '#e0e0e0', type: 'color', label: 'Border Color' }, backgroundColor: { value: '#ffffff', type: 'color', label: 'Background Color' }, textColor: { value: '#000000', type: 'color', label: 'Text Color' } }
+                },
+                chip: {
+                    html: (props) => `<span class="m3-chip">${props.text.value}</span>`,
+                    properties: { text: { value: 'Chip Text', type: 'text', label: 'Chip Text' }, backgroundColor: { value: '#e0e0e0', type: 'color', label: 'Background Color' }, textColor: { value: '#000000', type: 'color', label: 'Text Color' }, borderRadius: { value: 16, type: 'range', label: 'Border Radius', min: 0, max: 25, unit: 'px' }, fontSize: { value: 14, type: 'select', label: 'Font Size', options: [12, 14, 16], unit: 'px' }, }
+                },
+                card: {
+                    html: (props) => `<div class="m3-card"><h3>${props.title.value}</h3><p>${props.content.value}</p></div>`,
+                    properties: { title: { value: 'Card Title', type: 'text', label: 'Card Title' }, content: { value: 'Card content goes here...', type: 'textarea', label: 'Card Content' }, backgroundColor: { value: '#ffffff', type: 'color', label: 'Background Color' }, titleColor: { value: '#000000', type: 'color', label: 'Title Color' }, contentColor: { value: '#666666', type: 'color', label: 'Content Color' }, elevation: { value: '0 1px 3px rgba(0,0,0,0.12)', type: 'select', label: 'Elevation', options: {'None': 'none', 'Low': '0 1px 3px rgba(0,0,0,0.12)', 'Medium': '0 4px 8px rgba(0,0,0,0.16)', 'High': '0 8px 16px rgba(0,0,0,0.2)'} }, borderRadius: { value: 12, type: 'range', label: 'Border Radius', min: 0, max: 30, unit: 'px' }, padding: { value: 16, type: 'select', label: 'Padding', options: [8, 12, 16, 20, 24, 32], unit: 'px' }, width: { value: '100%', type: 'select', label: 'Width', options: ['100%', '75%', '50%', '25%'] } }
+                },
+                text: {
+                    html: (props) => `<div style="padding: 8px 0;">${props.content.value}</div>`,
+                    properties: { content: { value: 'Sample text content. Edit this in the properties panel.', type: 'textarea', label: 'Text Content (HTML allowed)' }, fontSize: { value: 16, type: 'select', label: 'Font Size', options: [10, 12, 14, 16, 18, 20, 24, 28, 32], unit: 'px' }, textColor: { value: '#333333', type: 'color', label: 'Text Color' }, fontWeight: { value: 'normal', type: 'select', label: 'Font Weight', options: ['300', 'normal', '500', '700', 'bold'] }, textAlign: { value: 'left', type: 'select', label: 'Text Alignment', options: ['left', 'center', 'right', 'justify'] }, lineHeight: { value: 1.5, type: 'select', label: 'Line Height', options: [1, 1.2, 1.5, 1.8, 2] }, }
+                },
+                image: {
+                    html: (props) => `<img src="${props.src.value}" alt="${props.alt.value}" />`,
+                    properties: { src: { value: 'https://via.placeholder.com/300x200', type: 'text', label: 'Image URL' }, alt: { value: 'Placeholder', type: 'text', label: 'Alt Text' }, width: { value: '100%', type: 'select', label: 'Width', options: ['25%', '50%', '75%', '100%', 'auto'] }, height: { value: 'auto', type: 'text', label: 'Height (auto, 200px, etc)' }, borderRadius: { value: 8, type: 'range', label: 'Border Radius', min: 0, max: 50, unit: 'px' }, objectFit: { value: 'cover', type: 'select', label: 'Image Fit', options: ['cover', 'contain', 'fill', 'scale-down', 'none'] }, alignment: { value: 'flex-start', type: 'select', label: 'Alignment', options: {'Left': 'flex-start', 'Center': 'center', 'Right': 'flex-end'} } }
+                },
+                divider: {
+                    html: (props) => `<hr />`,
+                    properties: { color: { value: '#e0e0e0', type: 'color', label: 'Color' }, thickness: { value: 1, type: 'select', label: 'Thickness', options: [1, 2, 3, 4, 5], unit: 'px' }, margin: { value: 16, type: 'select', label: 'Vertical Margin', options: [0, 8, 12, 16, 20, 24, 32], unit: 'px' }, width: { value: '100%', type: 'select', label: 'Width', options: ['25%', '50%', '75%', '100%'] } }
+                },
+                appbar: {
+                    html: (props) => `<div class="m3-top-app-bar"><h1>${props.title.value}</h1></div>`,
+                    properties: { title: { value: 'App Title', type: 'text', label: 'App Title' }, backgroundColor: { value: '#1976d2', type: 'color', label: 'Background Color' }, textColor: { value: '#ffffff', type: 'color', label: 'Text Color' }, height: { value: 64, type: 'select', label: 'Height', options: [48, 56, 64, 72, 80], unit: 'px' }, fontSize: { value: 20, type: 'select', label: 'Title Size', options: [16, 18, 20, 22, 24], unit: 'px' }, elevation: { value: '0 2px 4px rgba(0,0,0,0.1)', type: 'select', label: 'Shadow', options: {'None': 'none', 'Low': '0 2px 4px rgba(0,0,0,0.1)', 'Medium': '0 4px 5px rgba(0,0,0,0.15)', 'High': '0 8px 10px rgba(0,0,0,0.2)'} } }
+                },
+                navigation: {
+                    html: (props) => `<div class="m3-navigation-rail">${props.items.value.split(',').map(item => `<div class="nav-item"><span class="material-icons">${item.trim()}</span></div>`).join('')}</div>`,
+                    properties: { items: { value: 'home, search, favorite', type: 'text', label: 'Icons (comma-separated)' }, backgroundColor: { value: '#f5f5f5', type: 'color', label: 'Background Color' }, iconColor: { value: '#666666', type: 'color', label: 'Icon Color' }, activeColor: { value: '#1976d2', type: 'color', label: 'Active/Hover Color' }, width: { value: 80, type: 'select', label: 'Width', options: [60, 70, 80, 90, 100], unit: 'px' }, }
+                },
+            };
+
+            // --- DRAG & DROP LOGIC ---
+            // Drag from component panel
             componentItems.forEach(item => {
-                item.addEventListener('dragstart', (e) => {
+                item.addEventListener('dragstart', e => {
                     e.dataTransfer.setData('text/plain', item.dataset.component);
                 });
             });
 
-            [dropZone, canvasContent].forEach(zone => {
-                zone.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    zone.classList.add('drag-over');
-                });
-
-                zone.addEventListener('dragleave', (e) => {
-                    if (!zone.contains(e.relatedTarget)) {
-                        zone.classList.remove('drag-over');
+            // Universal dragover for the canvas content area
+            canvasContent.addEventListener('dragover', e => {
+                e.preventDefault();
+                const draggingComponent = document.querySelector('.dragging');
+                if (draggingComponent) { // If reordering
+                    const placeholder = document.querySelector('.drop-placeholder');
+                    const afterElement = getDragAfterElement(canvasContent, e.clientY);
+                    if (afterElement == null) {
+                        canvasContent.appendChild(placeholder);
+                    } else {
+                        canvasContent.insertBefore(placeholder, afterElement);
                     }
-                });
-
-                zone.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    zone.classList.remove('drag-over');
-                    
-                    const componentType = e.dataTransfer.getData('text/plain');
-                    if (componentType) {
-                        addComponent(componentType);
-                    }
-                });
-            });
-        }
-
-        function addComponent(type) {
-            const template = componentTemplates[type];
-            if (!template) return;
-
-            componentCounter++;
-            const componentId = `component-${componentCounter}`;
-            
-            const componentWrapper = document.createElement('div');
-            componentWrapper.className = 'dropped-component';
-            componentWrapper.id = componentId;
-            componentWrapper.innerHTML = `
-                ${template.html}
-                <div class="component-controls">
-                    <button class="control-btn" onclick="selectComponent('${componentId}')">
-                        <span class="material-icons" style="font-size: 16px;">edit</span>
-                    </button>
-                    <button class="control-btn" onclick="deleteComponent('${componentId}')">
-                        <span class="material-icons" style="font-size: 16px;">delete</span>
-                    </button>
-                </div>
-            `;
-
-            // Remove drop zone if it exists
-            const dropZone = document.getElementById('dropZone');
-            if (dropZone) {
-                dropZone.remove();
-            }
-
-            const canvasContent = document.getElementById('canvasContent');
-            canvasContent.appendChild(componentWrapper);
-
-            // Store component data
-            websiteComponents.push({
-                id: componentId,
-                type: type,
-                properties: { ...template.properties }
-            });
-
-            // Auto-select the new component
-            selectComponent(componentId);
-        }
-
-        function selectComponent(componentId) {
-            // Deselect previous
-            if (selectedComponent) {
-                document.getElementById(selectedComponent).classList.remove('selected');
-            }
-
-            // Select new
-            selectedComponent = componentId;
-            const element = document.getElementById(componentId);
-            element.classList.add('selected');
-
-            // Show properties
-            showProperties(componentId);
-        }
-
-        function deleteComponent(componentId) {
-            const element = document.getElementById(componentId);
-            element.remove();
-
-            // Remove from data
-            websiteComponents = websiteComponents.filter(comp => comp.id !== componentId);
-
-            // Clear properties if this was selected
-            if (selectedComponent === componentId) {
-                selectedComponent = null;
-                clearProperties();
-            }
-
-            // Add drop zone back if no components
-            if (websiteComponents.length === 0) {
-                const canvasContent = document.getElementById('canvasContent');
-                canvasContent.innerHTML = '<div class="drop-zone" id="dropZone">Drop components here to start building your website</div>';
-                initializeDragDrop();
-            }
-        }
-
-        function showProperties(componentId) {
-            const component = websiteComponents.find(comp => comp.id === componentId);
-            if (!component) return;
-
-            const propertiesContent = document.getElementById('propertiesContent');
-            let propertiesHTML = `<h3 style="margin-bottom: 16px;">${component.type.charAt(0).toUpperCase() + component.type.slice(1)} Properties</h3>`;
-
-            for (const [key, value] of Object.entries(component.properties)) {
-                propertiesHTML += `
-                    <div class="property-group">
-                        <label class="property-label">${key}</label>
-                        <input class="property-input" type="text" 
-                               value="${value}" 
-                               onchange="updateProperty('${componentId}', '${key}', this.value)" />
-                    </div>
-                `;
-            }
-
-            propertiesContent.innerHTML = propertiesHTML;
-        }
-
-        function updateProperty(componentId, property, value) {
-            const component = websiteComponents.find(comp => comp.id === componentId);
-            if (!component) return;
-
-            component.properties[property] = value;
-            
-            // Update the component in the canvas
-            refreshComponent(componentId);
-        }
-
-        function refreshComponent(componentId) {
-            const component = websiteComponents.find(comp => comp.id === componentId);
-            if (!component) return;
-
-            const element = document.getElementById(componentId);
-            const template = componentTemplates[component.type];
-            
-            // Update the component HTML based on its properties
-            let updatedHTML = template.html;
-            
-            // Apply property changes based on component type
-            switch(component.type) {
-                case 'button':
-                    updatedHTML = `<button class="m3-button ${component.properties.type}" style="background-color: ${component.properties.color};">${component.properties.text}</button>`;
-                    break;
-                case 'textfield':
-                    updatedHTML = `<input class="m3-text-field" placeholder="${component.properties.placeholder}" type="${component.properties.type}" />`;
-                    break;
-                case 'chip':
-                    updatedHTML = `<span class="m3-chip">${component.properties.text}</span>`;
-                    break;
-                case 'card':
-                    updatedHTML = `<div class="m3-card"><h3>${component.properties.title}</h3><p>${component.properties.content}</p></div>`;
-                    break;
-                case 'appbar':
-                    updatedHTML = `<div class="m3-top-app-bar" style="background-color: ${component.properties.color};"><h1>${component.properties.title}</h1></div>`;
-                    break;
-                case 'text':
-                    updatedHTML = `<p style="font-size: ${component.properties.size}; color: ${component.properties.color};">${component.properties.content}</p>`;
-                    break;
-                case 'image':
-                    updatedHTML = `<img src="${component.properties.src}" alt="${component.properties.alt}" style="max-width: 100%; border-radius: 8px;" />`;
-                    break;
-            }
-
-            const controls = element.querySelector('.component-controls');
-            element.innerHTML = updatedHTML + controls.outerHTML;
-        }
-
-        function clearProperties() {
-            const propertiesContent = document.getElementById('propertiesContent');
-            propertiesContent.innerHTML = '<p style="color: #666; text-align: center; margin-top: 40px;">Select a component to edit its properties</p>';
-        }
-
-        function clearCanvas() {
-            if (confirm('Are you sure you want to clear the canvas? This will remove all components.')) {
-                const canvasContent = document.getElementById('canvasContent');
-                canvasContent.innerHTML = '<div class="drop-zone" id="dropZone">Drop components here to start building your website</div>';
-                websiteComponents = [];
-                selectedComponent = null;
-                clearProperties();
-                initializeDragDrop();
-            }
-        }
-
-        function previewSite() {
-            const previewWindow = window.open('', '_blank');
-            const html = generateWebsiteHTML();
-            previewWindow.document.write(html);
-            previewWindow.document.close();
-        }
-
-        function exportCode() {
-            const html = generateWebsiteHTML();
-            document.getElementById('exportedCode').value = html;
-            document.getElementById('exportModal').style.display = 'flex';
-        }
-
-        function generateWebsiteHTML() {
-            const canvasContent = document.getElementById('canvasContent');
-            const components = canvasContent.querySelectorAll('.dropped-component');
-            
-            let bodyContent = '';
-            components.forEach(component => {
-                const content = component.innerHTML.replace(/<div class="component-controls">.*?<\/div>/s, '');
-                bodyContent += content + '\n';
-            });
-
-            return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Material 3 Website</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <style>
-        body { font-family: 'Roboto', sans-serif; margin: 0; padding: 20px; }
-        .m3-button { padding: 10px 24px; border: none; border-radius: 20px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; margin: 8px; }
-        .m3-button.filled { background: #1976d2; color: white; }
-        .m3-button.outlined { background: transparent; color: #1976d2; border: 1px solid #1976d2; }
-        .m3-button.text { background: transparent; color: #1976d2; }
-        .m3-card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); padding: 16px; margin: 16px 0; }
-        .m3-text-field { width: 100%; padding: 16px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 16px; margin: 8px 0; outline: none; }
-        .m3-chip { display: inline-flex; align-items: center; padding: 6px 12px; background: #e0e0e0; border-radius: 16px; font-size: 14px; margin: 4px; }
-        .m3-fab { width: 56px; height: 56px; border-radius: 16px; background: #1976d2; color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2); position: fixed; bottom: 16px; right: 16px; }
-        .m3-top-app-bar { height: 64px; background: #1976d2; color: white; display: flex; align-items: center; padding: 0 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .m3-navigation-rail { width: 80px; background: #f5f5f5; padding: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 12px; position: fixed; left: 0; top: 0; height: 100vh; }
-        .nav-item { width: 56px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    </style>
-</head>
-<body>
-${bodyContent}
-</body>
-</html>`;
-        }
-
-        function copyCode() {
-            const textarea = document.getElementById('exportedCode');
-            textarea.select();
-            document.execCommand('copy');
-            alert('Code copied to clipboard!');
-        }
-
-        function closeExport() {
-            document.getElementById('exportModal').style.display = 'none';
-        }
-
-        function saveTemplate() {
-            const templateData = {
-                components: websiteComponents,
-                timestamp: new Date().toISOString()
-            };
-            
-            const blob = new Blob([JSON.stringify(templateData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'website-template.json';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Initialize the application
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeDragDrop();
-            
-            // Add click handler for canvas to deselect components
-            document.getElementById('canvasContent').addEventListener('click', (e) => {
-                if (e.target.id === 'canvasContent' || e.target.id === 'dropZone') {
-                    if (selectedComponent) {
-                        document.getElementById(selectedComponent).classList.remove('selected');
-                        selectedComponent = null;
-                        clearProperties();
-                    }
+                } else { // If dragging a new component from the panel
+                    const dropZone = document.getElementById('dropZone');
+                    if (dropZone) dropZone.classList.add('drag-over');
                 }
             });
 
-            // Load template function
-            window.loadTemplate = function() {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = '.json';
-                input.onchange = function(e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            try {
-                                const templateData = JSON.parse(e.target.result);
-                                loadTemplateData(templateData);
-                            } catch (error) {
-                                alert('Error loading template: Invalid file format');
-                            }
-                        };
-                        reader.readAsText(file);
-                    }
-                };
-                input.click();
-            };
+            // Universal dragleave for the canvas content area
+            canvasContent.addEventListener('dragleave', () => {
+                const dropZone = document.getElementById('dropZone');
+                if (dropZone) dropZone.classList.remove('drag-over');
+            });
 
-            // Add load template button
-            const toolbar = document.querySelector('.canvas-toolbar');
-            const loadBtn = document.createElement('button');
-            loadBtn.className = 'toolbar-btn';
-            loadBtn.innerHTML = '<span class="material-icons">upload_file</span> Load Template';
-            loadBtn.onclick = loadTemplate;
-            toolbar.appendChild(loadBtn);
-        });
-
-        function loadTemplateData(templateData) {
-            // Clear existing canvas
-            clearCanvas();
-            
-            // Remove drop zone
-            const dropZone = document.getElementById('dropZone');
-            if (dropZone) dropZone.remove();
-
-            const canvasContent = document.getElementById('canvasContent');
-            
-            // Load components
-            templateData.components.forEach(compData => {
-                const template = componentTemplates[compData.type];
-                if (!template) return;
-
-                const componentWrapper = document.createElement('div');
-                componentWrapper.className = 'dropped-component';
-                componentWrapper.id = compData.id;
+            // Universal drop for the canvas content area
+            canvasContent.addEventListener('drop', e => {
+                e.preventDefault();
+                const newComponentType = e.dataTransfer.getData('text/plain');
+                const movedComponentId = e.dataTransfer.getData('text/component-id');
                 
-                // Generate HTML based on stored properties
-                let componentHTML = template.html;
-                switch(compData.type) {
+                // If we were reordering an existing component
+                if (movedComponentId) {
+                    const movedElement = document.getElementById(movedComponentId);
+                    const placeholder = document.querySelector('.drop-placeholder');
+                    if (placeholder) {
+                        // Insert the moved element before the placeholder
+                        placeholder.parentNode.insertBefore(movedElement, placeholder);
+                    }
+                    updateDataArrayOrder(); // Sync the data array with the new DOM order
+                } 
+                // If we were dropping a new component from the panel
+                else if (newComponentType && componentTemplates[newComponentType]) {
+                    const dropZone = document.getElementById('dropZone');
+                    if (dropZone) dropZone.classList.remove('drag-over');
+                    addComponentToCanvas(newComponentType);
+                }
+
+                // Cleanup after any drag operation
+                const placeholder = document.querySelector('.drop-placeholder');
+                if (placeholder) placeholder.remove();
+                
+                const draggingEl = document.querySelector('.dragging');
+                if (draggingEl) draggingEl.classList.remove('dragging');
+            });
+            
+            // --- EVENT DELEGATION FOR DRAG HANDLE ---
+            // Listen for drag start on the entire canvas, but only act if it's from a drag handle
+            canvasContent.addEventListener('dragstart', e => {
+                const handle = e.target.closest('.drag-handle');
+                if (handle) {
+                    const component = handle.closest('.dropped-component');
+                    // Add a class to the component being dragged
+                    component.classList.add('dragging');
+                    // Set data to identify the component being moved
+                    e.dataTransfer.setData('text/component-id', component.id);
+
+                    // Create and show the placeholder
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'drop-placeholder';
+                    document.body.appendChild(placeholder); // Append to body to avoid flicker
+                }
+            });
+
+
+            // --- COMPONENT MANAGEMENT ---
+            function addComponentToCanvas(type, data = null) {
+                const id = `comp-${componentCounter++}`;
+                const template = componentTemplates[type];
+                const initialProps = data ? data.properties : JSON.parse(JSON.stringify(template.properties));
+                const componentData = { id, type, properties: initialProps };
+                websiteComponents.push(componentData);
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'dropped-component';
+                wrapper.id = id;
+                wrapper.dataset.type = type;
+
+                const controls = document.createElement('div');
+                controls.className = 'component-controls';
+                // The draggable="true" attribute is correctly placed on the button itself
+                controls.innerHTML = `
+                    <button class="control-btn drag-handle" draggable="true" title="Move">
+                        <span class="material-icons" style="font-size: 18px;">drag_indicator</span>
+                    </button>
+                    <button class="control-btn delete-btn" title="Delete">
+                        <span class="material-icons" style="font-size: 18px;">delete</span>
+                    </button>
+                `;
+                wrapper.appendChild(controls);
+
+                const element = document.createElement('div');
+                element.className = 'component-render';
+                wrapper.appendChild(element);
+                
+                const dropZone = document.getElementById('dropZone');
+                canvasContent.insertBefore(wrapper, dropZone);
+                
+                updateComponentElement(id);
+                selectComponent(id);
+                checkCanvasEmpty();
+            }
+
+            function updateComponentElement(id) {
+                const componentData = websiteComponents.find(c => c.id === id);
+                const wrapper = document.getElementById(id);
+                if (!componentData || !wrapper) return;
+
+                const renderDiv = wrapper.querySelector('.component-render');
+                const template = componentTemplates[componentData.type];
+                renderDiv.innerHTML = template.html(componentData.properties);
+
+                const element = renderDiv.firstElementChild;
+                const props = componentData.properties;
+                let styles = {};
+                wrapper.style.display = '';
+                wrapper.style.justifyContent = '';
+
+                switch (componentData.type) {
                     case 'button':
-                        componentHTML = `<button class="m3-button ${compData.properties.type}" style="background-color: ${compData.properties.color};">${compData.properties.text}</button>`;
+                        element.textContent = props.text.value;
+                        element.className = 'm3-button';
+                        element.classList.add(props.style.value);
+                        styles = { backgroundColor: props.style.value === 'filled' ? props.backgroundColor.value : 'transparent', color: props.style.value !== 'filled' ? props.backgroundColor.value : props.textColor.value, borderColor: props.style.value === 'outlined' ? props.backgroundColor.value : 'transparent', borderRadius: `${props.borderRadius.value}px`, fontSize: `${props.fontSize.value}px`, fontWeight: props.fontWeight.value, padding: props.padding.value };
+                        wrapper.style.display = 'flex';
+                        wrapper.style.justifyContent = props.alignment.value;
+                        break;
+                    case 'fab':
+                        element.querySelector('.material-icons').textContent = props.icon.value;
+                        styles = { backgroundColor: props.backgroundColor.value, color: props.iconColor.value, width: `${props.size.value}px`, height: `${props.size.value}px`, borderRadius: `${props.borderRadius.value}px`, boxShadow: props.elevation.value };
                         break;
                     case 'textfield':
-                        componentHTML = `<input class="m3-text-field" placeholder="${compData.properties.placeholder}" type="${compData.properties.type}" />`;
+                        element.placeholder = props.placeholder.value;
+                        element.type = props.inputType.value;
+                        styles = { width: props.width.value, fontSize: `${props.fontSize.value}px`, borderColor: props.borderColor.value, backgroundColor: props.backgroundColor.value, color: props.textColor.value };
                         break;
                     case 'chip':
-                        componentHTML = `<span class="m3-chip">${compData.properties.text}</span>`;
+                        element.textContent = props.text.value;
+                        styles = { backgroundColor: props.backgroundColor.value, color: props.textColor.value, borderRadius: `${props.borderRadius.value}px`, fontSize: `${props.fontSize.value}px` };
                         break;
                     case 'card':
-                        componentHTML = `<div class="m3-card"><h3>${compData.properties.title}</h3><p>${compData.properties.content}</p></div>`;
-                        break;
-                    case 'appbar':
-                        componentHTML = `<div class="m3-top-app-bar" style="background-color: ${compData.properties.color};"><h1>${compData.properties.title}</h1></div>`;
+                        element.querySelector('h3').textContent = props.title.value;
+                        element.querySelector('p').innerHTML = props.content.value.replace(/\n/g, '<br>');
+                        styles = { width: props.width.value, backgroundColor: props.backgroundColor.value, boxShadow: props.elevation.value, borderRadius: `${props.borderRadius.value}px`, padding: `${props.padding.value}px` };
+                        element.querySelector('h3').style.color = props.titleColor.value;
+                        element.querySelector('p').style.color = props.contentColor.value;
                         break;
                     case 'text':
-                        componentHTML = `<p style="font-size: ${compData.properties.size}; color: ${compData.properties.color};">${compData.properties.content}</p>`;
+                        element.innerHTML = props.content.value;
+                        styles = { fontSize: `${props.fontSize.value}px`, color: props.textColor.value, fontWeight: props.fontWeight.value, textAlign: props.textAlign.value, lineHeight: props.lineHeight.value };
                         break;
                     case 'image':
-                        componentHTML = `<img src="${compData.properties.src}" alt="${compData.properties.alt}" style="max-width: 100%; border-radius: 8px;" />`;
+                        element.src = props.src.value;
+                        element.alt = props.alt.value;
+                        styles = { width: props.width.value, height: props.height.value, borderRadius: `${props.borderRadius.value}px`, objectFit: props.objectFit.value };
+                        wrapper.style.display = 'flex';
+                        wrapper.style.justifyContent = props.alignment.value;
+                        break;
+                    case 'divider':
+                        styles = { border: 'none', height: `${props.thickness.value}px`, backgroundColor: props.color.value, margin: `${props.margin.value}px 0`, width: props.width.value };
+                        break;
+                    case 'appbar':
+                        element.querySelector('h1').textContent = props.title.value;
+                        styles = { backgroundColor: props.backgroundColor.value, color: props.textColor.value, height: `${props.height.value}px`, boxShadow: props.elevation.value };
+                        element.querySelector('h1').style.fontSize = `${props.fontSize.value}px`;
+                        break;
+                    case 'navigation':
+                        styles = { backgroundColor: props.backgroundColor.value, width: `${props.width.value}px`, };
+                        element.querySelectorAll('.nav-item span').forEach(item => { item.style.color = props.iconColor.value; });
+                        element.querySelectorAll('.nav-item').forEach(item => {
+                            item.onmouseover = () => item.style.backgroundColor = props.activeColor.value + '20';
+                            item.onmouseout = () => item.style.backgroundColor = 'transparent';
+                        });
                         break;
                 }
+                Object.assign(element.style, styles);
+            }
+            
+            function deleteComponent(id) {
+                const index = websiteComponents.findIndex(c => c.id === id);
+                if (index > -1) { websiteComponents.splice(index, 1); }
+                document.getElementById(id)?.remove();
+                if (id === selectedComponentId) {
+                    clearPropertiesPanel();
+                    selectedComponentId = null;
+                }
+                checkCanvasEmpty();
+            }
 
-                componentWrapper.innerHTML = `
-                    ${componentHTML}
-                    <div class="component-controls">
-                        <button class="control-btn" onclick="selectComponent('${compData.id}')">
-                            <span class="material-icons" style="font-size: 16px;">edit</span>
-                        </button>
-                        <button class="control-btn" onclick="deleteComponent('${compData.id}')">
-                            <span class="material-icons" style="font-size: 16px;">delete</span>
-                        </button>
-                    </div>
-                `;
+            function selectComponent(id) {
+                if (selectedComponentId) { document.getElementById(selectedComponentId)?.classList.remove('selected'); }
+                selectedComponentId = id;
+                document.getElementById(id).classList.add('selected');
+                renderPropertiesPanel(id);
+            }
 
-                canvasContent.appendChild(componentWrapper);
+            function renderPropertiesPanel(id) {
+                const componentData = websiteComponents.find(c => c.id === id);
+                if (!componentData) { clearPropertiesPanel(); return; }
+                propertiesContent.innerHTML = '';
+                const props = componentData.properties;
+                for (const key in props) {
+                    const prop = props[key];
+                    const group = document.createElement('div'); group.className = 'property-group';
+                    const label = document.createElement('label'); label.className = 'property-label'; label.textContent = prop.label; group.appendChild(label);
+                    let input;
+                    switch (prop.type) {
+                        case 'text': input = document.createElement('input'); input.type = 'text'; input.className = 'property-input'; input.value = prop.value; input.oninput = (e) => updateProperty(id, key, e.target.value); break;
+                        case 'textarea': input = document.createElement('textarea'); input.className = 'property-textarea'; input.value = prop.value; input.oninput = (e) => updateProperty(id, key, e.target.value); break;
+                        case 'select':
+                            input = document.createElement('select'); input.className = 'property-select';
+                            const options = Array.isArray(prop.options) ? prop.options : Object.keys(prop.options);
+                            options.forEach(opt => { const optionEl = document.createElement('option'); const value = Array.isArray(prop.options) ? opt : prop.options[opt]; optionEl.value = value; optionEl.textContent = opt; if (value == prop.value) optionEl.selected = true; input.appendChild(optionEl); });
+                            input.onchange = (e) => updateProperty(id, key, e.target.value); break;
+                        case 'color': input = document.createElement('input'); input.type = 'color'; input.className = 'property-color'; input.value = prop.value; input.oninput = (e) => updateProperty(id, key, e.target.value); break;
+                        case 'range':
+                            group.innerHTML += `<input type="range" class="property-range" min="${prop.min}" max="${prop.max}" value="${prop.value}"><div class="range-display">${prop.value}${prop.unit || ''}</div>`;
+                            input = group.querySelector('.property-range');
+                            input.oninput = (e) => { group.querySelector('.range-display').textContent = `${e.target.value}${prop.unit || ''}`; updateProperty(id, key, e.target.value); }; break;
+                    }
+                    if (input) group.appendChild(input);
+                    propertiesContent.appendChild(group);
+                }
+            }
+            
+            function updateProperty(id, key, value) {
+                const componentData = websiteComponents.find(c => c.id === id);
+                if (componentData) {
+                    componentData.properties[key].value = value;
+                    updateComponentElement(id);
+                }
+            }
+
+            function clearPropertiesPanel() {
+                propertiesContent.innerHTML = `<p style="color: #666; text-align: center; margin-top: 40px;">Select a component to edit its properties</p>`;
+            }
+
+            function checkCanvasEmpty() {
+                if (websiteComponents.length === 0) { canvasContent.classList.add('is-empty'); } else { canvasContent.classList.remove('is-empty'); }
+            }
+
+            // --- UI EVENT LISTENERS ---
+            canvas.addEventListener('click', e => {
+                const clickedComponent = e.target.closest('.dropped-component');
+                if (e.target.closest('.delete-btn')) { deleteComponent(clickedComponent.id); return; }
+                if (clickedComponent) { selectComponent(clickedComponent.id); } 
+                else if (!e.target.closest('.properties-panel')) {
+                    if (selectedComponentId) { document.getElementById(selectedComponentId)?.classList.remove('selected'); selectedComponentId = null; clearPropertiesPanel(); }
+                }
             });
 
-            // Restore component data
-            websiteComponents = [...templateData.components];
-            componentCounter = Math.max(...websiteComponents.map(c => parseInt(c.id.split('-')[1]))) || 0;
-        }
-
-        // Add responsive design toggle
-        let isResponsivePreview = false;
-        function toggleResponsivePreview() {
-            const canvas = document.getElementById('canvas');
-            if (isResponsivePreview) {
-                canvas.style.maxWidth = 'none';
-                canvas.style.margin = '24px';
-                isResponsivePreview = false;
-            } else {
-                canvas.style.maxWidth = '375px';
-                canvas.style.margin = '24px auto';
-                isResponsivePreview = true;
-            }
-        }
-
-        // Add responsive toggle button
-        document.addEventListener('DOMContentLoaded', () => {
-            const toolbar = document.querySelector('.canvas-toolbar');
-            const responsiveBtn = document.createElement('button');
-            responsiveBtn.className = 'toolbar-btn';
-            responsiveBtn.innerHTML = '<span class="material-icons">phone_android</span> Mobile View';
-            responsiveBtn.onclick = () => {
-                toggleResponsivePreview();
-                responsiveBtn.innerHTML = isResponsivePreview ? 
-                    '<span class="material-icons">desktop_windows</span> Desktop View' : 
-                    '<span class="material-icons">phone_android</span> Mobile View';
-            };
-            toolbar.insertBefore(responsiveBtn, toolbar.children[2]);
-        });
-
-        // Add theme toggle
-        let isDarkTheme = false;
-        function toggleTheme() {
-            const canvas = document.getElementById('canvas');
-            const canvasContent = document.getElementById('canvasContent');
+            document.getElementById('clearBtn').addEventListener('click', () => {
+                if (confirm('Are you sure you want to clear the entire canvas?')) {
+                    websiteComponents = [];
+                    // Remove all component elements but keep the dropzone
+                    const componentsToRemove = canvasContent.querySelectorAll('.dropped-component');
+                    componentsToRemove.forEach(c => c.remove());
+                    checkCanvasEmpty();
+                    clearPropertiesPanel();
+                }
+            });
             
-            if (isDarkTheme) {
-                canvas.style.background = '#ffffff';
-                canvasContent.style.background = '#ffffff';
-                canvasContent.style.color = '#000000';
-                isDarkTheme = false;
-            } else {
-                canvas.style.background = '#121212';
-                canvasContent.style.background = '#121212';
-                canvasContent.style.color = '#ffffff';
-                isDarkTheme = true;
-            }
-        }
+            document.getElementById('previewBtn').addEventListener('click', () => {
+                const previewHtml = generateExportHtml(true);
+                const previewWindow = window.open('', '_blank');
+                previewWindow.document.write(previewHtml);
+                previewWindow.document.close();
+            });
+            
+            document.getElementById('exportBtn').addEventListener('click', () => {
+                document.getElementById('exportedCode').value = generateExportHtml(false);
+                exportModal.style.display = 'flex';
+            });
+            
+            document.getElementById('saveBtn').addEventListener('click', () => {
+                updateDataArrayOrder();
+                localStorage.setItem('m3BuilderSave', JSON.stringify(websiteComponents));
+                alert('Layout saved to your browser\'s local storage!');
+            });
+            
+            document.getElementById('loadBtn').addEventListener('click', () => {
+                const savedData = localStorage.getItem('m3BuilderSave');
+                if (savedData) {
+                    if (confirm('This will replace your current layout. Are you sure?')) {
+                        // Clear current canvas
+                        const componentsToRemove = canvasContent.querySelectorAll('.dropped-component');
+                        componentsToRemove.forEach(c => c.remove());
+                        websiteComponents = [];
 
-        // Add theme toggle button
-        document.addEventListener('DOMContentLoaded', () => {
-            const toolbar = document.querySelector('.canvas-toolbar');
-            const themeBtn = document.createElement('button');
-            themeBtn.className = 'toolbar-btn';
-            themeBtn.innerHTML = '<span class="material-icons">dark_mode</span> Dark Theme';
-            themeBtn.onclick = () => {
-                toggleTheme();
-                themeBtn.innerHTML = isDarkTheme ? 
-                    '<span class="material-icons">light_mode</span> Light Theme' : 
-                    '<span class="material-icons">dark_mode</span> Dark Theme';
-            };
-            toolbar.appendChild(themeBtn);
+                        const loadedComponents = JSON.parse(savedData);
+                        loadedComponents.forEach(compData => { addComponentToCanvas(compData.type, compData); });
+                        checkCanvasEmpty();
+                        clearPropertiesPanel();
+                    }
+                } else { alert('No saved layout found.'); }
+            });
+
+            document.getElementById('closeExportBtn').addEventListener('click', () => exportModal.style.display = 'none');
+            document.getElementById('copyCodeBtn').addEventListener('click', () => {
+                const code = document.getElementById('exportedCode');
+                code.select();
+                navigator.clipboard.writeText(code.value).then(() => { alert('Code copied to clipboard!'); });
+            });
+            
+            // --- HELPER FUNCTIONS ---
+            function generateExportHtml(forPreview) {
+                updateDataArrayOrder(); // Ensure data array matches DOM before export
+                let bodyContent = '';
+                websiteComponents.forEach(comp => {
+                    const wrapperOnCanvas = document.getElementById(comp.id);
+                    if (!wrapperOnCanvas) return;
+                    const renderedElement = wrapperOnCanvas.querySelector('.component-render').firstElementChild;
+                    if (!renderedElement) return;
+                    let finalHtml = renderedElement.outerHTML;
+                    const alignment = comp.properties.alignment?.value;
+                    if (alignment && alignment !== 'flex-start') {
+                        finalHtml = `<div style="display: flex; justify-content: ${alignment};">${finalHtml}</div>`;
+                    }
+                    bodyContent += finalHtml + '\n\n';
+                });
+                if (!forPreview) { return bodyContent.replace(/(\n\n\n)/g, '\n\n').trim(); }
+                return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Preview</title><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"><style>body { font-family: 'Roboto', sans-serif; margin: 0; padding: 20px; background-color: #f8f9fa; } * { box-sizing: border-box; } .m3-button { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s ease; } .m3-fab { display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; } .m3-card { margin: 16px 0; } .m3-card h3 { margin-top: 0; } .m3-top-app-bar { display: flex; align-items: center; } .m3-navigation-rail { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 12px 0; } .nav-item { display:flex; align-items:center; justify-content:center; }</style></head><body>${bodyContent}</body></html>`;
+            }
+
+            function getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.dropped-component:not(.dragging)')];
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+            
+            function updateDataArrayOrder() {
+                const orderedIds = [...canvasContent.querySelectorAll('.dropped-component')].map(el => el.id);
+                websiteComponents.sort((a, b) => orderedIds.indexOf(a.id) - orderedIds.indexOf(b.id));
+            }
+
+            // Initial state check
+            checkCanvasEmpty();
         });
     </script>
 </body>
