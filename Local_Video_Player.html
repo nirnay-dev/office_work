@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Video Player</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for responsiveness and overall look */
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text color */
+        }
+        /* Custom scrollbar for video list */
+        .video-list-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .video-list-container::-webkit-scrollbar-track {
+            background: #2d3748; /* Darker track */
+            border-radius: 10px;
+        }
+        .video-list-container::-webkit-scrollbar-thumb {
+            background: #4a5568; /* Scrollbar thumb color */
+            border-radius: 10px;
+        }
+        .video-list-container::-webkit-scrollbar-thumb:hover {
+            background: #606d81; /* Darker thumb on hover */
+        }
+        /* Hide default file input button, use custom one */
+        input[type="file"] {
+            display: none;
+        }
+        /* Style for custom video controls (play/pause, volume etc.) */
+        .custom-controls-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Space out elements */
+            gap: 1rem; /* Gap between control groups */
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            padding: 0.75rem; /* Tailwind p-3 */
+            background-color: #374151; /* Tailwind bg-gray-700 */
+            border-radius: 0.5rem; /* Tailwind rounded-lg */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Tailwind shadow-md */
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem; /* Smaller gap within groups */
+        }
+
+        .control-button {
+            padding: 0.5rem 1rem; /* px-4 py-2 */
+            background-color: #8b5cf6; /* bg-purple-600 */
+            color: white;
+            font-weight: 600; /* font-semibold */
+            border-radius: 9999px; /* rounded-full */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            transition: all 0.3s ease-in-out; /* transition duration-300 ease-in-out */
+            transform: scale(1);
+        }
+        .control-button:hover {
+            background-color: #7c3aed; /* hover:bg-purple-700 */
+            transform: scale(1.05); /* hover:scale-105 */
+        }
+        .control-button:disabled {
+            background-color: #6b7280; /* bg-gray-500 */
+            cursor: not-allowed;
+            transform: none; /* No scale on disabled */
+            opacity: 0.7;
+        }
+
+        .volume-slider {
+            width: 80px; /* Adjust as needed */
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            background: #4a5568; /* Tailwind bg-gray-600 */
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+
+        .volume-slider:hover {
+            opacity: 1;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #8b5cf6; /* Purple thumb */
+            cursor: pointer;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #8b5cf6; /* Purple thumb */
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="container mx-auto bg-gray-800 rounded-xl shadow-lg p-6 max-w-7xl w-full flex flex-col lg:flex-row space-y-6 lg:space-y-0 lg:space-x-6">
+
+        <!-- Left Column: Video Player -->
+        <div class="lg:w-3/4 flex flex-col space-y-4">
+            <h1 class="text-3xl font-bold text-center text-teal-300">Local Video Player</h1>
+
+            <!-- Folder Input Section -->
+            <div id="dropArea" class="bg-gray-700 p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between shadow-md border-2 border-dashed border-gray-600 hover:border-blue-500 transition duration-300 ease-in-out">
+                <label for="folderInput" class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                    Select Video Folder
+                </label>
+                <input type="file" id="folderInput" webkitdirectory directory multiple />
+                <span id="selectedFolderName" class="mt-3 sm:mt-0 text-sm text-gray-400 italic break-all">Or drag & drop a folder here</span>
+                <div id="loadingIndicator" class="hidden text-green-400 text-sm ml-4">Loading videos...</div>
+            </div>
+
+            <!-- Main Video Player -->
+            <div class="w-full bg-black rounded-lg overflow-hidden shadow-xl aspect-video">
+                <video id="mainVideoPlayer" controls class="w-full h-full bg-black">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+
+            <!-- Custom Video Controls -->
+            <div class="custom-controls-container">
+                <div class="control-group">
+                    <button id="prevVideoButton" class="control-button" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-skip-back"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" x2="5" y1="19" y2="5"/></svg>
+                    </button>
+                    <button id="playPauseButton" class="control-button">
+                        <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <svg id="pauseIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pause hidden"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                    </button>
+                    <button id="nextVideoButton" class="control-button" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-skip-forward"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/></svg>
+                    </button>
+                </div>
+
+                <div class="control-group flex-grow flex items-center gap-2">
+                    <span id="currentTimeDisplay" class="text-sm text-gray-300">00:00</span>
+                    <input type="range" id="progressBar" value="0" min="0" max="100" class="flex-grow h-2 rounded-lg bg-gray-600 appearance-none cursor-pointer">
+                    <span id="durationDisplay" class="text-sm text-gray-300">00:00</span>
+                </div>
+
+                <div class="control-group">
+                    <button id="muteUnmuteButton" class="control-button">
+                        <svg id="volumeHighIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M22.39 2.61a14 14 0 0 1 0 19.78"/></svg>
+                        <svg id="volumeXIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-x hidden"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" x2="16" y1="9" y2="15"/><line x1="16" x2="22" y1="9" y2="15"/></svg>
+                    </button>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" class="volume-slider">
+                </div>
+
+                <div class="control-group">
+                    <label for="playbackSpeed" class="text-gray-200 text-sm hidden sm:block">Speed:</label>
+                    <select id="playbackSpeed" class="bg-gray-600 text-white rounded-md py-1 px-2 cursor-pointer focus:ring-2 focus:ring-purple-500">
+                        <option value="0.5">0.5x</option>
+                        <option value="0.75">0.75x</option>
+                        <option value="1" selected>1x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="1.75">1.75x</option>
+                        <option value="2">2x</option>
+                    </select>
+                    <button id="fullscreenButton" class="control-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-maximize"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3m-18 0v3a2 2 0 0 0 2 2h3"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Current Video Title -->
+            <div class="bg-gray-700 p-3 rounded-lg shadow-md">
+                <h2 id="currentVideoTitle" class="text-xl font-semibold text-gray-200">No video playing</h2>
+            </div>
+        </div>
+
+        <!-- Right Column: Video List / Playlist -->
+        <div class="lg:w-1/4 flex flex-col space-y-4 bg-gray-700 p-4 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold text-center text-orange-300 mb-2">Playlist</h2>
+            <div id="videoList" class="video-list-container flex-grow overflow-y-auto pr-2" style="max-height: calc(100vh - 250px);">
+                <!-- Video items will be populated here by JavaScript -->
+                <p id="noVideosMessage" class="text-center text-gray-400 mt-4">Select a folder to see your videos here.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Utility function to format time (e.g., 90 seconds to 01:30)
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            const paddedMinutes = String(minutes).padStart(2, '0');
+            const paddedSeconds = String(remainingSeconds).padStart(2, '0');
+            return `${paddedMinutes}:${paddedSeconds}`;
+        }
+
+        // JavaScript for handling file input and video playback
+        document.addEventListener('DOMContentLoaded', () => {
+            const folderInput = document.getElementById('folderInput');
+            const selectedFolderNameSpan = document.getElementById('selectedFolderName');
+            const mainVideoPlayer = document.getElementById('mainVideoPlayer');
+            const currentVideoTitle = document.getElementById('currentVideoTitle');
+            const videoList = document.getElementById('videoList');
+            const noVideosMessage = document.getElementById('noVideosMessage');
+            const prevVideoButton = document.getElementById('prevVideoButton');
+            const nextVideoButton = document.getElementById('nextVideoButton');
+            const playbackSpeedSelect = document.getElementById('playbackSpeed');
+            const playPauseButton = document.getElementById('playPauseButton');
+            const playIcon = document.getElementById('playIcon');
+            const pauseIcon = document.getElementById('pauseIcon');
+            const currentTimeDisplay = document.getElementById('currentTimeDisplay');
+            const durationDisplay = document.getElementById('durationDisplay');
+            const progressBar = document.getElementById('progressBar');
+            const muteUnmuteButton = document.getElementById('muteUnmuteButton');
+            const volumeHighIcon = document.getElementById('volumeHighIcon');
+            const volumeXIcon = document.getElementById('volumeXIcon');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const fullscreenButton = document.getElementById('fullscreenButton');
+            const dropArea = document.getElementById('dropArea');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+
+
+            // Array to store video file objects and their URLs
+            let videoFiles = [];
+            let currentVideoIndex = -1; // Keep track of the currently playing video
+
+            // Function to update button states (disabled/enabled)
+            const updateButtonStates = () => {
+                prevVideoButton.disabled = currentVideoIndex <= 0;
+                nextVideoButton.disabled = currentVideoIndex >= videoFiles.length - 1;
+                // Enable/disable play/pause, volume, speed, fullscreen if a video is loaded
+                const isVideoLoaded = mainVideoPlayer.src !== '';
+                playPauseButton.disabled = !isVideoLoaded;
+                muteUnmuteButton.disabled = !isVideoLoaded;
+                volumeSlider.disabled = !isVideoLoaded;
+                playbackSpeedSelect.disabled = !isVideoLoaded;
+                fullscreenButton.disabled = !isVideoLoaded;
+                progressBar.disabled = !isVideoLoaded;
+            };
+
+            // Toggle play/pause
+            playPauseButton.addEventListener('click', () => {
+                if (mainVideoPlayer.paused) {
+                    mainVideoPlayer.play();
+                } else {
+                    mainVideoPlayer.pause();
+                }
+            });
+
+            // Update play/pause button icon
+            mainVideoPlayer.addEventListener('play', () => {
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+            });
+            mainVideoPlayer.addEventListener('pause', () => {
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            });
+
+            // Update current time and progress bar
+            mainVideoPlayer.addEventListener('timeupdate', () => {
+                currentTimeDisplay.textContent = formatTime(mainVideoPlayer.currentTime);
+                const progress = (mainVideoPlayer.currentTime / mainVideoPlayer.duration) * 100;
+                progressBar.value = isNaN(progress) ? 0 : progress; // Handle NaN for duration
+            });
+
+            // Update duration when metadata is loaded
+            mainVideoPlayer.addEventListener('loadedmetadata', () => {
+                durationDisplay.textContent = formatTime(mainVideoPlayer.duration);
+                // Set initial playback rate
+                mainVideoPlayer.playbackRate = parseFloat(playbackSpeedSelect.value);
+                updateButtonStates(); // Ensure controls are enabled after metadata loads
+            });
+
+            // Seek video when progress bar is changed
+            progressBar.addEventListener('input', () => {
+                const seekTime = (progressBar.value / 100) * mainVideoPlayer.duration;
+                if (!isNaN(seekTime)) { // Prevent seeking with invalid duration
+                    mainVideoPlayer.currentTime = seekTime;
+                }
+            });
+
+            // Mute/Unmute functionality
+            muteUnmuteButton.addEventListener('click', () => {
+                mainVideoPlayer.muted = !mainVideoPlayer.muted;
+                if (mainVideoPlayer.muted) {
+                    volumeHighIcon.classList.add('hidden');
+                    volumeXIcon.classList.remove('hidden');
+                } else {
+                    volumeHighIcon.classList.remove('hidden');
+                    volumeXIcon.classList.add('hidden');
+                }
+                // Sync volume slider with mute state
+                volumeSlider.value = mainVideoPlayer.muted ? 0 : mainVideoPlayer.volume;
+            });
+
+            // Volume control
+            volumeSlider.addEventListener('input', (event) => {
+                mainVideoPlayer.volume = parseFloat(event.target.value);
+                // Update mute button icon based on volume
+                if (mainVideoPlayer.volume === 0) {
+                    volumeHighIcon.classList.add('hidden');
+                    volumeXIcon.classList.remove('hidden');
+                    mainVideoPlayer.muted = true; // Ensure muted property is true
+                } else {
+                    volumeHighIcon.classList.remove('hidden');
+                    volumeXIcon.classList.add('hidden');
+                    mainVideoPlayer.muted = false; // Ensure muted property is false
+                }
+            });
+
+            // Sync volume slider with video player's actual volume
+            mainVideoPlayer.addEventListener('volumechange', () => {
+                if (mainVideoPlayer.volume === 0 || mainVideoPlayer.muted) {
+                    volumeHighIcon.classList.add('hidden');
+                    volumeXIcon.classList.remove('hidden');
+                } else {
+                    volumeHighIcon.classList.remove('hidden');
+                    volumeXIcon.classList.add('hidden');
+                }
+                volumeSlider.value = mainVideoPlayer.volume;
+            });
+
+
+            // Fullscreen functionality
+            fullscreenButton.addEventListener('click', () => {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    mainVideoPlayer.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                    });
+                }
+            });
+
+            // Event listener for when a folder is selected
+            folderInput.addEventListener('change', (event) => {
+                loadingIndicator.classList.remove('hidden'); // Show loading indicator
+                // Clear previous videos and messages
+                videoList.innerHTML = '';
+                videoFiles = [];
+                currentVideoIndex = -1; // Reset index
+                noVideosMessage.classList.add('hidden'); // Hide "No videos" message initially
+                mainVideoPlayer.src = ''; // Clear current video
+                mainVideoPlayer.pause(); // Pause any current video
+                currentVideoTitle.textContent = 'No video playing'; // Reset title
+                currentTimeDisplay.textContent = '00:00'; // Reset time display
+                durationDisplay.textContent = '00:00'; // Reset duration display
+                progressBar.value = 0; // Reset progress bar
+                updateButtonStates(); // Update button states based on empty list
+
+                const files = event.target.files;
+
+                if (files.length === 0) {
+                    selectedFolderNameSpan.textContent = 'No folder selected';
+                    noVideosMessage.classList.remove('hidden');
+                    loadingIndicator.classList.add('hidden'); // Hide loading indicator
+                    return;
+                }
+
+                // Get the name of the selected folder (first file's webkitRelativePath up to the first '/')
+                const firstFilePath = files[0].webkitRelativePath;
+                const folderName = firstFilePath.split('/')[0];
+                selectedFolderNameSpan.textContent = `Folder: ${folderName}`;
+
+                // Filter for video files and process them
+                Array.from(files).forEach(file => {
+                    // Check if the file is a video (basic MIME type check)
+                    if (file.type.startsWith('video/')) {
+                        // Create a URL for the file to be used in the video player
+                        const videoURL = URL.createObjectURL(file);
+                        videoFiles.push({
+                            file: file,
+                            url: videoURL,
+                            name: file.name
+                        });
+                    }
+                });
+
+                if (videoFiles.length === 0) {
+                    noVideosMessage.textContent = 'No video files found in the selected folder.';
+                    noVideosMessage.classList.remove('hidden');
+                    loadingIndicator.classList.add('hidden'); // Hide loading indicator
+                    return;
+                }
+
+                // Sort videos alphabetically by name
+                videoFiles.sort((a, b) => a.name.localeCompare(b.name));
+
+                // Populate the video list
+                videoFiles.forEach((video, index) => {
+                    const videoItem = document.createElement('div');
+                    videoItem.className = 'flex items-center space-x-3 p-3 bg-gray-600 hover:bg-gray-500 rounded-lg cursor-pointer transition duration-200 ease-in-out mb-2 shadow-md border border-gray-600'; // Improved playlist item styling
+                    videoItem.setAttribute('data-index', index); // Store index for easy lookup
+
+                    // Video icon for thumbnail placeholder
+                    const videoIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-video w-10 h-10 text-gray-400"><path d="m22 8-6 4 6 4V8Z"/><path d="M14 12H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6Z"/></svg>`;
+
+                    const thumbnailPlaceholder = document.createElement('div');
+                    thumbnailPlaceholder.className = 'flex-shrink-0 w-16 h-12 bg-gray-800 rounded-md flex items-center justify-center overflow-hidden';
+                    thumbnailPlaceholder.innerHTML = videoIcon;
+
+                    const videoInfo = document.createElement('div');
+                    videoInfo.className = 'flex-grow';
+
+                    const videoTitle = document.createElement('h3');
+                    videoTitle.className = 'text-md font-medium text-gray-100 truncate';
+                    videoTitle.textContent = video.name;
+
+                    videoInfo.appendChild(videoTitle);
+                    videoItem.appendChild(thumbnailPlaceholder);
+                    videoItem.appendChild(videoInfo);
+                    videoList.appendChild(videoItem);
+
+                    // Add click listener to each video item
+                    videoItem.addEventListener('click', () => {
+                        playVideo(index);
+                    });
+                });
+
+                // Automatically play the first video if available
+                if (videoFiles.length > 0) {
+                    playVideo(0);
+                }
+                updateButtonStates(); // Update button states after loading videos
+                loadingIndicator.classList.add('hidden'); // Hide loading indicator
+            });
+
+            // Function to play a video by its index in the videoFiles array
+            function playVideo(index) {
+                if (index >= 0 && index < videoFiles.length) {
+                    currentVideoIndex = index; // Update current index
+                    const video = videoFiles[index];
+                    mainVideoPlayer.src = video.url;
+                    currentVideoTitle.textContent = video.name;
+                    mainVideoPlayer.play().catch(error => {
+                        console.error('Error playing video:', error);
+                        currentVideoTitle.textContent = `${video.name} (Click play button to start)`;
+                        // If autoplay fails, ensure play/pause button reflects 'play' state
+                        playIcon.classList.remove('hidden');
+                        pauseIcon.classList.add('hidden');
+                    });
+
+                    // Highlight the currently playing video in the list
+                    Array.from(videoList.children).forEach((item, idx) => {
+                        if (idx === currentVideoIndex) {
+                            item.classList.remove('bg-gray-600');
+                            item.classList.add('bg-blue-600', 'border-blue-700'); // Highlight current video more distinctly
+                        } else {
+                            item.classList.remove('bg-blue-600', 'border-blue-700');
+                            item.classList.add('bg-gray-600', 'border-gray-600');
+                        }
+                    });
+                    updateButtonStates(); // Update button states after playing a video
+                }
+            }
+
+            // Play next video
+            nextVideoButton.addEventListener('click', () => {
+                if (currentVideoIndex < videoFiles.length - 1) {
+                    playVideo(currentVideoIndex + 1);
+                }
+            });
+
+            // Play previous video
+            prevVideoButton.addEventListener('click', () => {
+                if (currentVideoIndex > 0) {
+                    playVideo(currentVideoIndex - 1);
+                }
+            });
+
+            // Handle playback speed change
+            playbackSpeedSelect.addEventListener('change', (event) => {
+                mainVideoPlayer.playbackRate = parseFloat(event.target.value);
+            });
+
+            // Automatically play next video when current one ends
+            mainVideoPlayer.addEventListener('ended', () => {
+                if (currentVideoIndex < videoFiles.length - 1) {
+                    playVideo(currentVideoIndex + 1);
+                } else {
+                    // Loop back to the start or just pause
+                    mainVideoPlayer.pause();
+                    currentVideoTitle.textContent = `${videoFiles[currentVideoIndex].name} (Playback finished)`;
+                    // Reset play button icon
+                    playIcon.classList.remove('hidden');
+                    pauseIcon.classList.add('hidden');
+                }
+            });
+
+            // Drag and drop functionality
+            dropArea.addEventListener('dragover', (event) => {
+                event.preventDefault(); // Prevent default to allow drop
+                dropArea.classList.add('border-blue-500', 'bg-gray-600'); // Visual feedback
+                selectedFolderNameSpan.textContent = 'Drop folder here to load videos...';
+            });
+
+            dropArea.addEventListener('dragleave', (event) => {
+                dropArea.classList.remove('border-blue-500', 'bg-gray-600');
+                selectedFolderNameSpan.textContent = 'Or drag & drop a folder here';
+            });
+
+            dropArea.addEventListener('drop', (event) => {
+                event.preventDefault(); // Prevent default browser behavior (opening file)
+                dropArea.classList.remove('border-blue-500', 'bg-gray-600');
+                loadingIndicator.classList.remove('hidden'); // Show loading indicator
+
+                const items = event.dataTransfer.items;
+                let directoryHandle = null;
+
+                // Find the first directory item
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].webkitGetAsEntry && items[i].webkitGetAsEntry().isDirectory) {
+                        directoryHandle = items[i].webkitGetAsEntry();
+                        break;
+                    }
+                }
+
+                if (directoryHandle) {
+                    selectedFolderNameSpan.textContent = `Loading from: ${directoryHandle.name}`;
+                    // Use a recursive function to read directory contents
+                    readDirectoryContents(directoryHandle).then(files => {
+                        // Simulate event.target.files structure
+                        const dataTransfer = new DataTransfer();
+                        files.forEach(file => dataTransfer.items.add(file));
+                        folderInput.files = dataTransfer.files; // Set files on the hidden input
+
+                        // Manually trigger change event as direct manipulation of .files doesn't trigger it
+                        const changeEvent = new Event('change');
+                        folderInput.dispatchEvent(changeEvent);
+                    }).catch(error => {
+                        console.error('Error reading directory:', error);
+                        selectedFolderNameSpan.textContent = 'Error loading folder.';
+                        loadingIndicator.classList.add('hidden');
+                        noVideosMessage.textContent = 'Error loading folder. Please try selecting manually.';
+                        noVideosMessage.classList.remove('hidden');
+                    });
+                } else {
+                    selectedFolderNameSpan.textContent = 'No folder dropped. Please drop a folder.';
+                    loadingIndicator.classList.add('hidden');
+                }
+            });
+
+            // Recursive function to read directory contents for drag and drop
+            async function readDirectoryContents(entry) {
+                return new Promise((resolve, reject) => {
+                    if (entry.isFile) {
+                        entry.file(file => resolve([file]));
+                    } else if (entry.isDirectory) {
+                        const directoryReader = entry.createReader();
+                        let allFiles = [];
+                        const readEntries = () => {
+                            directoryReader.readEntries(async entries => {
+                                if (entries.length) {
+                                    for (const subEntry of entries) {
+                                        if (subEntry.isFile) {
+                                            const file = await new Promise(res => subEntry.file(res));
+                                            // Add webkitRelativePath for consistency with folderInput.files
+                                            Object.defineProperty(file, 'webkitRelativePath', {
+                                                value: `${entry.name}/${file.name}`
+                                            });
+                                            allFiles.push(file);
+                                        } else if (subEntry.isDirectory) {
+                                            const subFiles = await readDirectoryContents(subEntry);
+                                            // Prepend parent directory name to relative path for sub-files
+                                            subFiles.forEach(f => {
+                                                Object.defineProperty(f, 'webkitRelativePath', {
+                                                    value: `${entry.name}/${f.webkitRelativePath || f.name}`
+                                                });
+                                            });
+                                            allFiles = allFiles.concat(subFiles);
+                                        }
+                                    }
+                                    readEntries(); // Keep reading until no more entries
+                                } else {
+                                    resolve(allFiles);
+                                }
+                            }, reject);
+                        };
+                        readEntries();
+                    }
+                });
+            }
+
+
+            // Clean up object URLs when the page is unloaded to prevent memory leaks
+            window.addEventListener('beforeunload', () => {
+                videoFiles.forEach(video => {
+                    URL.revokeObjectURL(video.url);
+                });
+            });
+
+            // Initial button state setup
+            updateButtonStates();
+        });
+    </script>
+</body>
+</html>
