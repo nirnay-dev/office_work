@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local Video Player</title>
+    <title>Local Media Player</title>
     <!-- Tailwind CSS CDN for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -14,18 +14,18 @@
             color: #e2e8f0; /* Light text color */
         }
         /* Custom scrollbar for video list */
-        .video-list-container::-webkit-scrollbar {
+        .media-list-container::-webkit-scrollbar {
             width: 8px;
         }
-        .video-list-container::-webkit-scrollbar-track {
+        .media-list-container::-webkit-scrollbar-track {
             background: #2d3748; /* Darker track */
             border-radius: 10px;
         }
-        .video-list-container::-webkit-scrollbar-thumb {
+        .media-list-container::-webkit-scrollbar-thumb {
             background: #4a5568; /* Scrollbar thumb color */
             border-radius: 10px;
         }
-        .video-list-container::-webkit-scrollbar-thumb:hover {
+        .media-list-container::-webkit-scrollbar-thumb:hover {
             background: #606d81; /* Darker thumb on hover */
         }
         /* Hide default file input button, use custom one */
@@ -104,44 +104,58 @@
             background: #8b5cf6; /* Purple thumb */
             cursor: pointer;
         }
+        /* Hide video element when playing only audio */
+        .main-media-player.audio-only {
+            max-height: 0;
+            overflow: hidden;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease-out;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
     <div class="container mx-auto bg-gray-800 rounded-xl shadow-lg p-6 max-w-7xl w-full flex flex-col lg:flex-row space-y-6 lg:space-y-0 lg:space-x-6">
 
-        <!-- Left Column: Video Player -->
+        <!-- Left Column: Media Player -->
         <div class="lg:w-3/4 flex flex-col space-y-4">
-            <h1 class="text-3xl font-bold text-center text-teal-300">Local Video Player</h1>
+            <h1 class="text-3xl font-bold text-center text-teal-300">Local Media Player</h1>
 
             <!-- Folder Input Section -->
             <div id="dropArea" class="bg-gray-700 p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between shadow-md border-2 border-dashed border-gray-600 hover:border-blue-500 transition duration-300 ease-in-out">
                 <label for="folderInput" class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105">
-                    Select Video Folder
+                    Select Media Folder
                 </label>
                 <input type="file" id="folderInput" webkitdirectory directory multiple />
                 <span id="selectedFolderName" class="mt-3 sm:mt-0 text-sm text-gray-400 italic break-all">Or drag & drop a folder here</span>
-                <div id="loadingIndicator" class="hidden text-green-400 text-sm ml-4">Loading videos...</div>
+                <div id="loadingIndicator" class="hidden text-green-400 text-sm ml-4">Loading media...</div>
             </div>
 
-            <!-- Main Video Player -->
-            <div class="w-full bg-black rounded-lg overflow-hidden shadow-xl aspect-video">
-                <video id="mainVideoPlayer" controls class="w-full h-full bg-black">
-                    Your browser does not support the video tag.
+            <!-- Main Media Player -->
+            <!-- Using video tag for both audio and video, as it handles both -->
+            <div class="w-full bg-black rounded-lg overflow-hidden shadow-xl aspect-video relative flex items-center justify-center">
+                <video id="mainMediaPlayer" controls class="w-full h-full bg-black main-media-player">
+                    Your browser does not support the media tag.
                 </video>
+                <!-- Placeholder for audio playback visualization if video is hidden -->
+                <div id="audioVisualizer" class="absolute inset-0 flex items-center justify-center text-gray-500 text-6xl" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-music"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                </div>
             </div>
 
-            <!-- Custom Video Controls -->
+
+            <!-- Custom Media Controls -->
             <div class="custom-controls-container">
                 <div class="control-group">
-                    <button id="prevVideoButton" class="control-button" disabled>
+                    <button id="prevMediaButton" class="control-button" disabled>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-skip-back"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" x2="5" y1="19" y2="5"/></svg>
                     </button>
                     <button id="playPauseButton" class="control-button">
                         <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                         <svg id="pauseIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pause hidden"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
                     </button>
-                    <button id="nextVideoButton" class="control-button" disabled>
+                    <button id="nextMediaButton" class="control-button" disabled>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-skip-forward"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/></svg>
                     </button>
                 </div>
@@ -177,18 +191,18 @@
                 </div>
             </div>
 
-            <!-- Current Video Title -->
+            <!-- Current Media Title -->
             <div class="bg-gray-700 p-3 rounded-lg shadow-md">
-                <h2 id="currentVideoTitle" class="text-xl font-semibold text-gray-200">No video playing</h2>
+                <h2 id="currentMediaTitle" class="text-xl font-semibold text-gray-200">No media playing</h2>
             </div>
         </div>
 
-        <!-- Right Column: Video List / Playlist -->
+        <!-- Right Column: Media List / Playlist -->
         <div class="lg:w-1/4 flex flex-col space-y-4 bg-gray-700 p-4 rounded-xl shadow-lg">
             <h2 class="text-2xl font-bold text-center text-orange-300 mb-2">Playlist</h2>
-            <div id="videoList" class="video-list-container flex-grow overflow-y-auto pr-2" style="max-height: calc(100vh - 250px);">
-                <!-- Video items will be populated here by JavaScript -->
-                <p id="noVideosMessage" class="text-center text-gray-400 mt-4">Select a folder to see your videos here.</p>
+            <div id="mediaList" class="media-list-container flex-grow overflow-y-auto pr-2" style="max-height: calc(100vh - 250px);">
+                <!-- Media items will be populated here by JavaScript -->
+                <p id="noMediaMessage" class="text-center text-gray-400 mt-4">Select a folder to see your media here.</p>
             </div>
         </div>
 
@@ -197,6 +211,7 @@
     <script>
         // Utility function to format time (e.g., 90 seconds to 01:30)
         function formatTime(seconds) {
+            if (isNaN(seconds) || seconds < 0) return '00:00';
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = Math.floor(seconds % 60);
             const paddedMinutes = String(minutes).padStart(2, '0');
@@ -204,16 +219,16 @@
             return `${paddedMinutes}:${paddedSeconds}`;
         }
 
-        // JavaScript for handling file input and video playback
+        // JavaScript for handling file input and media playback
         document.addEventListener('DOMContentLoaded', () => {
             const folderInput = document.getElementById('folderInput');
             const selectedFolderNameSpan = document.getElementById('selectedFolderName');
-            const mainVideoPlayer = document.getElementById('mainVideoPlayer');
-            const currentVideoTitle = document.getElementById('currentVideoTitle');
-            const videoList = document.getElementById('videoList');
-            const noVideosMessage = document.getElementById('noVideosMessage');
-            const prevVideoButton = document.getElementById('prevVideoButton');
-            const nextVideoButton = document.getElementById('nextVideoButton');
+            const mainMediaPlayer = document.getElementById('mainMediaPlayer');
+            const currentMediaTitle = document.getElementById('currentMediaTitle');
+            const mediaList = document.getElementById('mediaList');
+            const noMediaMessage = document.getElementById('noMediaMessage');
+            const prevMediaButton = document.getElementById('prevMediaButton');
+            const nextMediaButton = document.getElementById('nextMediaButton');
             const playbackSpeedSelect = document.getElementById('playbackSpeed');
             const playPauseButton = document.getElementById('playPauseButton');
             const playIcon = document.getElementById('playIcon');
@@ -228,72 +243,75 @@
             const fullscreenButton = document.getElementById('fullscreenButton');
             const dropArea = document.getElementById('dropArea');
             const loadingIndicator = document.getElementById('loadingIndicator');
+            const audioVisualizer = document.getElementById('audioVisualizer');
 
 
-            // Array to store video file objects and their URLs
-            let videoFiles = [];
-            let currentVideoIndex = -1; // Keep track of the currently playing video
+            // Array to store media file objects and their URLs
+            let mediaFiles = [];
+            let currentMediaIndex = -1; // Keep track of the currently playing media
 
             // Function to update button states (disabled/enabled)
             const updateButtonStates = () => {
-                prevVideoButton.disabled = currentVideoIndex <= 0;
-                nextVideoButton.disabled = currentVideoIndex >= videoFiles.length - 1;
-                // Enable/disable play/pause, volume, speed, fullscreen if a video is loaded
-                const isVideoLoaded = mainVideoPlayer.src !== '';
-                playPauseButton.disabled = !isVideoLoaded;
-                muteUnmuteButton.disabled = !isVideoLoaded;
-                volumeSlider.disabled = !isVideoLoaded;
-                playbackSpeedSelect.disabled = !isVideoLoaded;
-                fullscreenButton.disabled = !isVideoLoaded;
-                progressBar.disabled = !isVideoLoaded;
+                prevMediaButton.disabled = currentMediaIndex <= 0;
+                nextMediaButton.disabled = currentMediaIndex >= mediaFiles.length - 1;
+                // Enable/disable play/pause, volume, speed, fullscreen if media is loaded
+                const isMediaLoaded = mainMediaPlayer.src !== '';
+                playPauseButton.disabled = !isMediaLoaded;
+                muteUnmuteButton.disabled = !isMediaLoaded;
+                volumeSlider.disabled = !isMediaLoaded;
+                playbackSpeedSelect.disabled = !isMediaLoaded;
+                progressBar.disabled = !isMediaLoaded;
+
+                // Fullscreen button only makes sense for video or if the browser allows fullscreen for audio elements which is rare
+                fullscreenButton.disabled = !isMediaLoaded || (mediaFiles[currentMediaIndex] && !mediaFiles[currentMediaIndex].file.type.startsWith('video/'));
             };
 
             // Toggle play/pause
             playPauseButton.addEventListener('click', () => {
-                if (mainVideoPlayer.paused) {
-                    mainVideoPlayer.play();
+                if (mainMediaPlayer.paused) {
+                    mainMediaPlayer.play();
                 } else {
-                    mainVideoPlayer.pause();
+                    mainMediaPlayer.pause();
                 }
             });
 
             // Update play/pause button icon
-            mainVideoPlayer.addEventListener('play', () => {
+            mainMediaPlayer.addEventListener('play', () => {
                 playIcon.classList.add('hidden');
                 pauseIcon.classList.remove('hidden');
             });
-            mainVideoPlayer.addEventListener('pause', () => {
+            mainMediaPlayer.addEventListener('pause', () => {
                 playIcon.classList.remove('hidden');
                 pauseIcon.classList.add('hidden');
             });
 
             // Update current time and progress bar
-            mainVideoPlayer.addEventListener('timeupdate', () => {
-                currentTimeDisplay.textContent = formatTime(mainVideoPlayer.currentTime);
-                const progress = (mainVideoPlayer.currentTime / mainVideoPlayer.duration) * 100;
+            mainMediaPlayer.addEventListener('timeupdate', () => {
+                currentTimeDisplay.textContent = formatTime(mainMediaPlayer.currentTime);
+                const progress = (mainMediaPlayer.currentTime / mainMediaPlayer.duration) * 100;
                 progressBar.value = isNaN(progress) ? 0 : progress; // Handle NaN for duration
             });
 
             // Update duration when metadata is loaded
-            mainVideoPlayer.addEventListener('loadedmetadata', () => {
-                durationDisplay.textContent = formatTime(mainVideoPlayer.duration);
+            mainMediaPlayer.addEventListener('loadedmetadata', () => {
+                durationDisplay.textContent = formatTime(mainMediaPlayer.duration);
                 // Set initial playback rate
-                mainVideoPlayer.playbackRate = parseFloat(playbackSpeedSelect.value);
+                mainMediaPlayer.playbackRate = parseFloat(playbackSpeedSelect.value);
                 updateButtonStates(); // Ensure controls are enabled after metadata loads
             });
 
-            // Seek video when progress bar is changed
+            // Seek media when progress bar is changed
             progressBar.addEventListener('input', () => {
-                const seekTime = (progressBar.value / 100) * mainVideoPlayer.duration;
-                if (!isNaN(seekTime)) { // Prevent seeking with invalid duration
-                    mainVideoPlayer.currentTime = seekTime;
+                const seekTime = (progressBar.value / 100) * mainMediaPlayer.duration;
+                if (!isNaN(seekTime) && isFinite(seekTime)) { // Prevent seeking with invalid duration
+                    mainMediaPlayer.currentTime = seekTime;
                 }
             });
 
             // Mute/Unmute functionality
             muteUnmuteButton.addEventListener('click', () => {
-                mainVideoPlayer.muted = !mainVideoPlayer.muted;
-                if (mainVideoPlayer.muted) {
+                mainMediaPlayer.muted = !mainMediaPlayer.muted;
+                if (mainMediaPlayer.muted) {
                     volumeHighIcon.classList.add('hidden');
                     volumeXIcon.classList.remove('hidden');
                 } else {
@@ -301,69 +319,74 @@
                     volumeXIcon.classList.add('hidden');
                 }
                 // Sync volume slider with mute state
-                volumeSlider.value = mainVideoPlayer.muted ? 0 : mainVideoPlayer.volume;
+                volumeSlider.value = mainMediaPlayer.muted ? 0 : mainMediaPlayer.volume;
             });
 
             // Volume control
             volumeSlider.addEventListener('input', (event) => {
-                mainVideoPlayer.volume = parseFloat(event.target.value);
+                mainMediaPlayer.volume = parseFloat(event.target.value);
                 // Update mute button icon based on volume
-                if (mainVideoPlayer.volume === 0) {
+                if (mainMediaPlayer.volume === 0) {
                     volumeHighIcon.classList.add('hidden');
                     volumeXIcon.classList.remove('hidden');
-                    mainVideoPlayer.muted = true; // Ensure muted property is true
+                    mainMediaPlayer.muted = true; // Ensure muted property is true
                 } else {
                     volumeHighIcon.classList.remove('hidden');
                     volumeXIcon.classList.add('hidden');
-                    mainVideoPlayer.muted = false; // Ensure muted property is false
+                    mainMediaPlayer.muted = false; // Ensure muted property is false
                 }
             });
 
-            // Sync volume slider with video player's actual volume
-            mainVideoPlayer.addEventListener('volumechange', () => {
-                if (mainVideoPlayer.volume === 0 || mainVideoPlayer.muted) {
+            // Sync volume slider with media player's actual volume
+            mainMediaPlayer.addEventListener('volumechange', () => {
+                if (mainMediaPlayer.volume === 0 || mainMediaPlayer.muted) {
                     volumeHighIcon.classList.add('hidden');
                     volumeXIcon.classList.remove('hidden');
                 } else {
                     volumeHighIcon.classList.remove('hidden');
                     volumeXIcon.classList.add('hidden');
                 }
-                volumeSlider.value = mainVideoPlayer.volume;
+                volumeSlider.value = mainMediaPlayer.volume;
             });
 
 
             // Fullscreen functionality
             fullscreenButton.addEventListener('click', () => {
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                } else {
-                    mainVideoPlayer.requestFullscreen().catch(err => {
-                        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-                    });
+                // Check if the current media is a video before requesting fullscreen
+                if (mediaFiles[currentMediaIndex] && mediaFiles[currentMediaIndex].file.type.startsWith('video/')) {
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                    } else {
+                        mainMediaPlayer.requestFullscreen().catch(err => {
+                            console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                        });
+                    }
                 }
             });
 
             // Event listener for when a folder is selected
             folderInput.addEventListener('change', (event) => {
                 loadingIndicator.classList.remove('hidden'); // Show loading indicator
-                // Clear previous videos and messages
-                videoList.innerHTML = '';
-                videoFiles = [];
-                currentVideoIndex = -1; // Reset index
-                noVideosMessage.classList.add('hidden'); // Hide "No videos" message initially
-                mainVideoPlayer.src = ''; // Clear current video
-                mainVideoPlayer.pause(); // Pause any current video
-                currentVideoTitle.textContent = 'No video playing'; // Reset title
+                // Clear previous media and messages
+                mediaList.innerHTML = '';
+                mediaFiles = [];
+                currentMediaIndex = -1; // Reset index
+                noMediaMessage.classList.add('hidden'); // Hide "No media" message initially
+                mainMediaPlayer.src = ''; // Clear current media
+                mainMediaPlayer.pause(); // Pause any current media
+                currentMediaTitle.textContent = 'No media playing'; // Reset title
                 currentTimeDisplay.textContent = '00:00'; // Reset time display
                 durationDisplay.textContent = '00:00'; // Reset duration display
                 progressBar.value = 0; // Reset progress bar
+                audioVisualizer.style.display = 'none'; // Hide audio visualizer
+                mainMediaPlayer.classList.remove('audio-only'); // Ensure video player is visible
                 updateButtonStates(); // Update button states based on empty list
 
                 const files = event.target.files;
 
                 if (files.length === 0) {
                     selectedFolderNameSpan.textContent = 'No folder selected';
-                    noVideosMessage.classList.remove('hidden');
+                    noMediaMessage.classList.remove('hidden');
                     loadingIndicator.classList.add('hidden'); // Hide loading indicator
                     return;
                 }
@@ -373,125 +396,137 @@
                 const folderName = firstFilePath.split('/')[0];
                 selectedFolderNameSpan.textContent = `Folder: ${folderName}`;
 
-                // Filter for video files and process them
+                // Filter for video and audio files and process them
                 Array.from(files).forEach(file => {
-                    // Check if the file is a video (basic MIME type check)
-                    if (file.type.startsWith('video/')) {
-                        // Create a URL for the file to be used in the video player
-                        const videoURL = URL.createObjectURL(file);
-                        videoFiles.push({
+                    // Check if the file is a video or audio (basic MIME type check)
+                    if (file.type.startsWith('video/') || file.type.startsWith('audio/')) {
+                        // Create a URL for the file to be used in the media player
+                        const mediaURL = URL.createObjectURL(file);
+                        mediaFiles.push({
                             file: file,
-                            url: videoURL,
+                            url: mediaURL,
                             name: file.name
                         });
                     }
                 });
 
-                if (videoFiles.length === 0) {
-                    noVideosMessage.textContent = 'No video files found in the selected folder.';
-                    noVideosMessage.classList.remove('hidden');
+                if (mediaFiles.length === 0) {
+                    noMediaMessage.textContent = 'No video or audio files found in the selected folder.';
+                    noMediaMessage.classList.remove('hidden');
                     loadingIndicator.classList.add('hidden'); // Hide loading indicator
                     return;
                 }
 
-                // Sort videos alphabetically by name
-                videoFiles.sort((a, b) => a.name.localeCompare(b.name));
+                // Sort media alphabetically by name
+                mediaFiles.sort((a, b) => a.name.localeCompare(b.name));
 
-                // Populate the video list
-                videoFiles.forEach((video, index) => {
-                    const videoItem = document.createElement('div');
-                    videoItem.className = 'flex items-center space-x-3 p-3 bg-gray-600 hover:bg-gray-500 rounded-lg cursor-pointer transition duration-200 ease-in-out mb-2 shadow-md border border-gray-600'; // Improved playlist item styling
-                    videoItem.setAttribute('data-index', index); // Store index for easy lookup
+                // Populate the media list
+                mediaFiles.forEach((media, index) => {
+                    const mediaItem = document.createElement('div');
+                    mediaItem.className = 'flex items-center space-x-3 p-3 bg-gray-600 hover:bg-gray-500 rounded-lg cursor-pointer transition duration-200 ease-in-out mb-2 shadow-md border border-gray-600'; // Improved playlist item styling
+                    mediaItem.setAttribute('data-index', index); // Store index for easy lookup
 
-                    // Video icon for thumbnail placeholder
-                    const videoIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-video w-10 h-10 text-gray-400"><path d="m22 8-6 4 6 4V8Z"/><path d="M14 12H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6Z"/></svg>`;
+                    // Choose icon based on media type
+                    const mediaIconSvg = media.file.type.startsWith('video/') ?
+                        `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-video w-10 h-10 text-gray-400"><path d="m22 8-6 4 6 4V8Z"/><path d="M14 12H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6Z"/></svg>` :
+                        `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-music w-10 h-10 text-gray-400"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`;
 
                     const thumbnailPlaceholder = document.createElement('div');
                     thumbnailPlaceholder.className = 'flex-shrink-0 w-16 h-12 bg-gray-800 rounded-md flex items-center justify-center overflow-hidden';
-                    thumbnailPlaceholder.innerHTML = videoIcon;
+                    thumbnailPlaceholder.innerHTML = mediaIconSvg;
 
-                    const videoInfo = document.createElement('div');
-                    videoInfo.className = 'flex-grow';
+                    const mediaInfo = document.createElement('div');
+                    mediaInfo.className = 'flex-grow';
 
-                    const videoTitle = document.createElement('h3');
-                    videoTitle.className = 'text-md font-medium text-gray-100 truncate';
-                    videoTitle.textContent = video.name;
+                    const mediaTitle = document.createElement('h3');
+                    mediaTitle.className = 'text-md font-medium text-gray-100 truncate';
+                    mediaTitle.textContent = media.name;
 
-                    videoInfo.appendChild(videoTitle);
-                    videoItem.appendChild(thumbnailPlaceholder);
-                    videoItem.appendChild(videoInfo);
-                    videoList.appendChild(videoItem);
+                    mediaInfo.appendChild(mediaTitle);
+                    mediaItem.appendChild(thumbnailPlaceholder);
+                    mediaItem.appendChild(mediaInfo);
+                    mediaList.appendChild(mediaItem);
 
-                    // Add click listener to each video item
-                    videoItem.addEventListener('click', () => {
-                        playVideo(index);
+                    // Add click listener to each media item
+                    mediaItem.addEventListener('click', () => {
+                        playMedia(index);
                     });
                 });
 
-                // Automatically play the first video if available
-                if (videoFiles.length > 0) {
-                    playVideo(0);
+                // Automatically play the first media if available
+                if (mediaFiles.length > 0) {
+                    playMedia(0);
                 }
-                updateButtonStates(); // Update button states after loading videos
+                updateButtonStates(); // Update button states after loading media
                 loadingIndicator.classList.add('hidden'); // Hide loading indicator
             });
 
-            // Function to play a video by its index in the videoFiles array
-            function playVideo(index) {
-                if (index >= 0 && index < videoFiles.length) {
-                    currentVideoIndex = index; // Update current index
-                    const video = videoFiles[index];
-                    mainVideoPlayer.src = video.url;
-                    currentVideoTitle.textContent = video.name;
-                    mainVideoPlayer.play().catch(error => {
-                        console.error('Error playing video:', error);
-                        currentVideoTitle.textContent = `${video.name} (Click play button to start)`;
+            // Function to play a media by its index in the mediaFiles array
+            function playMedia(index) {
+                if (index >= 0 && index < mediaFiles.length) {
+                    currentMediaIndex = index; // Update current index
+                    const media = mediaFiles[index];
+                    mainMediaPlayer.src = media.url;
+                    currentMediaTitle.textContent = media.name;
+
+                    // Show/hide video player and audio visualizer based on media type
+                    if (media.file.type.startsWith('audio/')) {
+                        mainMediaPlayer.classList.add('audio-only'); // Hide video player visually
+                        audioVisualizer.style.display = 'flex'; // Show audio icon
+                    } else {
+                        mainMediaPlayer.classList.remove('audio-only');
+                        audioVisualizer.style.display = 'none';
+                    }
+
+                    mainMediaPlayer.play().catch(error => {
+                        console.error('Error playing media:', error);
+                        currentMediaTitle.textContent = `${media.name} (Click play button to start)`;
                         // If autoplay fails, ensure play/pause button reflects 'play' state
                         playIcon.classList.remove('hidden');
                         pauseIcon.classList.add('hidden');
                     });
 
-                    // Highlight the currently playing video in the list
-                    Array.from(videoList.children).forEach((item, idx) => {
-                        if (idx === currentVideoIndex) {
+                    // Highlight the currently playing media in the list
+                    Array.from(mediaList.children).forEach((item, idx) => {
+                        if (idx === currentMediaIndex) {
                             item.classList.remove('bg-gray-600');
-                            item.classList.add('bg-blue-600', 'border-blue-700'); // Highlight current video more distinctly
+                            item.classList.add('bg-blue-600', 'border-blue-700'); // Highlight current media more distinctly
                         } else {
                             item.classList.remove('bg-blue-600', 'border-blue-700');
                             item.classList.add('bg-gray-600', 'border-gray-600');
                         }
                     });
-                    updateButtonStates(); // Update button states after playing a video
+                    updateButtonStates(); // Update button states after playing a media
                 }
             }
 
-            // Play next video
-            nextVideoButton.addEventListener('click', () => {
-                if (currentVideoIndex < videoFiles.length - 1) {
-                    playVideo(currentVideoIndex + 1);
+            // Play next media
+            nextMediaButton.addEventListener('click', () => {
+                if (currentMediaIndex < mediaFiles.length - 1) {
+                    playMedia(currentMediaIndex + 1);
                 }
             });
 
-            // Play previous video
-            prevVideoButton.addEventListener('click', () => {
-                if (currentVideoIndex > 0) {
-                    playVideo(currentVideoIndex - 1);
+            // Play previous media
+            prevMediaButton.addEventListener('click', () => {
+                if (currentMediaIndex > 0) {
+                    playMedia(currentMediaIndex - 1);
                 }
             });
 
             // Handle playback speed change
             playbackSpeedSelect.addEventListener('change', (event) => {
-                mainVideoPlayer.playbackRate = parseFloat(event.target.value);
+                mainMediaPlayer.playbackRate = parseFloat(event.target.value);
             });
 
-            // Automatically play next video when current one ends
-            mainVideoPlayer.addEventListener('ended', () => {
-                if (currentVideoIndex < videoFiles.length - 1) {
-                    playVideo(currentVideoIndex + 1);
+            // Automatically play next media when current one ends
+            mainMediaPlayer.addEventListener('ended', () => {
+                if (currentMediaIndex < mediaFiles.length - 1) {
+                    playMedia(currentMediaIndex + 1);
                 } else {
                     // Loop back to the start or just pause
-                    mainVideoPlayer.pause();
-                    currentVideoTitle.textContent = `${videoFiles[currentVideoIndex].name} (Playback finished)`;
+                    mainMediaPlayer.pause();
+                    currentMediaTitle.textContent = `${mediaFiles[currentMediaIndex].name} (Playback finished)`;
                     // Reset play button icon
                     playIcon.classList.remove('hidden');
                     pauseIcon.classList.add('hidden');
@@ -502,7 +537,7 @@
             dropArea.addEventListener('dragover', (event) => {
                 event.preventDefault(); // Prevent default to allow drop
                 dropArea.classList.add('border-blue-500', 'bg-gray-600'); // Visual feedback
-                selectedFolderNameSpan.textContent = 'Drop folder here to load videos...';
+                selectedFolderNameSpan.textContent = 'Drop folder here to load media...';
             });
 
             dropArea.addEventListener('dragleave', (event) => {
@@ -542,8 +577,8 @@
                         console.error('Error reading directory:', error);
                         selectedFolderNameSpan.textContent = 'Error loading folder.';
                         loadingIndicator.classList.add('hidden');
-                        noVideosMessage.textContent = 'Error loading folder. Please try selecting manually.';
-                        noVideosMessage.classList.remove('hidden');
+                        noMediaMessage.textContent = 'Error loading folder. Please try selecting manually.';
+                        noMediaMessage.classList.remove('hidden');
                     });
                 } else {
                     selectedFolderNameSpan.textContent = 'No folder dropped. Please drop a folder.';
@@ -595,8 +630,8 @@
 
             // Clean up object URLs when the page is unloaded to prevent memory leaks
             window.addEventListener('beforeunload', () => {
-                videoFiles.forEach(video => {
-                    URL.revokeObjectURL(video.url);
+                mediaFiles.forEach(media => {
+                    URL.revokeObjectURL(media.url);
                 });
             });
 
