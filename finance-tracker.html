@@ -6,6 +6,8 @@
     <title>Personal Finance Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* Base Styles - Using Tailwind for most, but defining custom properties for theme */
         :root {
@@ -238,6 +240,14 @@
                 </div>
             </div>
 
+            <!-- Financial Overview (Charts) -->
+            <div class="bg-[var(--app-bg-color)] rounded-xl shadow-lg p-6 border-[var(--card-border-color)] border">
+                <h2 class="text-2xl font-semibold text-[var(--text-color)] mb-4">Expense Breakdown by Category</h2>
+                <div class="relative h-80"> <!-- Added relative and height for chart responsiveness -->
+                    <canvas id="expenseChart"></canvas>
+                </div>
+            </div>
+
             <!-- Transactions List -->
             <div class="bg-[var(--app-bg-color)] rounded-xl shadow-lg p-6 border-[var(--card-border-color)] border">
                 <h2 class="text-2xl font-semibold text-[var(--text-color)] mb-4">Recent Transactions</h2>
@@ -396,6 +406,10 @@
             const darkModeToggle = document.getElementById('darkModeToggle');
             const body = document.body;
 
+            // --- Chart Elements ---
+            const expenseChartCanvas = document.getElementById('expenseChart');
+            let expenseChartInstance = null; // To store the Chart.js instance
+
             // --- State Variables (now loaded from localStorage) ---
             let transactions = [];
             let categories = [];
@@ -497,6 +511,7 @@
             renderSummary();
             renderCategories();
             renderBudgets();
+            renderCharts(); // Render charts on initialization
 
             // Ensure main content is visible by default
             financeTrackerContent.classList.remove('hidden');
@@ -651,12 +666,81 @@
                 addDeleteBudgetListeners();
             }
 
+            function renderCharts() {
+                if (expenseChartInstance) {
+                    expenseChartInstance.destroy(); // Destroy existing chart before re-rendering
+                }
+
+                const expenseData = {};
+                transactions.filter(t => t.type === 'expense').forEach(t => {
+                    expenseData[t.category] = (expenseData[t.category] || 0) + t.amount;
+                });
+
+                const chartLabels = Object.keys(expenseData);
+                const chartValues = Object.values(expenseData);
+
+                const ctx = expenseChartCanvas.getContext('2d');
+                expenseChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'Expenses by Category (₹)',
+                            data: chartValues,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)', // Red
+                                'rgba(54, 162, 235, 0.7)', // Blue
+                                'rgba(255, 206, 86, 0.7)', // Yellow
+                                'rgba(75, 192, 192, 0.7)', // Green
+                                'rgba(153, 102, 255, 0.7)',// Purple
+                                'rgba(255, 159, 64, 0.7)'  // Orange
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false, // Allow canvas to resize freely based on parent
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Amount (₹)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Category'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false // No need for legend for single dataset
+                            }
+                        }
+                    }
+                });
+            }
+
+
             function rerenderAll() {
                 renderSummary();
                 renderTransactions();
                 renderCategories(); // Re-populate category selects on transaction/category change
                 renderBudgets();
                 populateCategorySelects();
+                renderCharts(); // Re-render charts when data changes
             }
 
             // --- Modal Handling ---
