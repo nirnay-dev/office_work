@@ -400,114 +400,123 @@
     </div>
 
     <!-- Main Finance Tracker Content -->
-    <div id="financeTrackerContent" class="main-layout w-full max-w-7xl mx-auto p-4 flex flex-col lg:flex-row gap-6 hidden">
+    <div id="financeTrackerContent" class="main-layout w-full max-w-7xl mx-auto p-4 flex flex-col gap-6 hidden">
 
-        <!-- Header & Controls -->
-        <div class="bg-[var(--app-bg-color)] rounded-xl shadow-lg p-5 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h1 class="text-3xl font-bold text-[var(--text-color)]">Finance Tracker</h1>
-            <div class="flex flex-wrap gap-3">
-                <button id="addTransactionButton" class="header-button bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">Add Transaction</button>
-                <button id="darkModeToggle" class="header-button bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300" aria-label="Toggle Mode">Light Mode</button>
+        <!-- Top Section: Header + Summary Cards -->
+        <div class="bg-[var(--app-bg-color)] rounded-xl shadow-lg p-5 flex flex-col lg:grid lg:grid-cols-3 lg:gap-6 items-center lg:items-start">
+            <!-- Left part of header (title and main action buttons) -->
+            <div class="lg:col-span-1 flex flex-col sm:flex-row lg:flex-col justify-between items-center sm:items-start lg:items-center gap-4 w-full">
+                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--text-color)]">Finance Tracker</h1>
+                <div class="flex flex-wrap justify-center sm:justify-start lg:justify-center gap-3 w-full">
+                    <button id="addTransactionButton" class="header-button bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">Add Transaction</button>
+                    <button id="darkModeToggle" class="header-button bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300" aria-label="Toggle Mode">Light Mode</button>
+                </div>
+            </div>
+
+            <!-- Right part of header (Summary Cards - now spanning 2 columns on large) -->
+            <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-6 lg:mt-0">
+                <!-- Income Card -->
+                <div class="bg-[var(--card-bg-color)] rounded-xl shadow-lg p-4 sm:p-6 flex flex-col items-center justify-center border-[var(--card-border-color)] border">
+                    <h3 class="text-lg sm:text-xl font-semibold text-[var(--text-color)] opacity-90 mb-2">Total Income</h3>
+                    <p id="totalIncome" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--income-color)]">₹0.00</p>
+                </div>
+                <!-- Expenses Card -->
+                <div class="bg-[var(--card-bg-color)] rounded-xl shadow-lg p-4 sm:p-6 flex flex-col items-center justify-center border-[var(--card-border-color)] border">
+                    <h3 class="text-lg sm:text-xl font-semibold text-[var(--text-color)] opacity-90 mb-2">Total Expenses</h3>
+                    <p id="totalExpenses" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--expense-color)]">₹0.00</p>
+                </div>
+                <!-- Balance Card -->
+                <div class="bg-[var(--card-bg-color)] rounded-xl shadow-lg p-4 sm:p-6 flex flex-col items-center justify-center border-[var(--card-border-color)] border">
+                    <h3 class="text-lg sm:text-xl font-semibold text-[var(--text-color)] opacity-90 mb-2">Current Balance</h3>
+                    <p id="currentBalance" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--balance-color)]">₹0.00</p>
+                </div>
             </div>
         </div>
 
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-[var(--card-bg-color)] rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border-[var(--card-border-color)] border">
-                <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-2">Total Income</h3>
-                <p id="totalIncome" class="text-4xl font-bold text-[var(--income-color)]">₹0.00</p>
+        <!-- Middle Section: Chart + Transactions -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Financial Overview (Charts) -->
+            <div class="bg-[var(--app-bg-color)] rounded-xl shadow-lg p-6 border-[var(--card-border-color)] border">
+                <h2 class="text-xl sm:text-2xl font-semibold text-[var(--text-color)] mb-4">Expense Breakdown by Category</h2>
+                <div class="relative h-64 sm:h-80">
+                    <canvas id="expenseChart"></canvas>
+                </div>
             </div>
-            <div class="bg-[var(--card-bg-color)] rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border-[var(--card-border-color)] border">
-                <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-2">Total Expenses</h3>
-                <p id="totalExpenses" class="text-4xl font-bold text-[var(--expense-color)]">₹0.00</p>
-            </div>
-            <div class="bg-[var(--card-bg-color)] rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border-[var(--card-border-color)] border">
-                <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-2">Current Balance</h3>
-                <p id="currentBalance" class="text-4xl font-bold text-[var(--balance-color)]">₹0.00</p>
+
+            <!-- Transactions List -->
+            <div class="bg-[var(--app-bg-color)] rounded-xl shadow-lg p-6 border-[var(--card-border-color)] border">
+                <h2 class="text-xl sm:text-2xl font-semibold text-[var(--text-color)] mb-4">Recent Transactions</h2>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <input type="search" id="transactionSearch" placeholder="Search transactions..." class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)] flex-grow">
+                    <select id="filterType" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
+                        <option value="all">All Types</option>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                    <select id="filterCategory" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
+                        <option value="all">All Categories</option>
+                        <!-- Categories populated by JS -->
+                    </select>
+                </div>
+                <ul id="transactionsList" class="divide-y divide-[var(--card-border-color)] max-h-96 overflow-y-auto">
+                    <!-- Transactions will be populated here by JS -->
+                    <li class="py-3 text-center text-[var(--text-color)] opacity-70" id="noTransactionsMessage">No transactions yet. Add one to get started!</li>
+                </ul>
             </div>
         </div>
 
-        <!-- Financial Overview (Charts) -->
-        <div class="bg-[var(--app-bg-color)] rounded-xl shadow-lg p-6 border-[var(--card-border-color)] border">
-            <h2 class="text-2xl font-semibold text-[var(--text-color)] mb-4">Expense Breakdown by Category</h2>
-            <div class="relative h-80"> <!-- Added relative and height for chart responsiveness -->
-                <canvas id="expenseChart"></canvas>
+        <!-- Bottom Section: Categories & Budgets (full width) -->
+        <div class="w-full bg-[var(--app-bg-color)] rounded-xl shadow-lg p-6 border-[var(--card-border-color)] border" id="categoriesBudgetsSection">
+            <h2 class="text-xl sm:text-2xl font-semibold text-[var(--text-color)] mb-4">Categories & Budgets</h2>
+
+            <div class="mb-6">
+                <h3 class="text-lg sm:text-xl font-semibold text-[var(--text-color)] opacity-90 mb-3">Categories</h3>
+                <ul id="categoryList" class="space-y-2">
+                    <!-- Categories will be populated here by JS -->
+                    <li class="flex justify-between items-center text-[var(--text-color)] opacity-90">
+                        <span>Food</span>
+                        <button class="text-red-500 hover:text-red-700 text-sm delete-category-btn" data-category="Food">Delete</button>
+                    </li>
+                    <li class="flex justify-between items-center text-[var(--text-color)] opacity-90">
+                        <span>Transport</span>
+                        <button class="text-red-500 hover:text-red-700 text-sm delete-category-btn" data-category="Transport">Delete</button>
+                    </li>
+                </ul>
+                <div class="mt-4 flex gap-2">
+                    <input type="text" id="newCategoryInput" placeholder="New Category Name" class="flex-grow p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
+                    <button id="addCategoryButton" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">Add</button>
+                </div>
             </div>
-        </div>
 
-        <!-- Transactions List -->
-        <div class="bg-[var(--app-bg-color)] rounded-xl shadow-lg p-6 border-[var(--card-border-color)] border">
-            <h2 class="text-2xl font-semibold text-[var(--text-color)] mb-4">Recent Transactions</h2>
-            <div class="flex flex-wrap gap-2 mb-4">
-                <input type="search" id="transactionSearch" placeholder="Search transactions..." class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)] flex-grow">
-                <select id="filterType" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
-                    <option value="all">All Types</option>
-                    <option value="income">Income</option>
-                    <option value="expense">Expense</option>
-                </select>
-                <select id="filterCategory" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
-                    <option value="all">All Categories</option>
-                    <!-- Categories populated by JS -->
-                </select>
-            </div>
-            <ul id="transactionsList" class="divide-y divide-[var(--card-border-color)] max-h-96 overflow-y-auto">
-                <!-- Transactions will be populated here by JS -->
-                <li class="py-3 text-center text-[var(--text-color)] opacity-70" id="noTransactionsMessage">No transactions yet. Add one to get started!</li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- Categories & Budgets Section (Side Panel) -->
-    <div class="w-full lg:w-96 flex-shrink-0 bg-[var(--app-bg-color)] rounded-xl shadow-lg p-6 border-[var(--card-border-color)] border hidden" id="categoriesBudgetsSection">
-        <h2 class="text-2xl font-semibold text-[var(--text-color)] mb-4">Categories & Budgets</h2>
-
-        <div class="mb-6">
-            <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-3">Categories</h3>
-            <ul id="categoryList" class="space-y-2">
-                <!-- Categories will be populated here by JS -->
-                <li class="flex justify-between items-center text-[var(--text-color)] opacity-90">
-                    <span>Food</span>
-                    <button class="text-red-500 hover:text-red-700 text-sm delete-category-btn" data-category="Food">Delete</button>
-                </li>
-                <li class="flex justify-between items-center text-[var(--text-color)] opacity-90">
-                    <span>Transport</span>
-                    <button class="text-red-500 hover:text-red-700 text-sm delete-category-btn" data-category="Transport">Delete</button>
-                </li>
-            </ul>
-            <div class="mt-4 flex gap-2">
-                <input type="text" id="newCategoryInput" placeholder="New Category Name" class="flex-grow p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
-                <button id="addCategoryButton" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">Add</button>
-            </div>
-        </div>
-
-        <div>
-            <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-3">Budget Overview</h3>
-            <ul id="budgetList" class="space-y-3">
-                <!-- Budgets will be populated here by JS -->
-                <li class="bg-[var(--card-bg-color)] p-3 rounded-md shadow-sm">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="font-medium">Rent</span>
-                        <span class="text-[var(--text-color)] opacity-70">₹800 / ₹1000</span>
-                    </div>
-                    <div class="w-full bg-[var(--progress-bar-bg)] rounded-full h-2.5">
-                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: 80%"></div>
-                    </div>
-                </li>
-                <li class="bg-[var(--card-bg-color)] p-3 rounded-md shadow-sm">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="font-medium">Groceries</span>
-                        <span class="text-[var(--text-color)] opacity-70 text-red-500">₹350 / ₹300</span>
-                    </div>
-                    <div class="w-full bg-[var(--progress-bar-bg)] rounded-full h-2.5">
-                        <div class="bg-red-600 h-2.5 rounded-full" style="width: 116%"></div>
-                    </div>
-                </li>
-            </ul>
-            <div class="mt-4 flex flex-col gap-2">
-                <h4 class="font-medium text-[var(--text-color)] opacity-90">Set New Budget</h4>
-                <input type="text" id="budgetCategoryInput" placeholder="Category" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
-                <input type="number" id="budgetAmountInput" placeholder="Amount" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
-                <button id="setBudgetButton" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">Set Budget</button>
+            <div>
+                <h3 class="text-lg sm:text-xl font-semibold text-[var(--text-color)] opacity-90 mb-3">Budget Overview</h3>
+                <ul id="budgetList" class="space-y-3">
+                    <!-- Budgets will be populated here by JS -->
+                    <li class="bg-[var(--card-bg-color)] p-3 rounded-md shadow-sm">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-medium">Rent</span>
+                            <span class="text-[var(--text-color)] opacity-70">₹800 / ₹1000</span>
+                        </div>
+                        <div class="w-full bg-[var(--progress-bar-bg)] rounded-full h-2.5">
+                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 80%"></div>
+                        </div>
+                    </li>
+                    <li class="bg-[var(--card-bg-color)] p-3 rounded-md shadow-sm">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-medium">Groceries</span>
+                            <span class="text-[var(--text-color)] opacity-70 text-red-500">₹350 / ₹300</span>
+                        </div>
+                        <div class="w-full bg-[var(--progress-bar-bg)] rounded-full h-2.5">
+                            <div class="bg-red-600 h-2.5 rounded-full" style="width: 116%"></div>
+                        </div>
+                    </li>
+                </ul>
+                <div class="mt-4 flex flex-col gap-2">
+                    <h4 class="font-medium text-[var(--text-color)] opacity-90">Set New Budget</h4>
+                    <input type="text" id="budgetCategoryInput" placeholder="Category" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
+                    <input type="number" id="budgetAmountInput" placeholder="Amount" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
+                    <button id="setBudgetButton" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">Set Budget</button>
+                </div>
             </div>
         </div>
     </div>
@@ -516,7 +525,7 @@
     <div id="transactionModal" class="modal">
         <div class="modal-content">
             <span class="close-button" id="closeTransactionModal">&times;</span>
-            <h3 id="modalTitle" class="text-2xl font-semibold mb-4">Add New Transaction</h3>
+            <h3 id="modalTitle" class="text-xl sm:text-2xl font-semibold mb-4">Add New Transaction</h3>
 
             <form id="transactionForm" class="grid grid-cols-1 gap-4">
                 <div class="form-field">
@@ -558,6 +567,7 @@
         // --- Static Login Credentials (NOT SECURE FOR PRODUCTION) ---
         const STATIC_USERNAME = 'user'; // Change this to your desired username
         const STATIC_PASSWORD = 'password'; // Change this to your desired password
+        const LOGIN_EXPIRY_HOURS = 24; // How long login persists in hours
 
         // --- Custom Message Box Functions (Replaces alert/confirm) ---
         function showMessageBox(message, type = 'alert', callback = null) {
@@ -697,18 +707,37 @@
                 }
             }
 
+            // --- Login Persistence and Logic ---
+            function setLoginSession() {
+                const expiryTime = new Date().getTime() + (LOGIN_EXPIRY_HOURS * 60 * 60 * 1000);
+                localStorage.setItem('loggedIn', 'true');
+                localStorage.setItem('loginExpiry', expiryTime);
+            }
 
-            // --- Login Logic ---
+            function checkLoginSession() {
+                const loggedIn = localStorage.getItem('loggedIn');
+                const loginExpiry = localStorage.getItem('loginExpiry');
+
+                if (loggedIn === 'true' && loginExpiry && new Date().getTime() < parseInt(loginExpiry)) {
+                    return true; // Session is valid
+                } else {
+                    // Clear invalid or expired session
+                    localStorage.removeItem('loggedIn');
+                    localStorage.removeItem('loginExpiry');
+                    return false;
+                }
+            }
+
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const username = usernameInput.value;
                 const password = passwordInput.value;
 
                 if (username === STATIC_USERNAME && password === STATIC_PASSWORD) {
+                    setLoginSession(); // Set login session
                     loginModal.style.display = 'none'; // Explicitly hide login modal
                     financeTrackerContent.classList.remove('hidden'); // Show main content
                     categoriesBudgetsSection.classList.remove('hidden'); // Show side panel
-
                     initializeFinanceTracker(); // Initialize the finance tracker functions
                 } else {
                     loginMessage.classList.remove('hidden');
@@ -718,7 +747,18 @@
                 }
             });
 
-            // --- Initialize Finance Tracker after successful login ---
+            // Check login status on page load
+            if (checkLoginSession()) {
+                loginModal.style.display = 'none'; // Hide login modal if already logged in
+                financeTrackerContent.classList.remove('hidden'); // Show main content
+                categoriesBudgetsSection.classList.remove('hidden'); // Show side panel
+                initializeFinanceTracker(); // Initialize the finance tracker functions
+            } else {
+                loginModal.style.display = 'flex'; // Show login modal if not logged in
+            }
+
+
+            // --- Initialize Finance Tracker after successful login or session check ---
             async function initializeFinanceTracker() {
                 await loadData(); // Load data from Apps Script
                 applySavedModePreference(); // Mode is still local storage
