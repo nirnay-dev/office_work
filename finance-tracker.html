@@ -205,123 +205,309 @@
             font-weight: 500;
             margin-left: 8px;
         }
+
+        /* Styles for the Login Modal */
+        #loginModal {
+            display: flex; /* Ensure it's visible by default to cover content */
+            position: fixed;
+            z-index: 2000; /* Higher than other modals */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); /* Darker overlay */
+            justify-content: center;
+            align-items: center;
+        }
+
+        #loginModal .modal-content {
+            background-color: var(--app-bg-color);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        #loginModal input[type="text"],
+        #loginModal input[type="password"] {
+            margin-bottom: 15px;
+            padding: 12px;
+            border: 1px solid var(--input-border-color);
+            border-radius: 8px;
+            background-color: var(--input-bg-color);
+            color: var(--input-text-color);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #loginModal button {
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        #loginModal button:hover {
+            background-color: var(--button-hover-bg-color);
+        }
+
+        #loginMessage {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--expense-color); /* Red for error messages */
+            font-weight: 500;
+        }
+
+        /* Custom message box for alerts/confirms */
+        .custom-message-box {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 2001; /* Above login modal */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .custom-message-content {
+            background-color: var(--modal-bg-color);
+            color: var(--text-color);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: var(--modal-shadow);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+        }
+
+        .custom-message-content p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .custom-message-buttons button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+
+        .custom-message-buttons .confirm-ok {
+            background-color: #28a745; /* Green */
+            color: white;
+        }
+        .custom-message-buttons .confirm-ok:hover {
+            background-color: #218838;
+        }
+
+        .custom-message-buttons .confirm-cancel {
+            background-color: #dc3545; /* Red */
+            color: white;
+        }
+        .custom-message-buttons .confirm-cancel:hover {
+            background-color: #c82333;
+        }
+
+        .custom-message-buttons .alert-ok {
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+        }
+        .custom-message-buttons .alert-ok:hover {
+            background-color: var(--button-hover-bg-color);
+        }
+
+        /* Loading Overlay */
+        #loadingOverlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2002; /* Above all other modals */
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
 
+    <!-- Custom Message Box (for alerts/confirms) -->
+    <div id="customMessageBox" class="custom-message-box">
+        <div class="custom-message-content">
+            <p id="customMessageText"></p>
+            <div id="customMessageButtons" class="custom-message-buttons">
+                <!-- Buttons will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <span>Loading...</span>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal">
+        <div class="modal-content">
+            <h2 class="text-3xl font-bold text-[var(--text-color)] mb-6">Login to Finance Tracker</h2>
+            <form id="loginForm">
+                <input type="text" id="usernameInput" placeholder="Username" required autocomplete="username">
+                <input type="password" id="passwordInput" placeholder="Password" required autocomplete="current-password">
+                <button type="submit" id="loginButton">Login</button>
+                <p id="loginMessage" class="mt-4 text-red-500 hidden">Invalid username or password.</p>
+            </form>
+            <p class="text-sm text-gray-500 mt-4">
+                <span class="font-bold text-red-600">Warning:</span> This is a static, client-side login for demonstration.
+                Credentials are visible in the page source. Not for sensitive data.
+            </p>
+        </div>
+    </div>
+
     <!-- Main Finance Tracker Content -->
-    <div id="financeTrackerContent" class="main-layout w-full max-w-7xl mx-auto p-4 flex flex-col lg:flex-row gap-6">
+    <div id="financeTrackerContent" class="main-layout w-full max-w-7xl mx-auto p-4 flex flex-col lg:flex-row gap-6 hidden">
 
-        <!-- Main Finance Section -->
-        <div class="flex-grow flex flex-col gap-6">
-
-            <!-- Header & Controls -->
-            <div class="bg-[var(--app-bg-color)] rounded-xl shadow-lg p-5 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <h1 class="text-3xl font-bold text-[var(--text-color)]">Finance Tracker</h1>
-                <div class="flex flex-wrap gap-3">
-                    <button id="addTransactionButton" class="header-button bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">Add Transaction</button>
-                    <button id="darkModeToggle" class="header-button bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300" aria-label="Toggle Mode">Light Mode</button>
-                </div>
-            </div>
-
-            <!-- Summary Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-[var(--card-bg-color)] rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border-[var(--card-border-color)] border">
-                    <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-2">Total Income</h3>
-                    <p id="totalIncome" class="text-4xl font-bold text-[var(--income-color)]">₹0.00</p>
-                </div>
-                <div class="bg-[var(--card-bg-color)] rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border-[var(--card-border-color)] border">
-                    <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-2">Total Expenses</h3>
-                    <p id="totalExpenses" class="text-4xl font-bold text-[var(--expense-color)]">₹0.00</p>
-                </div>
-                <div class="bg-[var(--card-bg-color)] rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border-[var(--card-border-color)] border">
-                    <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-2">Current Balance</h3>
-                    <p id="currentBalance" class="text-4xl font-bold text-[var(--balance-color)]">₹0.00</p>
-                </div>
-            </div>
-
-            <!-- Financial Overview (Charts) -->
-            <div class="bg-[var(--app-bg-color)] rounded-xl shadow-lg p-6 border-[var(--card-border-color)] border">
-                <h2 class="text-2xl font-semibold text-[var(--text-color)] mb-4">Expense Breakdown by Category</h2>
-                <div class="relative h-80"> <!-- Added relative and height for chart responsiveness -->
-                    <canvas id="expenseChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Transactions List -->
-            <div class="bg-[var(--app-bg-color)] rounded-xl shadow-lg p-6 border-[var(--card-border-color)] border">
-                <h2 class="text-2xl font-semibold text-[var(--text-color)] mb-4">Recent Transactions</h2>
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <input type="search" id="transactionSearch" placeholder="Search transactions..." class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)] flex-grow">
-                    <select id="filterType" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
-                        <option value="all">All Types</option>
-                        <option value="income">Income</option>
-                        <option value="expense">Expense</option>
-                    </select>
-                    <select id="filterCategory" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
-                        <option value="all">All Categories</option>
-                        <!-- Categories populated by JS -->
-                    </select>
-                </div>
-                <ul id="transactionsList" class="divide-y divide-[var(--card-border-color)] max-h-96 overflow-y-auto">
-                    <!-- Transactions will be populated here by JS -->
-                    <li class="py-3 text-center text-[var(--text-color)] opacity-70" id="noTransactionsMessage">No transactions yet. Add one to get started!</li>
-                </ul>
+        <!-- Header & Controls -->
+        <div class="bg-[var(--app-bg-color)] rounded-xl shadow-lg p-5 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h1 class="text-3xl font-bold text-[var(--text-color)]">Finance Tracker</h1>
+            <div class="flex flex-wrap gap-3">
+                <button id="addTransactionButton" class="header-button bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">Add Transaction</button>
+                <button id="darkModeToggle" class="header-button bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300" aria-label="Toggle Mode">Light Mode</button>
             </div>
         </div>
 
-        <!-- Categories & Budgets Section (Side Panel) -->
-        <div class="w-full lg:w-96 flex-shrink-0 bg-[var(--app-bg-color)] rounded-xl shadow-lg p-6 border-[var(--card-border-color)] border">
-            <h2 class="text-2xl font-semibold text-[var(--text-color)] mb-4">Categories & Budgets</h2>
-
-            <div class="mb-6">
-                <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-3">Categories</h3>
-                <ul id="categoryList" class="space-y-2">
-                    <!-- Categories will be populated here by JS -->
-                    <li class="flex justify-between items-center text-[var(--text-color)] opacity-90">
-                        <span>Food</span>
-                        <button class="text-red-500 hover:text-red-700 text-sm delete-category-btn" data-category="Food">Delete</button>
-                    </li>
-                    <li class="flex justify-between items-center text-[var(--text-color)] opacity-90">
-                        <span>Transport</span>
-                        <button class="text-red-500 hover:text-red-700 text-sm delete-category-btn" data-category="Transport">Delete</button>
-                    </li>
-                </ul>
-                <div class="mt-4 flex gap-2">
-                    <input type="text" id="newCategoryInput" placeholder="New Category Name" class="flex-grow p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
-                    <button id="addCategoryButton" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">Add</button>
-                </div>
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-[var(--card-bg-color)] rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border-[var(--card-border-color)] border">
+                <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-2">Total Income</h3>
+                <p id="totalIncome" class="text-4xl font-bold text-[var(--income-color)]">₹0.00</p>
             </div>
+            <div class="bg-[var(--card-bg-color)] rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border-[var(--card-border-color)] border">
+                <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-2">Total Expenses</h3>
+                <p id="totalExpenses" class="text-4xl font-bold text-[var(--expense-color)]">₹0.00</p>
+            </div>
+            <div class="bg-[var(--card-bg-color)] rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border-[var(--card-border-color)] border">
+                <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-2">Current Balance</h3>
+                <p id="currentBalance" class="text-4xl font-bold text-[var(--balance-color)]">₹0.00</p>
+            </div>
+        </div>
 
-            <div>
-                <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-3">Budget Overview</h3>
-                <ul id="budgetList" class="space-y-3">
-                    <!-- Budgets will be populated here by JS -->
-                    <li class="bg-[var(--card-bg-color)] p-3 rounded-md shadow-sm">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-medium">Rent</span>
-                            <span class="text-[var(--text-color)] opacity-70">₹800 / ₹1000</span>
-                        </div>
-                        <div class="w-full bg-[var(--progress-bar-bg)] rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 80%"></div>
-                        </div>
-                    </li>
-                    <li class="bg-[var(--card-bg-color)] p-3 rounded-md shadow-sm">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-medium">Groceries</span>
-                            <span class="text-[var(--text-color)] opacity-70 text-red-500">₹350 / ₹300</span>
-                        </div>
-                        <div class="w-full bg-[var(--progress-bar-bg)] rounded-full h-2.5">
-                            <div class="bg-red-600 h-2.5 rounded-full" style="width: 116%"></div>
-                        </div>
-                    </li>
-                </ul>
-                <div class="mt-4 flex flex-col gap-2">
-                    <h4 class="font-medium text-[var(--text-color)] opacity-90">Set New Budget</h4>
-                    <input type="text" id="budgetCategoryInput" placeholder="Category" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
-                    <input type="number" id="budgetAmountInput" placeholder="Amount" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
-                    <button id="setBudgetButton" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">Set Budget</button>
-                </div>
+        <!-- Financial Overview (Charts) -->
+        <div class="bg-[var(--app-bg-color)] rounded-xl shadow-lg p-6 border-[var(--card-border-color)] border">
+            <h2 class="text-2xl font-semibold text-[var(--text-color)] mb-4">Expense Breakdown by Category</h2>
+            <div class="relative h-80"> <!-- Added relative and height for chart responsiveness -->
+                <canvas id="expenseChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Transactions List -->
+        <div class="bg-[var(--app-bg-color)] rounded-xl shadow-lg p-6 border-[var(--card-border-color)] border">
+            <h2 class="text-2xl font-semibold text-[var(--text-color)] mb-4">Recent Transactions</h2>
+            <div class="flex flex-wrap gap-2 mb-4">
+                <input type="search" id="transactionSearch" placeholder="Search transactions..." class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)] flex-grow">
+                <select id="filterType" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
+                    <option value="all">All Types</option>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+                <select id="filterCategory" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
+                    <option value="all">All Categories</option>
+                    <!-- Categories populated by JS -->
+                </select>
+            </div>
+            <ul id="transactionsList" class="divide-y divide-[var(--card-border-color)] max-h-96 overflow-y-auto">
+                <!-- Transactions will be populated here by JS -->
+                <li class="py-3 text-center text-[var(--text-color)] opacity-70" id="noTransactionsMessage">No transactions yet. Add one to get started!</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Categories & Budgets Section (Side Panel) -->
+    <div class="w-full lg:w-96 flex-shrink-0 bg-[var(--app-bg-color)] rounded-xl shadow-lg p-6 border-[var(--card-border-color)] border hidden" id="categoriesBudgetsSection">
+        <h2 class="text-2xl font-semibold text-[var(--text-color)] mb-4">Categories & Budgets</h2>
+
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-3">Categories</h3>
+            <ul id="categoryList" class="space-y-2">
+                <!-- Categories will be populated here by JS -->
+                <li class="flex justify-between items-center text-[var(--text-color)] opacity-90">
+                    <span>Food</span>
+                    <button class="text-red-500 hover:text-red-700 text-sm delete-category-btn" data-category="Food">Delete</button>
+                </li>
+                <li class="flex justify-between items-center text-[var(--text-color)] opacity-90">
+                    <span>Transport</span>
+                    <button class="text-red-500 hover:text-red-700 text-sm delete-category-btn" data-category="Transport">Delete</button>
+                </li>
+            </ul>
+            <div class="mt-4 flex gap-2">
+                <input type="text" id="newCategoryInput" placeholder="New Category Name" class="flex-grow p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
+                <button id="addCategoryButton" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">Add</button>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="text-xl font-semibold text-[var(--text-color)] opacity-90 mb-3">Budget Overview</h3>
+            <ul id="budgetList" class="space-y-3">
+                <!-- Budgets will be populated here by JS -->
+                <li class="bg-[var(--card-bg-color)] p-3 rounded-md shadow-sm">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-medium">Rent</span>
+                        <span class="text-[var(--text-color)] opacity-70">₹800 / ₹1000</span>
+                    </div>
+                    <div class="w-full bg-[var(--progress-bar-bg)] rounded-full h-2.5">
+                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: 80%"></div>
+                    </div>
+                </li>
+                <li class="bg-[var(--card-bg-color)] p-3 rounded-md shadow-sm">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-medium">Groceries</span>
+                        <span class="text-[var(--text-color)] opacity-70 text-red-500">₹350 / ₹300</span>
+                    </div>
+                    <div class="w-full bg-[var(--progress-bar-bg)] rounded-full h-2.5">
+                        <div class="bg-red-600 h-2.5 rounded-full" style="width: 116%"></div>
+                    </div>
+                </li>
+            </ul>
+            <div class="mt-4 flex flex-col gap-2">
+                <h4 class="font-medium text-[var(--text-color)] opacity-90">Set New Budget</h4>
+                <input type="text" id="budgetCategoryInput" placeholder="Category" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
+                <input type="number" id="budgetAmountInput" placeholder="Amount" class="p-2 rounded-md border-[var(--input-border-color)] bg-[var(--input-bg-color)] text-[var(--input-text-color)]">
+                <button id="setBudgetButton" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">Set Budget</button>
             </div>
         </div>
     </div>
@@ -366,9 +552,66 @@
     </div>
 
     <script>
+        // IMPORTANT: Replace 'YOUR_WEB_APP_URL_HERE' with the URL you got from deploying your Apps Script.
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyfinNhXHDiSCMki2dtQ5AuOnuxmby1hHgmznnR-OiuJdpPa8oN1hSOe1RYDDudBtHs/exec'; // <<< PASTE YOUR WEB APP URL HERE
+
+        // --- Static Login Credentials (NOT SECURE FOR PRODUCTION) ---
+        const STATIC_USERNAME = 'user'; // Change this to your desired username
+        const STATIC_PASSWORD = 'password'; // Change this to your desired password
+
+        // --- Custom Message Box Functions (Replaces alert/confirm) ---
+        function showMessageBox(message, type = 'alert', callback = null) {
+            const messageBox = document.getElementById('customMessageBox');
+            const messageText = document.getElementById('customMessageText');
+            const messageButtons = document.getElementById('customMessageButtons');
+
+            messageText.textContent = message;
+            messageButtons.innerHTML = ''; // Clear existing buttons
+
+            if (type === 'alert') {
+                const okButton = document.createElement('button');
+                okButton.textContent = 'OK';
+                okButton.classList.add('alert-ok');
+                okButton.onclick = () => {
+                    messageBox.style.display = 'none';
+                    if (callback) callback(true);
+                };
+                messageButtons.appendChild(okButton);
+            } else if (type === 'confirm') {
+                const okButton = document.createElement('button');
+                okButton.textContent = 'Yes';
+                okButton.classList.add('confirm-ok');
+                okButton.onclick = () => {
+                    messageBox.style.display = 'none';
+                    if (callback) callback(true);
+                };
+                const cancelButton = document.createElement('button');
+                cancelButton.textContent = 'No';
+                cancelButton.classList.add('confirm-cancel');
+                cancelButton.onclick = () => {
+                    messageBox.style.display = 'none';
+                    if (callback) callback(false);
+                };
+                messageButtons.appendChild(okButton);
+                messageButtons.appendChild(cancelButton);
+            }
+
+            messageBox.style.display = 'flex';
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            // --- DOM Elements ---
-            const financeTrackerContent = document.getElementById('financeTrackerContent'); // Main content container
+            // --- Login Elements ---
+            const loginModal = document.getElementById('loginModal');
+            const loginForm = document.getElementById('loginForm');
+            const usernameInput = document.getElementById('usernameInput');
+            const passwordInput = document.getElementById('passwordInput');
+            const loginButton = document.getElementById('loginButton');
+            const loginMessage = document.getElementById('loginMessage');
+            const loadingOverlay = document.getElementById('loadingOverlay'); // Added loading overlay
+
+            // --- Main Finance Tracker Content ---
+            const financeTrackerContent = document.getElementById('financeTrackerContent');
+            const categoriesBudgetsSection = document.getElementById('categoriesBudgetsSection'); // Side panel
 
             const addTransactionButton = document.getElementById('addTransactionButton');
             const transactionModal = document.getElementById('transactionModal');
@@ -410,14 +653,78 @@
             const expenseChartCanvas = document.getElementById('expenseChart');
             let expenseChartInstance = null; // To store the Chart.js instance
 
-            // --- State Variables (now loaded from localStorage) ---
+            // --- State Variables (now loaded from Apps Script) ---
             let transactions = [];
             let categories = [];
             let budgets = {};
-            let currentMode = 'light';
+            let currentMode = 'light'; // Mode will still be local storage
             let currentSearchTerm = '';
             let currentFilterType = 'all';
             let currentFilterCategory = 'all';
+
+            // --- API Helper Function ---
+            async function callAppsScript(dataType, method, data = {}) {
+                loadingOverlay.style.display = 'flex'; // Show loading overlay
+                try {
+                    const url = new URL(WEB_APP_URL);
+                    const params = new URLSearchParams();
+                    params.append('dataType', dataType);
+
+                    if (method === 'GET') {
+                        Object.keys(data).forEach(key => params.append(key, data[key]));
+                        url.search = params.toString();
+                        const response = await fetch(url);
+                        return response.json();
+                    } else if (method === 'POST') {
+                        // For POST, send data in the body as x-www-form-urlencoded
+                        // This populates e.parameter in Apps Script
+                        Object.keys(data).forEach(key => params.append(key, data[key]));
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            body: params.toString(),
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            }
+                        });
+                        return response.json();
+                    }
+                } catch (error) {
+                    console.error('Error in callAppsScript:', error);
+                    showMessageBox(`Network error or server unreachable: ${error.message}`, 'alert');
+                    throw error; // Re-throw to propagate error for specific handling
+                } finally {
+                    loadingOverlay.style.display = 'none'; // Hide loading overlay
+                }
+            }
+
+
+            // --- Login Logic ---
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = usernameInput.value;
+                const password = passwordInput.value;
+
+                if (username === STATIC_USERNAME && password === STATIC_PASSWORD) {
+                    loginModal.style.display = 'none'; // Explicitly hide login modal
+                    financeTrackerContent.classList.remove('hidden'); // Show main content
+                    categoriesBudgetsSection.classList.remove('hidden'); // Show side panel
+
+                    initializeFinanceTracker(); // Initialize the finance tracker functions
+                } else {
+                    loginMessage.classList.remove('hidden');
+                    usernameInput.value = '';
+                    passwordInput.value = '';
+                    usernameInput.focus();
+                }
+            });
+
+            // --- Initialize Finance Tracker after successful login ---
+            async function initializeFinanceTracker() {
+                await loadData(); // Load data from Apps Script
+                applySavedModePreference(); // Mode is still local storage
+                populateCategorySelects();
+                rerenderAll(); // Initial render after data is loaded
+            }
 
             // --- Utility Functions ---
             function populateCategorySelects() {
@@ -463,10 +770,11 @@
                     currentMode = 'light';
                     darkModeToggle.textContent = 'Light Mode';
                 }
-                saveData(); // Save mode preference to localStorage
+                localStorage.setItem('financeMode', currentMode); // Save mode preference to localStorage
             }
 
             function applySavedModePreference() {
+                currentMode = localStorage.getItem('financeMode') || 'light';
                 body.classList.remove('light-mode', 'dark-mode', 'gray-mode');
                 if (currentMode === 'dark') {
                     body.classList.add('dark-mode');
@@ -479,78 +787,111 @@
                 }
             }
 
-            // --- Load/Save Data (using localStorage) ---
-            function loadData() {
-                transactions = JSON.parse(localStorage.getItem('financeTransactions')) || [];
-                categories = JSON.parse(localStorage.getItem('financeCategories')) || ['Food', 'Transport', 'Utilities', 'Salary', 'Rent', 'Entertainment', 'Shopping'];
-                budgets = JSON.parse(localStorage.getItem('financeBudgets')) || {};
-                currentMode = localStorage.getItem('financeMode') || 'light';
+            // --- Load Data from Apps Script ---
+            async function loadData() {
+                try {
+                    const [transactionsResponse, categoriesResponse, budgetsResponse] = await Promise.all([
+                        callAppsScript('transactions', 'GET'),
+                        callAppsScript('categories', 'GET'),
+                        callAppsScript('budgets', 'GET')
+                    ]);
 
-                // Ensure default categories exist if somehow removed
-                const defaultCategories = ['Food', 'Transport', 'Utilities', 'Salary', 'Rent', 'Entertainment', 'Shopping'];
-                defaultCategories.forEach(cat => {
-                    if (!categories.includes(cat)) {
-                        categories.push(cat);
+                    if (transactionsResponse.status === 'success') {
+                        // Data from Apps Script is array of arrays, map to objects
+                        transactions = transactionsResponse.data.map(row => ({
+                            id: row[0],
+                            description: row[1],
+                            amount: parseFloat(row[2]),
+                            type: row[3],
+                            category: row[4],
+                            date: row[5]
+                        }));
+                    } else {
+                        console.error('Error loading transactions:', transactionsResponse.message);
+                        showMessageBox(`Error loading transactions: ${transactionsResponse.message}`, 'alert');
                     }
-                });
-                categories.sort(); // Keep categories sorted
+
+                    if (categoriesResponse.status === 'success') {
+                        categories = categoriesResponse.data;
+                        // Ensure default categories exist if somehow removed from sheet
+                        const defaultCategories = ['Food', 'Transport', 'Utilities', 'Salary', 'Rent', 'Entertainment', 'Shopping'];
+                        defaultCategories.forEach(cat => {
+                            if (!categories.includes(cat)) {
+                                categories.push(cat);
+                            }
+                        });
+                        categories.sort(); // Keep categories sorted
+                    } else {
+                        console.error('Error loading categories:', categoriesResponse.message);
+                        showMessageBox(`Error loading categories: ${categoriesResponse.message}`, 'alert');
+                    }
+
+                    if (budgetsResponse.status === 'success') {
+                        budgets = budgetsResponse.data;
+                    } else {
+                        console.error('Error loading budgets:', budgetsResponse.message);
+                        showMessageBox(`Error loading budgets: ${budgetsResponse.message}`, 'alert');
+                    }
+                } catch (error) {
+                    console.error('Network or parsing error during data load:', error);
+                    showMessageBox('Failed to load data from server. Please check your internet connection or Apps Script deployment.', 'alert');
+                }
             }
-
-            function saveData() {
-                localStorage.setItem('financeTransactions', JSON.stringify(transactions));
-                localStorage.setItem('financeCategories', JSON.stringify(categories));
-                localStorage.setItem('financeBudgets', JSON.stringify(budgets));
-                localStorage.setItem('financeMode', currentMode);
-            }
-
-            // --- Initialization ---
-            loadData(); // Load data from localStorage
-            applySavedModePreference();
-            populateCategorySelects();
-            renderTransactions();
-            renderSummary();
-            renderCategories();
-            renderBudgets();
-            renderCharts(); // Render charts on initialization
-
-            // Ensure main content is visible by default
-            financeTrackerContent.classList.remove('hidden');
-
 
             // --- Transaction Management Functions ---
             function generateTransactionId() {
                 return `txn-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
             }
 
-            function addTransaction(transactionData) {
-                const newTransaction = {
-                    id: generateTransactionId(),
+            async function addTransaction(transactionData) {
+                const newTransactionId = generateTransactionId();
+                const response = await callAppsScript('transaction', 'POST', {
+                    action: 'add',
+                    id: newTransactionId,
                     description: transactionData.description,
-                    amount: parseFloat(transactionData.amount),
+                    amount: transactionData.amount,
                     type: transactionData.type,
                     category: transactionData.category,
                     date: transactionData.date
-                };
-                transactions.push(newTransaction);
-                saveData(); // Save data after adding
-                rerenderAll();
-            }
+                });
 
-            function updateTransaction(id, updatedData) {
-                const index = transactions.findIndex(t => t.id === id);
-                if (index !== -1) {
-                    transactions[index] = { ...transactions[index], ...updatedData, amount: parseFloat(updatedData.amount) };
-                    saveData(); // Save data after updating
+                if (response.status === 'success') {
+                    // Re-load data to ensure UI is in sync with sheet
+                    await loadData();
                     rerenderAll();
                 } else {
-                    console.error("Transaction not found for update:", id);
+                    showMessageBox(`Error adding transaction: ${response.message}`, 'alert');
                 }
             }
 
-            function deleteTransaction(id) {
-                transactions = transactions.filter(t => t.id !== id);
-                saveData(); // Save data after deleting
-                rerenderAll();
+            async function updateTransaction(id, updatedData) {
+                const response = await callAppsScript('transaction', 'POST', {
+                    action: 'update',
+                    id: id,
+                    description: updatedData.description,
+                    amount: updatedData.amount,
+                    type: updatedData.type,
+                    category: updatedData.category,
+                    date: updatedData.date
+                });
+
+                if (response.status === 'success') {
+                    await loadData();
+                    rerenderAll();
+                } else {
+                    showMessageBox(`Error updating transaction: ${response.message}`, 'alert');
+                }
+            }
+
+            async function deleteTransaction(id) {
+                const response = await callAppsScript('deleteTransaction', 'POST', { id: id });
+
+                if (response.status === 'success') {
+                    await loadData();
+                    rerenderAll();
+                } else {
+                    showMessageBox(`Error deleting transaction: ${response.message}`, 'alert');
+                }
             }
 
             // --- Rendering Functions ---
@@ -780,7 +1121,7 @@
                 }
             });
 
-            transactionForm.addEventListener('submit', (e) => {
+            transactionForm.addEventListener('submit', async (e) => { // Made async
                 e.preventDefault();
                 const id = editTransactionIdInput.value;
                 const transactionData = {
@@ -792,23 +1133,27 @@
                 };
 
                 if (!transactionData.description || isNaN(transactionData.amount) || transactionData.amount <= 0 || !transactionData.date) {
-                    alert('Please fill in all transaction details correctly.');
+                    showMessageBox('Please fill in all transaction details correctly.', 'alert');
                     return;
                 }
 
                 if (id) {
-                    updateTransaction(id, transactionData);
+                    await updateTransaction(id, transactionData);
                 } else {
-                    addTransaction(transactionData);
+                    await addTransaction(transactionData);
                 }
                 closeTransactionModal();
             });
 
             deleteTransactionButton.addEventListener('click', () => {
                 const id = editTransactionIdInput.value;
-                if (id && confirm('Are you sure you want to delete this transaction?')) {
-                    deleteTransaction(id);
-                    closeTransactionModal();
+                if (id) {
+                    showMessageBox('Are you sure you want to delete this transaction?', 'confirm', async (response) => { // Made async
+                        if (response) {
+                            await deleteTransaction(id);
+                            closeTransactionModal();
+                        }
+                    });
                 }
             });
 
@@ -839,16 +1184,19 @@
                 renderTransactions();
             });
 
-            addCategoryButton.addEventListener('click', () => {
+            addCategoryButton.addEventListener('click', async () => { // Made async
                 const newCat = newCategoryInput.value.trim();
                 if (newCat && !categories.includes(newCat)) {
-                    categories.push(newCat);
-                    categories.sort(); // Keep sorted
-                    saveData(); // Save data after adding category
-                    rerenderAll();
-                    newCategoryInput.value = '';
+                    const response = await callAppsScript('category', 'POST', { action: 'add', categoryName: newCat });
+                    if (response.status === 'success') {
+                        await loadData(); // Reload data after successful add
+                        rerenderAll();
+                        newCategoryInput.value = '';
+                    } else {
+                        showMessageBox(`Error adding category: ${response.message}`, 'alert');
+                    }
                 } else if (newCat) {
-                    alert('Category already exists or is invalid.');
+                    showMessageBox('Category already exists or is invalid.', 'alert');
                 }
             });
 
@@ -856,48 +1204,60 @@
                 document.querySelectorAll('.delete-category-btn').forEach(button => {
                     button.onclick = (e) => {
                         const catToDelete = e.target.dataset.category;
-                        if (confirm(`Are you sure you want to delete the category "${catToDelete}"? All transactions in this category will remain, but their category may become invalid if not updated.`)) {
-                            categories = categories.filter(c => c !== catToDelete);
-                            // Also remove from budgets if it exists
-                            if (budgets[catToDelete]) {
-                                delete budgets[catToDelete];
+                        showMessageBox(`Are you sure you want to delete the category "${catToDelete}"? All transactions in this category will remain, but their category may become invalid if not updated.`, 'confirm', async (response) => { // Made async
+                            if (response) {
+                                const response = await callAppsScript('deleteCategory', 'POST', { categoryName: catToDelete });
+                                if (response.status === 'success') {
+                                    await loadData(); // Reload data after successful delete
+                                    rerenderAll();
+                                } else {
+                                    showMessageBox(`Error deleting category: ${response.message}`, 'alert');
+                                }
                             }
-                            saveData(); // Save data after deleting category
-                            rerenderAll();
-                        }
+                        });
                     };
                 });
             }
 
-            setBudgetButton.addEventListener('click', () => {
+            setBudgetButton.addEventListener('click', async () => { // Made async
                 const category = budgetCategoryInput.value.trim();
                 const amount = parseFloat(budgetAmountInput.value);
 
                 if (!category || isNaN(amount) || amount <= 0) {
-                    alert('Please enter a valid category and amount for the budget.');
+                    showMessageBox('Please enter a valid category and amount for the budget.', 'alert');
                     return;
                 }
                 if (!categories.includes(category)) {
-                    alert(`Category "${category}" does not exist. Please add it first or select an existing one.`);
+                    showMessageBox(`Category "${category}" does not exist. Please add it first or select an existing one.`, 'alert');
                     return;
                 }
 
-                budgets[category] = amount;
-                saveData(); // Save data after setting budget
-                rerenderAll();
-                budgetCategoryInput.value = '';
-                budgetAmountInput.value = '';
+                const response = await callAppsScript('budget', 'POST', { category: category, amount: amount });
+                if (response.status === 'success') {
+                    await loadData(); // Reload data after successful set
+                    rerenderAll();
+                    budgetCategoryInput.value = '';
+                    budgetAmountInput.value = '';
+                } else {
+                    showMessageBox(`Error setting budget: ${response.message}`, 'alert');
+                }
             });
 
             function addDeleteBudgetListeners() {
                 document.querySelectorAll('.delete-budget-btn').forEach(button => {
                     button.onclick = (e) => {
                         const budgetCatToDelete = e.target.dataset.category;
-                        if (confirm(`Are you sure you want to delete the budget for "${budgetCatToDelete}"?`)) {
-                            delete budgets[budgetCatToDelete];
-                            saveData(); // Save data after deleting budget
-                            rerenderAll();
-                        }
+                        showMessageBox(`Are you sure you want to delete the budget for "${budgetCatToDelete}"?`, 'confirm', async (response) => { // Made async
+                            if (response) {
+                                const response = await callAppsScript('deleteBudget', 'POST', { category: budgetCatToDelete });
+                                if (response.status === 'success') {
+                                    await loadData(); // Reload data after successful delete
+                                    rerenderAll();
+                                } else {
+                                    showMessageBox(`Error deleting budget: ${response.message}`, 'alert');
+                                }
+                            }
+                        });
                     };
                 });
             }
