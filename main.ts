@@ -108,10 +108,13 @@ const handler = async (req: Request): Promise<Response> => {
           margin-bottom: 20px;
         }
         .view-controls {
-          text-align: right;
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          gap: 15px;
           margin-bottom: 20px;
         }
-        .view-toggle, .theme-toggle {
+        .view-toggle {
           padding: 8px 15px;
           border: none;
           background-color: #333;
@@ -121,8 +124,48 @@ const handler = async (req: Request): Promise<Response> => {
           font-size: 14px;
           transition: background-color 0.3s;
         }
-        .view-toggle:hover, .theme-toggle:hover {
+        .view-toggle:hover {
           background-color: #555;
+        }
+        
+        /* Toggle Switch Styling */
+        .theme-toggle-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .theme-toggle-wrapper span {
+            font-size: 14px;
+        }
+        .toggle-checkbox {
+          display: none;
+        }
+        .toggle-label {
+          display: block;
+          width: 50px;
+          height: 26px;
+          background-color: #555;
+          border-radius: 50px;
+          position: relative;
+          cursor: pointer;
+          transition: background-color 0.3s;
+        }
+        .toggle-label:after {
+          content: '';
+          position: absolute;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background-color: #f4f4f4;
+          top: 3px;
+          left: 3px;
+          transition: transform 0.3s;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+          background-color: #4CAF50;
+        }
+        .toggle-checkbox:checked + .toggle-label:after {
+          transform: translateX(24px);
         }
 
         /* Grid View Styling */
@@ -181,11 +224,11 @@ const handler = async (req: Request): Promise<Response> => {
         body.light-mode h1 {
           color: #1a237e;
         }
-        body.light-mode .view-toggle, body.light-mode .theme-toggle {
+        body.light-mode .view-toggle {
           background-color: #4CAF50;
           color: white;
         }
-        body.light-mode .view-toggle:hover, body.light-mode .theme-toggle:hover {
+        body.light-mode .view-toggle:hover {
           background-color: #45a049;
         }
         body.light-mode .grid-item {
@@ -233,7 +276,7 @@ const handler = async (req: Request): Promise<Response> => {
         body.light-mode .list-item a {
           color: #007bff;
         }
-
+        
         /* Hide a container based on the class */
         .hidden {
           display: none;
@@ -245,7 +288,11 @@ const handler = async (req: Request): Promise<Response> => {
         <h1>Available HTML Files</h1>
         <div class="view-controls">
           <button id="viewToggle" class="view-toggle">Switch to List View</button>
-          <button id="themeToggle" class="theme-toggle">Switch to Light Mode</button>
+          <div class="theme-toggle-wrapper">
+             <span>Dark Mode</span>
+             <input type="checkbox" id="themeToggle" class="toggle-checkbox">
+             <label for="themeToggle" class="toggle-label"></label>
+          </div>
         </div>
 
         <div id="gridView" class="grid-container">
@@ -270,7 +317,7 @@ const handler = async (req: Request): Promise<Response> => {
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme === 'light-mode') {
             body.classList.add('light-mode');
-            themeToggle.textContent = 'Switch to Dark Mode';
+            themeToggle.checked = true;
         }
 
         viewToggle.addEventListener('click', () => {
@@ -286,13 +333,12 @@ const handler = async (req: Request): Promise<Response> => {
           isGridView = !isGridView;
         });
 
-        themeToggle.addEventListener('click', () => {
-          body.classList.toggle('light-mode');
-          if (body.classList.contains('light-mode')) {
-            themeToggle.textContent = 'Switch to Dark Mode';
+        themeToggle.addEventListener('change', (event) => {
+          if (event.target.checked) {
+            body.classList.add('light-mode');
             localStorage.setItem('theme', 'light-mode');
           } else {
-            themeToggle.textContent = 'Switch to Light Mode';
+            body.classList.remove('light-mode');
             localStorage.setItem('theme', 'dark-mode');
           }
         });
