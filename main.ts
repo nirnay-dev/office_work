@@ -66,7 +66,7 @@ const handler = async (req: Request): Promise<Response> => {
           margin: 0;
           padding: 20px;
           background-color: #1a1a1a;
-          color: #f4f4f4;
+          color: #4CAF50; /* Green color for default text */
           transition: background-color 0.3s, color 0.3s;
         }
         .container {
@@ -74,7 +74,7 @@ const handler = async (req: Request): Promise<Response> => {
           margin: 40px auto;
         }
         h1 {
-          color: #e0e0e0;
+          color: #007bff; /* Blue for heading */
           text-align: center;
           margin-bottom: 20px;
         }
@@ -88,7 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
         .view-toggle {
           padding: 8px 15px;
           border: none;
-          background-color: #333;
+          background-color: #007bff; /* Blue button */
           color: white;
           border-radius: 5px;
           cursor: pointer;
@@ -96,7 +96,7 @@ const handler = async (req: Request): Promise<Response> => {
           transition: background-color 0.3s;
         }
         .view-toggle:hover {
-          background-color: #555;
+          background-color: #0056b3; /* Darker blue on hover */
         }
         
         /* Toggle Switch Styling */
@@ -115,7 +115,7 @@ const handler = async (req: Request): Promise<Response> => {
           display: block;
           width: 50px;
           height: 26px;
-          background-color: #555;
+          background-color: #007bff; /* Blue for the switch track */
           border-radius: 50px;
           position: relative;
           cursor: pointer;
@@ -133,7 +133,7 @@ const handler = async (req: Request): Promise<Response> => {
           transition: transform 0.3s;
         }
         .toggle-checkbox:checked + .toggle-label {
-          background-color: #4CAF50;
+          background-color: #4CAF50; /* Green when checked */
         }
         .toggle-checkbox:checked + .toggle-label:after {
           transform: translateX(24px);
@@ -164,7 +164,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
         .grid-item a, .list-item a {
           text-decoration: none;
-          color: #4CAF50; /* Green theme for links */
+          color: #4CAF50; /* Green for links in dark mode */
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -182,17 +182,17 @@ const handler = async (req: Request): Promise<Response> => {
         /* Light Mode - Optional Styles */
         body.light-mode {
           background-color: #f0f2f5;
-          color: #333;
+          color: #007bff; /* Blue for default text */
         }
         body.light-mode h1 {
-          color: #1a237e; /* Blue theme for heading */
+          color: #4CAF50; /* Green for heading */
         }
         body.light-mode .view-toggle {
-          background-color: #4CAF50;
+          background-color: #4CAF50; /* Green button */
           color: white;
         }
         body.light-mode .view-toggle:hover {
-          background-color: #45a049;
+          background-color: #45a049; /* Darker green on hover */
         }
         body.light-mode .grid-item, body.light-mode .list-item {
           background: #fff;
@@ -204,7 +204,7 @@ const handler = async (req: Request): Promise<Response> => {
           box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
         body.light-mode .grid-item a, body.light-mode .list-item a {
-          color: #007bff; /* Blue theme for links */
+          color: #007bff; /* Blue for links in light mode */
         }
         
         /* List View Specific Styling */
