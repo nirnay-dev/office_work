@@ -24,20 +24,16 @@ const logoMap = new Map<string, { src: string; alt: string }>([
   ['deno.json', { src: 'https://deno.land/logo.svg', alt: 'Deno Icon' }],
   ['readme.md', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/100px-Markdown-mark.svg.png', alt: 'README Markdown Icon' }],
   ['package.json', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/JSON_logo.svg/100px-JSON_logo.svg.png', alt: 'package.json Icon' }],
-  // Fallback for any other HTML files
   ['default.html', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/HTML5_logo_and_wordmark.svg/100px-HTML5_logo_and_wordmark.svg.png', alt: 'HTML Icon' }],
-  // Default for any other file
   ['default', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Text-x-generic-template.svg/100px-Text-x-generic-template.svg.png', alt: 'Generic File Icon' }]
 ]);
 
 // Function to get the correct logo based on the full filename
 function getFileLogo(filename: string): { src: string; alt: string } {
-  // Check for an exact filename match first
   if (logoMap.has(filename.toLowerCase())) {
     return logoMap.get(filename.toLowerCase())!;
   }
   
-  // As a fallback, check for common file extensions.
   const extensionMatch = filename.match(/\.([0-9a-z]+)(?=[?#])?$/i) || filename.match(/\.([0-9a-z]+)$/i);
   const extension = extensionMatch ? `default.${extensionMatch[1].toLowerCase()}` : 'default';
 
@@ -92,20 +88,22 @@ const handler = async (req: Request): Promise<Response> => {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Available HTML Files</title>
       <style>
+        /* Dark Mode - Default Styles */
         body {
           font-family: 'Arial', sans-serif;
           line-height: 1.6;
           margin: 0;
           padding: 20px;
-          background-color: #f0f2f5;
-          color: #333;
+          background-color: #1a1a1a;
+          color: #f4f4f4;
+          transition: background-color 0.3s, color 0.3s;
         }
         .container {
           max-width: 1200px;
           margin: 40px auto;
         }
         h1 {
-          color: #1a237e;
+          color: #e0e0e0;
           text-align: center;
           margin-bottom: 20px;
         }
@@ -113,18 +111,20 @@ const handler = async (req: Request): Promise<Response> => {
           text-align: right;
           margin-bottom: 20px;
         }
-        .view-toggle {
+        .view-toggle, .theme-toggle {
           padding: 8px 15px;
           border: none;
-          background-color: #4CAF50;
+          background-color: #333;
           color: white;
           border-radius: 5px;
           cursor: pointer;
           font-size: 14px;
+          transition: background-color 0.3s;
         }
-        .view-toggle:hover {
-          background-color: #45a049;
+        .view-toggle:hover, .theme-toggle:hover {
+          background-color: #555;
         }
+
         /* Grid View Styling */
         .grid-container {
           display: grid;
@@ -134,20 +134,21 @@ const handler = async (req: Request): Promise<Response> => {
           padding: 0;
         }
         .grid-item {
-          background: #fff;
-          border: 1px solid #ddd;
+          background: #2a2a2a;
+          border: 1px solid #444;
           border-radius: 8px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s;
           overflow: hidden;
         }
         .grid-item:hover {
           transform: translateY(-5px);
-          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+          background-color: #3a3a3a;
         }
         .grid-item a {
           text-decoration: none;
-          color: #333;
+          color: #f4f4f4;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -171,28 +172,68 @@ const handler = async (req: Request): Promise<Response> => {
           text-align: center;
           word-break: break-all;
         }
+
+        /* Light Mode - Optional Styles */
+        body.light-mode {
+          background-color: #f0f2f5;
+          color: #333;
+        }
+        body.light-mode h1 {
+          color: #1a237e;
+        }
+        body.light-mode .view-toggle, body.light-mode .theme-toggle {
+          background-color: #4CAF50;
+          color: white;
+        }
+        body.light-mode .view-toggle:hover, body.light-mode .theme-toggle:hover {
+          background-color: #45a049;
+        }
+        body.light-mode .grid-item {
+          background: #fff;
+          border: 1px solid #ddd;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        body.light-mode .grid-item:hover {
+          background-color: #f9f9f9;
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        body.light-mode .grid-item a {
+          color: #333;
+        }
+        
         /* List View Styling (for the toggle) */
         .list-container {
           list-style: none;
           padding: 0;
         }
         .list-item {
-          background: #fff;
-          border: 1px solid #ddd;
+          background: #2a2a2a;
+          border: 1px solid #444;
           border-radius: 5px;
           padding: 15px;
           margin-bottom: 10px;
           transition: background-color 0.3s ease;
         }
         .list-item:hover {
-          background-color: #f9f9f9;
+          background-color: #3a3a3a;
         }
         .list-item a {
           text-decoration: none;
-          color: #007bff;
+          color: #4CAF50;
           font-weight: bold;
           display: block;
         }
+        body.light-mode .list-item {
+          background: #fff;
+          border: 1px solid #ddd;
+        }
+        body.light-mode .list-item:hover {
+          background-color: #f9f9f9;
+        }
+        body.light-mode .list-item a {
+          color: #007bff;
+        }
+
         /* Hide a container based on the class */
         .hidden {
           display: none;
@@ -204,6 +245,7 @@ const handler = async (req: Request): Promise<Response> => {
         <h1>Available HTML Files</h1>
         <div class="view-controls">
           <button id="viewToggle" class="view-toggle">Switch to List View</button>
+          <button id="themeToggle" class="theme-toggle">Switch to Light Mode</button>
         </div>
 
         <div id="gridView" class="grid-container">
@@ -217,9 +259,19 @@ const handler = async (req: Request): Promise<Response> => {
 
       <script>
         const viewToggle = document.getElementById('viewToggle');
+        const themeToggle = document.getElementById('themeToggle');
         const gridView = document.getElementById('gridView');
         const listView = document.getElementById('listView');
+        const body = document.body;
+
         let isGridView = true;
+        
+        // Load theme from local storage or default to dark
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme === 'light-mode') {
+            body.classList.add('light-mode');
+            themeToggle.textContent = 'Switch to Dark Mode';
+        }
 
         viewToggle.addEventListener('click', () => {
           if (isGridView) {
@@ -232,6 +284,17 @@ const handler = async (req: Request): Promise<Response> => {
             viewToggle.textContent = 'Switch to List View';
           }
           isGridView = !isGridView;
+        });
+
+        themeToggle.addEventListener('click', () => {
+          body.classList.toggle('light-mode');
+          if (body.classList.contains('light-mode')) {
+            themeToggle.textContent = 'Switch to Dark Mode';
+            localStorage.setItem('theme', 'light-mode');
+          } else {
+            themeToggle.textContent = 'Switch to Light Mode';
+            localStorage.setItem('theme', 'dark-mode');
+          }
         });
       </script>
     </body>
