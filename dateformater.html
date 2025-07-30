@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Date Duration Calculator for Excel</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="tailwindcss.js"></script>
+    <!-- SheetJS library for Excel processing -->
+    <script src="xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .file-input-button {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .file-input-button:hover {
+            background-color: #4f46e5;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen py-12">
+    <div class="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8 md:p-12">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Date Duration Calculator</h1>
+            <p class="text-gray-500 mt-2">Fully adaptable calculator for any Excel file format.</p>
+        </div>
+
+        <div class="space-y-6">
+            <!-- Step 1: Upload File -->
+            <div>
+                <label class="text-lg font-semibold text-gray-700">Step 1: Upload Excel File</label>
+                <div class="mt-2 flex flex-col sm:flex-row items-center justify-center w-full bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <svg class="w-10 h-10 mb-3 sm:mb-0 sm:mr-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    <div class="flex flex-col items-center sm:items-start">
+                        <label for="file-upload" class="file-input-button relative bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md">
+                            <span>Choose a file</span>
+                            <input id="file-upload" name="file-upload" type="file" class="sr-only" accept=".xlsx, .xls">
+                        </label>
+                        <p id="file-name" class="mt-2 text-sm text-gray-500">No file selected</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Specify Header Row -->
+            <div id="header-row-container" class="hidden">
+                <label class="text-lg font-semibold text-gray-700">Step 2: Specify Header Row</label>
+                <div class="mt-2">
+                    <label for="header-row-input" class="block text-sm font-medium text-gray-700">Enter the row number containing the headers:</label>
+                    <input type="number" id="header-row-input" value="1" min="1" class="mt-1 block w-full sm:w-48 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                </div>
+            </div>
+
+            <!-- Step 3: Select Date Columns -->
+            <div id="column-selector-container" class="hidden">
+                <label class="text-lg font-semibold text-gray-700">Step 3: Select Date Columns</label>
+                <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="start-date-column" class="block text-sm font-medium text-gray-700">Start Date Column</label>
+                        <select id="start-date-column" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"></select>
+                    </div>
+                    <div>
+                        <label for="end-date-column" class="block text-sm font-medium text-gray-700">End Date Column</label>
+                        <select id="end-date-column" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"></select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Choose Result Columns -->
+            <div id="result-column-container" class="hidden">
+                <label class="text-lg font-semibold text-gray-700">Step 4: Choose Result Columns</label>
+                <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="duration-years-select" class="block text-sm font-medium text-gray-700">Duration (Years) Location</label>
+                        <select id="duration-years-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"></select>
+                        <input type="text" id="duration-years-new-name" value="Duration (Years)" class="mt-2 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="total-months-select" class="block text-sm font-medium text-gray-700">Total Months Location</label>
+                        <select id="total-months-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"></select>
+                        <input type="text" id="total-months-new-name" value="Total Months" class="mt-2 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Process & Download -->
+            <div>
+                <label class="text-lg font-semibold text-gray-700">Step 5: Process & Download</label>
+                <div class="mt-2 space-y-4">
+                    <button id="process-btn" class="w-full bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-600 transition duration-300 disabled:bg-gray-400">
+                        Calculate Duration
+                    </button>
+                    <button id="download-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-300 hidden">
+                        Download Excel File
+                    </button>
+                </div>
+            </div>
+
+            <div id="status-container" class="pt-4 text-center">
+                <p id="status-message" class="text-gray-600"></p>
+            </div>
+
+            <div id="preview-container" class="hidden pt-4">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Calculation Preview</h3>
+                <div id="preview-table-wrapper" class="overflow-x-auto border border-gray-200 rounded-lg"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileUpload = document.getElementById('file-upload');
+        const fileNameDisplay = document.getElementById('file-name');
+        const headerRowContainer = document.getElementById('header-row-container');
+        const headerRowInput = document.getElementById('header-row-input');
+        const columnSelectorContainer = document.getElementById('column-selector-container');
+        const startDateColumnSelect = document.getElementById('start-date-column');
+        const endDateColumnSelect = document.getElementById('end-date-column');
+        const resultColumnContainer = document.getElementById('result-column-container');
+        const durationYearsSelect = document.getElementById('duration-years-select');
+        const durationYearsNewName = document.getElementById('duration-years-new-name');
+        const totalMonthsSelect = document.getElementById('total-months-select');
+        const totalMonthsNewName = document.getElementById('total-months-new-name');
+        const processBtn = document.getElementById('process-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const statusMessage = document.getElementById('status-message');
+        const previewContainer = document.getElementById('preview-container');
+        const previewTableWrapper = document.getElementById('preview-table-wrapper');
+
+        let selectedFile = null;
+        let worksheet = null;
+        let workbookData = null;
+        let processedData = null;
+
+        processBtn.disabled = true;
+
+        fileUpload.addEventListener('change', (event) => {
+            selectedFile = event.target.files[0];
+            if (selectedFile) {
+                fileNameDisplay.textContent = selectedFile.name;
+                resetUI();
+                processUploadedFile();
+            } else {
+                fileNameDisplay.textContent = 'No file selected';
+                resetUI();
+            }
+        });
+        
+        headerRowInput.addEventListener('input', () => {
+             if(worksheet) updateHeadersAndSelectors();
+        });
+
+        durationYearsSelect.addEventListener('change', () => durationYearsNewName.classList.toggle('hidden', durationYearsSelect.value !== '_createNew_'));
+        totalMonthsSelect.addEventListener('change', () => totalMonthsNewName.classList.toggle('hidden', totalMonthsSelect.value !== '_createNew_'));
+
+        processBtn.addEventListener('click', calculateAndPreviewData);
+        downloadBtn.addEventListener('click', downloadFile);
+
+        function resetUI() {
+            processBtn.disabled = true;
+            statusMessage.textContent = '';
+            [headerRowContainer, columnSelectorContainer, resultColumnContainer, previewContainer, downloadBtn].forEach(el => el.classList.add('hidden'));
+            [durationYearsNewName, totalMonthsNewName].forEach(el => el.classList.remove('hidden'));
+            startDateColumnSelect.innerHTML = '';
+            endDateColumnSelect.innerHTML = '';
+            worksheet = null;
+            workbookData = null;
+            processedData = null;
+        }
+
+        function processUploadedFile() {
+            statusMessage.textContent = 'Reading file...';
+            statusMessage.className = 'text-blue-600';
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    headerRowContainer.classList.remove('hidden');
+                    updateHeadersAndSelectors();
+                } catch (error) {
+                    statusMessage.textContent = `Error: ${error.message}`;
+                    statusMessage.className = 'text-red-600';
+                }
+            };
+            reader.readAsArrayBuffer(selectedFile);
+        }
+        
+        function updateHeadersAndSelectors() {
+            const headerRowIndex = parseInt(headerRowInput.value, 10);
+            if (isNaN(headerRowIndex) || headerRowIndex < 1) {
+                statusMessage.textContent = 'Please enter a valid header row number (1 or greater).';
+                statusMessage.className = 'text-red-600';
+                return;
+            }
+
+            try {
+                const dataAsArrays = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: '' });
+                
+                if (dataAsArrays.length < headerRowIndex) {
+                    throw new Error("Header row number is greater than the total number of rows.");
+                }
+
+                const headers = dataAsArrays[headerRowIndex - 1];
+                const dataRows = dataAsArrays.slice(headerRowIndex);
+
+                workbookData = dataRows.map(rowArray => {
+                    const obj = {};
+                    headers.forEach((header, index) => {
+                        obj[header] = rowArray[index];
+                    });
+                    return obj;
+                });
+                
+                if (Object.keys(headers).length === 0) throw new Error("Could not find any headers in the selected row.");
+
+                populateColumnSelectors(headers);
+                populateResultColumnSelectors(headers);
+
+                [columnSelectorContainer, resultColumnContainer].forEach(el => el.classList.remove('hidden'));
+                processBtn.disabled = false;
+                statusMessage.textContent = 'Ready. Configure columns and click calculate.';
+                statusMessage.className = 'text-green-600';
+
+            } catch (error) {
+                processBtn.disabled = true;
+                [columnSelectorContainer, resultColumnContainer].forEach(el => el.classList.add('hidden'));
+                statusMessage.textContent = `Error: ${error.message}`;
+                statusMessage.className = 'text-red-600';
+            }
+        }
+        
+        function populateColumnSelectors(headers) {
+            [startDateColumnSelect, endDateColumnSelect].forEach(sel => sel.innerHTML = '');
+            headers.forEach(header => {
+                if (header) { // Only add if header is not empty
+                    const option = new Option(header, header);
+                    startDateColumnSelect.appendChild(option.cloneNode(true));
+                    endDateColumnSelect.appendChild(option.cloneNode(true));
+                }
+            });
+            startDateColumnSelect.value = headers.find(h => h && h.toLowerCase().includes('start')) || headers[0];
+            endDateColumnSelect.value = headers.find(h => h && h.toLowerCase().includes('end')) || headers[1] || headers[0];
+        }
+
+        function populateResultColumnSelectors(headers) {
+            [durationYearsSelect, totalMonthsSelect].forEach(sel => {
+                sel.innerHTML = ''; 
+                const createNewOpt = new Option('[Create New Column]', '_createNew_');
+                sel.appendChild(createNewOpt);
+                headers.forEach(header => {
+                    if (header) {
+                        const option = new Option(header, header);
+                        sel.appendChild(option);
+                    }
+                });
+                sel.value = '_createNew_';
+                sel.dispatchEvent(new Event('change'));
+            });
+        }
+
+        function parseTextDate(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string') return null;
+            const parts = dateStr.split(/[-\/]/);
+            if (parts.length !== 2) return null;
+            const monthStr = parts[0];
+            const yearStr = parts[1];
+            const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+            const monthIndex = monthNames.indexOf(monthStr.toLowerCase().trim());
+            if (monthIndex === -1) return null;
+            let year = parseInt(yearStr, 10);
+            if (isNaN(year)) return null;
+            if (year < 50) { year += 2000; } else { year += 1900; }
+            return new Date(year, monthIndex, 1);
+        }
+        
+        function normalizeDate(value) {
+            if (typeof value === 'string' && value.trim()) return parseTextDate(value);
+            if (value instanceof Date) return value;
+            if (typeof value === 'number') {
+                const utc_days = Math.floor(value - 25569);
+                const date = new Date(utc_days * 86400000);
+                return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+            }
+            return null;
+        }
+
+        function formatDateToMmmYy(date) {
+            if (!(date instanceof Date && !isNaN(date))) return "";
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            return `${monthNames[date.getMonth()]}-${date.getFullYear().toString().slice(-2)}`;
+        }
+        
+        function calculateDuration(startDate, endDate) {
+            const errorResult = { durationYears: "Invalid Data", totalMonths: "Invalid Data" };
+            if (!startDate || !endDate) return errorResult;
+            if (endDate < startDate) return { durationYears: "End before start", totalMonths: "End before start" };
+            
+            let months = (endDate.getFullYear() - startDate.getFullYear()) * 12;
+            months -= startDate.getMonth();
+            months += endDate.getMonth();
+            
+            if (endDate.getDate() < startDate.getDate()) {
+                months--;
+            }
+
+            months = Math.max(0, months);
+            
+            return { durationYears: (months / 12).toFixed(1), totalMonths: months };
+        }
+
+        function displayPreview(data) {
+            const previewData = data.slice(0, 10);
+            if (previewData.length === 0) {
+                 previewTableWrapper.innerHTML = `<p class="p-4 text-gray-500">No data to preview. (This is expected if there are no data rows after your selected header row).</p>`;
+                 return;
+            }
+            const headers = Object.keys(previewData[0]);
+            let tableHTML = `<table class="min-w-full text-sm text-left text-gray-500">`;
+            tableHTML += `<thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr>`;
+            headers.forEach(header => tableHTML += `<th scope="col" class="px-6 py-3">${header}</th>`);
+            tableHTML += `</tr></thead><tbody>`;
+            previewData.forEach(row => {
+                tableHTML += `<tr class="bg-white border-b">`;
+                headers.forEach(header => tableHTML += `<td class="px-6 py-4">${row[header] === undefined ? '' : row[header]}</td>`);
+                tableHTML += `</tr>`;
+            });
+            tableHTML += `</tbody></table>`;
+            previewTableWrapper.innerHTML = tableHTML;
+            previewContainer.classList.remove('hidden');
+        }
+        
+        function getTargetColumnName(selectElement, inputElement) {
+            return selectElement.value === '_createNew_' ? inputElement.value : selectElement.value;
+        }
+
+        function calculateAndPreviewData() {
+            const startDateHeader = startDateColumnSelect.value;
+            const endDateHeader = endDateColumnSelect.value;
+            const durationYearsColName = getTargetColumnName(durationYearsSelect, durationYearsNewName);
+            const totalMonthsColName = getTargetColumnName(totalMonthsSelect, totalMonthsNewName);
+
+            if (!workbookData) { statusMessage.textContent = 'Error: Data not loaded.'; statusMessage.className = 'text-red-600'; return; }
+            if (startDateHeader === endDateHeader) { statusMessage.textContent = 'Start and End date columns cannot be the same.'; statusMessage.className = 'text-red-600'; return; }
+            if (!durationYearsColName || !totalMonthsColName) { statusMessage.textContent = 'A result column name cannot be empty.'; statusMessage.className = 'text-red-600'; return; }
+            if (durationYearsColName === totalMonthsColName) { statusMessage.textContent = 'Result column names cannot be the same.'; statusMessage.className = 'text-red-600'; return; }
+
+            statusMessage.textContent = 'Calculating...';
+            statusMessage.className = 'text-blue-600';
+            try {
+                processedData = workbookData.map(row => {
+                    const newRow = {...row};
+                    const startDateVal = newRow[startDateHeader];
+                    const endDateVal = newRow[endDateHeader];
+
+                    // **UPDATED LOGIC**: Only calculate if both input cells have data.
+                    if (startDateVal && endDateVal) {
+                        const startDate = normalizeDate(startDateVal);
+                        const endDate = normalizeDate(endDateVal);
+                        const durationInfo = calculateDuration(startDate, endDate);
+                        
+                        newRow[durationYearsColName] = durationInfo.durationYears;
+                        newRow[totalMonthsColName] = durationInfo.totalMonths;
+
+                        // Only format the dates if they were valid to begin with
+                        if(startDate) newRow[startDateHeader] = formatDateToMmmYy(startDate);
+                        if(endDate) newRow[endDateHeader] = formatDateToMmmYy(endDate);
+                    } else {
+                        // If input is missing, ensure result columns are blank
+                        newRow[durationYearsColName] = '';
+                        newRow[totalMonthsColName] = '';
+                    }
+                    return newRow;
+                });
+                displayPreview(processedData);
+                statusMessage.textContent = 'Preview generated. You can now download the file.';
+                statusMessage.className = 'text-green-600';
+                downloadBtn.classList.remove('hidden');
+            } catch (error) {
+                statusMessage.textContent = `Error processing data: ${error.message}`;
+                statusMessage.className = 'text-red-600';
+            }
+        }
+
+        function downloadFile() {
+            if (!processedData) return;
+            const newWs = XLSX.utils.json_to_sheet(processedData);
+            const newWb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(newWb, newWs, 'Duration Calculation');
+            XLSX.writeFile(newWb, `duration_calculated_${selectedFile.name}`);
+        }
+    </script>
+</body>
+</html>

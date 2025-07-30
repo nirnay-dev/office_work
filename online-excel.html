@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Online Excel Editor</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+    .toolbar {
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #ccc;
+        flex-shrink: 0;
+    }
+    .toolbar button {
+        margin: 0 5px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        background-color: #fff;
+        cursor: pointer;
+    }
+    .toolbar button:hover {
+        background-color: #e9ecef;
+    }
+    #spreadsheet-container {
+        flex-grow: 1;
+        overflow: auto;
+        border: 1px solid #ccc;
+    }
+    table {
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        min-width: 100px;
+        height: 25px;
+        box-sizing: border-box;
+        outline: none;
+        text-align: left;
+        white-space: nowrap;
+        user-select: none;
+    }
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        left: 0;
+        z-index: 2;
+    }
+    th:first-child { z-index: 3; }
+    tbody th {
+        background-color: #f2f2f2;
+        position: sticky;
+        left: 0;
+        z-index: 1;
+    }
+    td.selected {
+        border: 2px solid #0b57d0;
+        background-color: #d3e3fd;
+    }
+    td:focus {
+        border: 2px solid #0b57d0;
+        background-color: white;
+    }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+    <button id="clear-all">Clear All</button>
+    <button id="add-row">Add Row</button>
+    <button id="add-col">Add Column</button>
+    <button id="download-excel">Download as Excel (.csv)</button>
+    <button id="download-txt">Download as Notepad (.txt)</button>
+    <button id="download-word">Download as Word (.doc)</button>
+</div>
+
+<div id="spreadsheet-container">
+    <table id="spreadsheet">
+        <thead><tr id="header-row"></tr></thead>
+        <tbody id="table-body"></tbody>
+    </table>
+</div>
+
+<script>
+    const tableBody = document.getElementById('table-body');
+    const headerRow = document.getElementById('header-row');
+    let numRows = 20;
+    let numCols = 15;
+
+    let historyStack = [];
+    let historyIndex = -1;
+    let isSelecting = false;
+    let startCell = null;
+    let endCell = null;
+
+    // --- GRID CREATION (FIXED) ---
+    function createGrid() {
+        headerRow.innerHTML = '';
+        tableBody.innerHTML = '';
+
+        // 1. Create corner empty cell
+        const cornerCell = document.createElement('th');
+        headerRow.appendChild(cornerCell);
+
+        // 2. Create Column Headers (A, B, C...)
+        for (let i = 0; i < numCols; i++) {
+            const th = document.createElement('th');
+            th.textContent = String.fromCharCode(65 + i);
+            headerRow.appendChild(th);
+        }
+
+        // 3. Create Rows and Cells
+        for (let i = 0; i < numRows; i++) {
+            const tr = document.createElement('tr');
+            
+            // 4. Create Row Header (1, 2, 3...) - THIS WAS THE BROKEN PART
+            const rowHeaderCell = document.createElement('th');
+            rowHeaderCell.textContent = i + 1;
+            tr.appendChild(rowHeaderCell);
+
+            for (let j = 0; j < numCols; j++) {
+                const td = document.createElement('td');
+                td.id = `${String.fromCharCode(65 + j)}${i + 1}`;
+                td.dataset.row = i;
+                td.dataset.col = j;
+                tr.appendChild(td);
+            }
+            tableBody.appendChild(tr);
+        }
+    }
+
+    // --- UNDO/REDO LOGIC ---
+    function saveState() {
+        const state = [];
+        tableBody.querySelectorAll('td').forEach(cell => {
+            state.push({
+                id: cell.id,
+                text: cell.textContent,
+                formula: cell.dataset.formula
+            });
+        });
+        
+        if (historyIndex < historyStack.length - 1) {
+            historyStack = historyStack.slice(0, historyIndex + 1);
+        }
+        
+        historyStack.push(state);
+        historyIndex++;
+    }
+
+    function restoreState(state) {
+        if (!state) return;
+        state.forEach(cellState => {
+            const cell = document.getElementById(cellState.id);
+            if (cell) {
+                cell.textContent = cellState.text || '';
+                if(cellState.formula) {
+                    cell.dataset.formula = cellState.formula;
+                } else {
+                    delete cell.dataset.formula;
+                }
+            }
+        });
+        evaluateSheet();
+    }
+
+    function undo() {
+        if (historyIndex > 0) {
+            historyIndex--;
+            restoreState(historyStack[historyIndex]);
+        }
+    }
+
+    function redo() {
+        if (historyIndex < historyStack.length - 1) {
+            historyIndex++;
+            restoreState(historyStack[historyIndex]);
+        }
+    }
+
+    // --- BUTTON EVENT LISTENERS ---
+    document.getElementById('clear-all').addEventListener('click', () => {
+        if (confirm('Are you sure you want to clear the entire sheet?')) {
+            createGrid();
+            historyStack = [];
+            historyIndex = -1;
+            saveState();
+        }
+    });
+    document.getElementById('add-row').addEventListener('click', () => { numRows++; createGrid(); saveState(); });
+    document.getElementById('add-col').addEventListener('click', () => { numCols++; createGrid(); saveState(); });
+
+    // --- DOWNLOAD LOGIC ---
+    function generateCSV() {
+        let csv = '';
+        for (let r = 0; r < numRows; r++) {
+            let rowData = [];
+            for (let c = 0; c < numCols; c++) {
+                const cell = document.getElementById(getIdFromCoords(r, c));
+                let value = cell.dataset.formula || cell.textContent || '';
+                if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                    value = `"${value.replace(/"/g, '""')}"`;
+                }
+                rowData.push(value);
+            }
+            csv += rowData.join(',') + '\r\n';
+        }
+        return csv;
+    }
+
+    function downloadFile(content, filename, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    document.getElementById('download-excel').addEventListener('click', () => {
+        downloadFile(generateCSV(), 'spreadsheet.csv', 'text/csv;charset=utf-8;');
+    });
+
+    document.getElementById('download-txt').addEventListener('click', () => {
+        const txtContent = generateCSV().replace(/,/g, '\t');
+        downloadFile(txtContent, 'spreadsheet.txt', 'text/plain;charset=utf-8;');
+    });
+
+    document.getElementById('download-word').addEventListener('click', () => {
+        const tableHtml = document.getElementById('spreadsheet').outerHTML;
+        const wordContent = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export</title></head><body>${tableHtml}</body></html>`;
+        downloadFile(wordContent, 'spreadsheet.doc', 'application/msword');
+    });
+
+    // --- CORE INTERACTIVITY ---
+    function makeCellEditable(cell) {
+        cell.setAttribute('contenteditable', 'true');
+        cell.focus();
+        if (cell.dataset.formula) {
+            cell.textContent = cell.dataset.formula;
+        }
+    }
+
+    function processCellInput(cell) {
+        cell.removeAttribute('contenteditable');
+        const text = cell.textContent.trim();
+        delete cell.dataset.formula;
+        if (text.startsWith('=')) {
+            cell.dataset.formula = text;
+        }
+        evaluateSheet();
+        saveState();
+    }
+    
+    function evaluateSheet() {
+        const cellsWithFormulas = tableBody.querySelectorAll('td[data-formula]');
+        cellsWithFormulas.forEach(cell => {
+            try {
+                const formula = cell.dataset.formula.substring(1).toUpperCase();
+                if (formula.startsWith('SUM(') && formula.endsWith(')')) {
+                    const rangeStr = formula.substring(4, formula.length - 1);
+                    const [startId, endId] = rangeStr.split(':');
+                    const startCoords = getCoordsFromId(startId);
+                    const endCoords = getCoordsFromId(endId);
+
+                    let sum = 0;
+                    for (let r = Math.min(startCoords.row, endCoords.row); r <= Math.max(startCoords.row, endCoords.row); r++) {
+                        for (let c = Math.min(startCoords.col, endCoords.col); c <= Math.max(startCoords.col, endCoords.col); c++) {
+                            const valueCell = document.getElementById(getIdFromCoords(r, c));
+                            if (valueCell && valueCell.textContent !== '') {
+                                const value = parseCellValue(valueCell.textContent);
+                                if (!isNaN(value)) sum += value;
+                            }
+                        }
+                    }
+                    cell.textContent = sum;
+                } else {
+                    cell.textContent = '#NAME?';
+                }
+            } catch (err) {
+                cell.textContent = '#ERROR!';
+            }
+        });
+    }
+
+    // --- SELECTION ---
+    function clearSelection() {
+        document.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+    }
+
+    function selectRange(start, end) {
+        clearSelection();
+        const startRow = Math.min(start.dataset.row, end.dataset.row);
+        const endRow = Math.max(start.dataset.row, end.dataset.row);
+        const startCol = Math.min(start.dataset.col, end.dataset.col);
+        const endCol = Math.max(start.dataset.col, end.dataset.col);
+
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startCol; c <= endCol; c++) {
+                const cell = tableBody.rows[r]?.cells[c + 1]; // +1 to account for row header
+                if (cell) cell.classList.add('selected');
+            }
+        }
+    }
+
+    // --- EVENT LISTENERS ---
+    tableBody.addEventListener('dblclick', (e) => {
+        if (e.target.tagName === 'TD') makeCellEditable(e.target);
+    });
+    tableBody.addEventListener('mousedown', (e) => {
+        if (e.target.tagName !== 'TD') return;
+        isSelecting = true;
+        startCell = e.target;
+        endCell = e.target;
+        clearSelection();
+        e.target.classList.add('selected');
+    });
+    tableBody.addEventListener('mouseover', (e) => {
+        if (!isSelecting || e.target.tagName !== 'TD') return;
+        endCell = e.target;
+        selectRange(startCell, endCell);
+    });
+    window.addEventListener('mouseup', () => { isSelecting = false; });
+    tableBody.addEventListener('blur', (e) => {
+        if (e.target.hasAttribute('contenteditable')) processCellInput(e.target);
+    }, true);
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+            if (e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); }
+            if (e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); }
+        } else if (e.target.hasAttribute('contenteditable')) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); processCellInput(e.target); }
+            if (e.key === 'Escape') {
+                e.target.textContent = e.target.dataset.formula || e.target.textContent;
+                e.target.removeAttribute('contenteditable');
+                e.target.blur();
+            }
+        }
+    });
+    document.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const activeCell = document.querySelector('.selected');
+        if (!activeCell) return;
+        const startRow = parseInt(activeCell.dataset.row);
+        const startCol = parseInt(activeCell.dataset.col);
+        navigator.clipboard.readText().then(pastedText => {
+            const delimiter = pastedText.includes('\t') ? '\t' : ',';
+            pastedText.trim().split('\n').forEach((rowText, rowIndex) => {
+                rowText.split(delimiter).forEach((value, colIndex) => {
+                    const targetRow = startRow + rowIndex;
+                    const targetCol = startCol + colIndex;
+                    if (targetRow < numRows && targetCol < numCols) {
+                        const cell = document.getElementById(getIdFromCoords(targetRow, targetCol));
+                        delete cell.dataset.formula;
+                        const trimmedValue = value.trim();
+                         if (trimmedValue.startsWith('=')) {
+                            cell.dataset.formula = trimmedValue;
+                        } else {
+                            cell.textContent = trimmedValue;
+                        }
+                    }
+                });
+            });
+            evaluateSheet();
+            saveState();
+        });
+    });
+
+    // --- HELPER FUNCTIONS ---
+    function getCoordsFromId(id) { const colStr = id.match(/[A-Z]+/)[0]; const rowStr = id.match(/\d+/)[0]; return { row: parseInt(rowStr) - 1, col: colStr.charCodeAt(0) - 65 }; }
+    function getIdFromCoords(row, col) { return `${String.fromCharCode(65 + col)}${row + 1}`; }
+    function parseCellValue(str) { return parseFloat(str.replace(',', '.')); }
+
+    // --- INITIALIZE ---
+    createGrid();
+    saveState();
+</script>
+</body>
+</html>
