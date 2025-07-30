@@ -15,29 +15,39 @@ async function listHtmlFiles(): Promise<string[]> {
   return htmlFiles;
 }
 
-// Map of specific filenames to logo URLs and alt text
-const logoMap = new Map<string, { src: string; alt: string }>([
-  ['index.html', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/HTML5_logo_and_wordmark.svg/100px-HTML5_logo_and_wordmark.svg.png', alt: 'Index HTML Icon' }],
-  ['main.ts', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Typescript_logo_2020.svg/100px-Typescript_logo_2020.svg.png', alt: 'Main TypeScript Icon' }],
-  ['style.css', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/CSS3_logo.svg/100px-CSS3_logo.svg.png', alt: 'Style CSS Icon' }],
-  ['script.js', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/JavaScript-logo.png/100px-JavaScript-logo.png', alt: 'JavaScript Icon' }],
-  ['deno.json', { src: 'https://deno.land/logo.svg', alt: 'Deno Icon' }],
-  ['readme.md', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/100px-Markdown-mark.svg.png', alt: 'README Markdown Icon' }],
-  ['package.json', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/JSON_logo.svg/100px-JSON_logo.svg.png', alt: 'package.json Icon' }],
-  ['default.html', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/HTML5_logo_and_wordmark.svg/100px-HTML5_logo_and_wordmark.svg.png', alt: 'HTML Icon' }],
-  ['default', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Text-x-generic-template.svg/100px-Text-x-generic-template.svg.png', alt: 'Generic File Icon' }]
+// Map of extensions/filenames to their corresponding logo name in the library
+const logoNameMap = new Map<string, string>([
+  ['html', 'html5'],
+  ['css', 'css3'],
+  ['js', 'javascript'],
+  ['ts', 'typescript'],
+  ['json', 'json'],
+  ['md', 'markdown'],
+  // Specific filename mappings
+  ['main.ts', 'deno'],
+  ['index.html', 'googlechrome']
 ]);
 
-// Function to get the correct logo based on the full filename
-function getFileLogo(filename: string): { src: string; alt: string } {
-  if (logoMap.has(filename.toLowerCase())) {
-    return logoMap.get(filename.toLowerCase())!;
+// Function to get the correct logo name based on the full filename
+function getFileLogoName(filename: string): string {
+  const lowercaseFilename = filename.toLowerCase();
+  
+  // Check for specific filename matches first (e.g., 'main.ts')
+  if (logoNameMap.has(lowercaseFilename)) {
+    return logoNameMap.get(lowercaseFilename)!;
   }
   
-  const extensionMatch = filename.match(/\.([0-9a-z]+)(?=[?#])?$/i) || filename.match(/\.([0-9a-z]+)$/i);
-  const extension = extensionMatch ? `default.${extensionMatch[1].toLowerCase()}` : 'default';
+  // Fallback to checking for common file extensions
+  const extensionMatch = filename.match(/\.([0-9a-z]+)$/i);
+  if (extensionMatch) {
+    const extension = extensionMatch[1].toLowerCase();
+    if (logoNameMap.has(extension)) {
+      return logoNameMap.get(extension)!;
+    }
+  }
 
-  return logoMap.get(extension) || logoMap.get('default')!;
+  // Final fallback to a generic file icon
+  return 'file';
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -65,12 +75,16 @@ const handler = async (req: Request): Promise<Response> => {
   const gridItems = htmlFiles
     .map(
       (file) => {
-        const logo = getFileLogo(file);
+        const logoName = getFileLogoName(file);
+        // Use a dynamic logo library URL (e.g., from Simple Icons)
+        const logoSrc = `https://cdn.simpleicons.org/${logoName}/white`;
+        const altText = `${file} Logo`;
+        
         return `
           <div class="grid-item">
             <a href="/${encodeURIComponent(file)}" target="_blank">
               <div class="file-icon">
-                <img src="${logo.src}" alt="${logo.alt}" class="html-icon">
+                <img src="${logoSrc}" alt="${altText}" class="html-icon">
               </div>
               <div class="file-name">${file}</div>
             </a>
@@ -134,7 +148,7 @@ const handler = async (req: Request): Promise<Response> => {
           align-items: center;
           gap: 10px;
         }
-        .theme-toggle-wrapper span {
+        #themeText {
             font-size: 14px;
         }
         .toggle-checkbox {
@@ -289,7 +303,7 @@ const handler = async (req: Request): Promise<Response> => {
         <div class="view-controls">
           <button id="viewToggle" class="view-toggle">Switch to List View</button>
           <div class="theme-toggle-wrapper">
-             <span>Dark Mode</span>
+             <span id="themeText">Dark Mode</span>
              <input type="checkbox" id="themeToggle" class="toggle-checkbox">
              <label for="themeToggle" class="toggle-label"></label>
           </div>
@@ -307,6 +321,7 @@ const handler = async (req: Request): Promise<Response> => {
       <script>
         const viewToggle = document.getElementById('viewToggle');
         const themeToggle = document.getElementById('themeToggle');
+        const themeText = document.getElementById('themeText');
         const gridView = document.getElementById('gridView');
         const listView = document.getElementById('listView');
         const body = document.body;
@@ -318,6 +333,7 @@ const handler = async (req: Request): Promise<Response> => {
         if (currentTheme === 'light-mode') {
             body.classList.add('light-mode');
             themeToggle.checked = true;
+            themeText.textContent = 'Light Mode';
         }
 
         viewToggle.addEventListener('click', () => {
@@ -336,9 +352,11 @@ const handler = async (req: Request): Promise<Response> => {
         themeToggle.addEventListener('change', (event) => {
           if (event.target.checked) {
             body.classList.add('light-mode');
+            themeText.textContent = 'Light Mode';
             localStorage.setItem('theme', 'light-mode');
           } else {
             body.classList.remove('light-mode');
+            themeText.textContent = 'Dark Mode';
             localStorage.setItem('theme', 'dark-mode');
           }
         });
