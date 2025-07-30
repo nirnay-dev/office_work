@@ -42,7 +42,9 @@ const handler = async (req: Request): Promise<Response> => {
       (file) => `
         <div class="grid-item">
           <a href="/${encodeURIComponent(file)}" target="_blank">
-            <div class="file-icon">📄</div>
+            <div class="file-icon">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/HTML5_logo_and_wordmark.svg/100px-HTML5_logo_and_wordmark.svg.png" alt="HTML Icon" class="html-icon">
+            </div>
             <div class="file-name">${file}</div>
           </a>
         </div>
@@ -120,8 +122,17 @@ const handler = async (req: Request): Promise<Response> => {
           padding: 20px;
         }
         .file-icon {
-          font-size: 50px;
+          width: 80px; /* Adjust size as needed */
+          height: 80px; /* Adjust size as needed */
+          display: flex;
+          justify-content: center;
+          align-items: center;
           margin-bottom: 10px;
+        }
+        .html-icon {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain; /* Ensure the image fits within the div */
         }
         .file-name {
           font-weight: bold;
