@@ -6,35 +6,19 @@
 <title>Online Excel Editor</title>
 <style>
     :root {
-        --bg-color: #f4f4f4;
-        --primary-text-color: #212529;
-        --secondary-bg-color: #fff;
-        --border-color: #ccc;
-        --toolbar-bg: #f8f9fa;
-        --header-bg: #f2f2f2;
-        --selected-bg: #d3e3fd;
-        --selected-border: #0b57d0;
-        --icon-color: #495057;
+        --bg-color: #f4f4f4; --primary-text-color: #212529; --secondary-bg-color: #fff;
+        --border-color: #ccc; --toolbar-bg: #f8f9fa; --header-bg: #f2f2f2;
+        --selected-bg: #d3e3fd; --selected-border: #0b57d0; --icon-color: #495057;
     }
     body.dark-mode {
-        --bg-color: #212529;
-        --primary-text-color: #f8f9fa;
-        --secondary-bg-color: #343a40;
-        --border-color: #6c757d;
-        --toolbar-bg: #495057;
-        --header-bg: #495057;
-        --selected-bg: #0b57d0;
-        --selected-border: #6ea8fe;
-        --icon-color: #f8f9fa;
+        --bg-color: #212529; --primary-text-color: #f8f9fa; --secondary-bg-color: #343a40;
+        --border-color: #6c757d; --toolbar-bg: #495057; --header-bg: #495057;
+        --selected-bg: #0b57d0; --selected-border: #6ea8fe; --icon-color: #f8f9fa;
     }
     body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        background-color: var(--bg-color);
-        color: var(--primary-text-color);
+        margin: 0; display: flex; flex-direction: column; height: 100vh;
+        background-color: var(--bg-color); color: var(--primary-text-color);
         transition: background-color 0.3s, color 0.3s;
     }
     .main-container {
@@ -42,23 +26,20 @@
     }
     .toolbar {
         padding: 10px; background-color: var(--toolbar-bg); border-bottom: 1px solid var(--border-color);
-        flex-shrink: 0; display: flex; align-items: center;
+        flex-shrink: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 5px;
     }
     .toolbar button {
-        margin: 0 5px; padding: 8px 12px; border-radius: 4px; border: 1px solid var(--border-color);
+        margin: 0; padding: 8px 12px; border-radius: 4px; border: 1px solid var(--border-color);
         background-color: var(--secondary-bg-color); color: var(--primary-text-color); cursor: pointer;
         transition: background-color 0.2s;
     }
     .toolbar button:hover { background-color: var(--header-bg); }
+    .toolbar .separator { flex-grow: 1; }
     #settings-btn {
-        margin-left: auto; width: 40px; height: 38px; display: inline-flex;
+        width: 40px; height: 38px; display: inline-flex;
         align-items: center; justify-content: center; padding: 0;
     }
-    .icon {
-        width: 20px; height: 20px;
-        stroke: var(--icon-color);
-    }
-
+    .icon { width: 20px; height: 20px; stroke: var(--icon-color); }
     #resizable-container {
         resize: both; overflow: hidden; border: 2px dashed var(--border-color);
         min-width: 300px; min-height: 200px; width: 100%; height: 100%; display: flex;
@@ -77,32 +58,16 @@
     tbody th { position: sticky; left: 0; z-index: 1; }
     td.selected { border: 2px solid var(--selected-border); background-color: var(--selected-bg); }
     td:focus { border: 2px solid var(--selected-border); background-color: var(--secondary-bg-color); user-select: text; }
-    
-    /* --- MODAL STYLES (FIXED) --- */
     .modal {
-        display: none; /* Initially hidden */
-        position: fixed;
-        z-index: 1000;
-        left: 0; top: 0;
-        width: 100%; height: 100%;
-        background-color: rgba(0,0,0,0.5);
-        /* Use Flexbox to center the modal content */
-        align-items: center;
-        justify-content: center;
+        display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+        width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);
+        align-items: center; justify-content: center;
     }
     .modal-content {
-        background-color: var(--bg-color);
-        color: var(--primary-text-color);
-        padding: 20px;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        width: 90%;
-        max-width: 700px;
-        position: relative;
-        animation: fadeIn 0.3s;
-        /* THE FIX: Set a max-height and enable internal scrolling */
-        max-height: 85vh;
-        overflow-y: auto;
+        background-color: var(--bg-color); color: var(--primary-text-color); padding: 20px;
+        border: 1px solid var(--border-color); border-radius: 8px; width: 90%;
+        max-width: 700px; position: relative; animation: fadeIn 0.3s;
+        max-height: 85vh; overflow-y: auto;
     }
     @keyframes fadeIn { from {opacity: 0; transform: scale(0.95);} to {opacity: 1; transform: scale(1);} }
     .modal-close {
@@ -111,14 +76,12 @@
     }
     .modal-close .icon { width: 24px; height: 24px; }
     .modal-close:hover .icon { stroke: var(--selected-border); }
-
     .modal h2 { margin-top: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
     .instruction-columns { display: flex; flex-wrap: wrap; gap: 20px; }
     .instruction-columns > div { flex: 1; min-width: 250px; }
     .instructions ul { list-style-type: none; padding-left: 0; font-size: 0.9em; }
     .instructions li { margin-bottom: 10px; line-height: 1.4; }
     kbd { background-color: var(--header-bg); border: 1px solid var(--border-color); color: var(--primary-text-color); border-radius: 3px; padding: 2px 5px; font-family: monospace; font-size: 0.9em; }
-
     .setting-item { display: flex; align-items: center; justify-content: space-between; margin: 15px 0;}
     .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
     .switch input { opacity: 0; width: 0; height: 0; }
@@ -131,14 +94,17 @@
 <body>
 
 <div class="toolbar">
-    <button id="clear-all">Clear All</button>
     <button id="add-row">Add Row</button>
+    <button id="delete-row">Delete Row</button>
     <button id="add-col">Add Column</button>
-    <button id="download-excel">Download .csv</button>
-    <button id="download-txt">Download .txt</button>
-    <button id="download-word">Download .doc</button>
+    <button id="delete-col">Delete Column</button>
+    <button id="clear-all">Clear All</button>
+    <div class="separator"></div>
+    <button id="download-excel">.csv</button>
+    <button id="download-txt">.txt</button>
+    <button id="download-word">.doc</button>
     <button id="settings-btn" title="Settings">
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.438.995s.145.755.438.995l1.003.827c.48.398.668 1.03.26 1.431l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.075.124a6.57 6.57 0 01-.22.127c-.332.183-.582.495-.645.87l-.213 1.281c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 01-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 01-1.37-.49l-1.296-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.437-.995s-.145-.755-.437-.995l-1.004-.827a1.125 1.125 0 01-.26-1.431l1.296-2.247a1.125 1.125 0 011.37-.49l1.217.456c.355.133.75.072 1.075-.124.072-.044.146-.087.22-.127.332-.183.582-.495.645-.87l.213-1.281z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.438.995s.145.755.438.995l1.003.827c.48.398.668 1.03.26 1.431l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.075.124a6.57 6.57 0 01-.22.127c-.332.183-.582.495-.645.87l-.213 1.281c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 01-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 01-1.37-.49l-1.296-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.437-.995s-.145-.755-.437-.995l-1.004-.827a1.125 1.125 0 01-.26-1.431l1.296-2.247a1.125 1.125 0 011.37-.49l1.217.456c.355.133.75.072 1.075-.124.072-.044.146-.087.22-.127.332-.183.582.495.645-.87l.213-1.281z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
     </button>
 </div>
 
@@ -166,7 +132,7 @@
         <div class="instructions">
             <h2>How to Use</h2>
             <div class="instruction-columns">
-                <div><h4>Basic Operations</h4><ul><li><strong>Select Cells:</strong> Click and drag your mouse.</li><li><strong>Add Row/Column:</strong> Use toolbar buttons.</li><li><strong>Clear Sheet:</strong> Use "Clear All" button.</li><li><strong>Resize Canvas:</strong> Drag the bottom-right corner.</li></ul></div>
+                <div><h4>Basic Operations</h4><ul><li><strong>Select Cells:</strong> Click and drag.</li><li><strong>Resize Canvas:</strong> Drag the bottom-right corner.</li></ul></div>
                 <div><h4>Editing & Formulas</h4><ul><li><strong>Edit Cell:</strong> Double-click a cell.</li><li><strong>Confirm Edit:</strong> Press <kbd>Enter</kbd>.</li><li><strong>Cancel Edit:</strong> Press <kbd>Escape</kbd>.</li><li><strong>Enter Formula:</strong> Start with <code>=</code>. Ex: <code>=SUM(A1:A5)</code></li></ul></div>
                 <div><h4>Shortcuts & Data</h4><ul><li><strong>Copy:</strong> <kbd>Ctrl</kbd> + <kbd>C</kbd> (or <kbd>Cmd</kbd>)</li><li><strong>Paste:</strong> <kbd>Ctrl</kbd> + <kbd>V</kbd> (or <kbd>Cmd</kbd>)</li><li><strong>Undo:</strong> <kbd>Ctrl</kbd> + <kbd>Z</kbd> (or <kbd>Cmd</kbd>)</li><li><strong>Redo:</strong> <kbd>Ctrl</kbd> + <kbd>Y</kbd> (or <kbd>Cmd</kbd>)</li></ul></div>
             </div>
@@ -175,30 +141,29 @@
 </div>
 
 <script>
-    const tableBody = document.getElementById("table-body"), headerRow = document.getElementById("header-row"), settingsModal = document.getElementById("settings-modal"), settingsBtn = document.getElementById("settings-btn"), closeModalBtn = document.querySelector(".modal-close"), darkModeToggle = document.getElementById("dark-mode-toggle");
-    let numRows = 50, numCols = 20, historyStack = [], historyIndex = -1, isSelecting = !1, startCell = null, endCell = null;
-
-    // --- SETTINGS & THEME LOGIC (FIXED) ---
-    // THE FIX: Change display to 'flex' to enable centering
-    settingsBtn.onclick = () => settingsModal.style.display = 'flex';
-    closeModalBtn.onclick = () => settingsModal.style.display = 'none';
-    window.onclick = (e) => { if (e.target == settingsModal) settingsModal.style.display = 'none'; };
-
-    darkModeToggle.addEventListener('change', (e) => {
-        document.body.classList.toggle('dark-mode', e.target.checked);
-        localStorage.setItem('darkMode', e.target.checked);
-    });
-
-    function loadPreferences() {
-        const isDarkMode = localStorage.getItem('darkMode') === 'true';
-        darkModeToggle.checked = isDarkMode;
-        document.body.classList.toggle('dark-mode', isDarkMode);
-    }
+    // ---ELEMENT REFERENCES---
+    const tableBody=document.getElementById("table-body"),headerRow=document.getElementById("header-row"),settingsModal=document.getElementById("settings-modal"),settingsBtn=document.getElementById("settings-btn"),closeModalBtn=document.querySelector(".modal-close"),darkModeToggle=document.getElementById("dark-mode-toggle");
+    let numRows=50,numCols=26,historyStack=[],historyIndex=-1,isSelecting=!1,startCell=null,endCell=null;
     
-    // --- All other JavaScript logic from the previous version remains the same ---
+    // --- CORE APP LOGIC ---
+    function getGridData(){const e=[];return tableBody.querySelectorAll("td").forEach(t=>{t.textContent||t.dataset.formula?e.push({row:parseInt(t.dataset.row),col:parseInt(t.dataset.col),value:t.textContent,formula:t.dataset.formula}):void 0}),e}
+    function applyData(e){e.forEach(e=>{const t=document.getElementById(getIdFromCoords(e.row,e.col));t&&(t.textContent=e.value||"",e.formula?t.dataset.formula=e.formula:delete t.dataset.formula)})}
+    
+    // --- NEW: DELETE ROW/COLUMN LOGIC ---
+    function deleteSelectedRow(){const e=document.querySelector(".selected");if(!e)return void alert("Please select a cell in the row to delete.");const t=parseInt(e.dataset.row),o=getGridData().filter(e=>e.row!==t).map(e=>(e.row>t&&e.row--,e));numRows--,createGrid(),applyData(o),evaluateSheet(),saveState()}
+    function deleteSelectedColumn(){const e=document.querySelector(".selected");if(!e)return void alert("Please select a cell in the column to delete.");const t=parseInt(e.dataset.col),o=getGridData().filter(e=>e.col!==t).map(e=>(e.col>t&&e.col--,e));numCols--,createGrid(),applyData(o),evaluateSheet(),saveState()}
+
+    // --- BUTTON EVENT LISTENERS ---
+    document.getElementById("add-row").addEventListener("click",()=>{numRows++,createGrid(),saveState()});
+    document.getElementById("delete-row").addEventListener("click",deleteSelectedRow);
+    document.getElementById("add-col").addEventListener("click",()=>{numCols++,createGrid(),saveState()});
+    document.getElementById("delete-col").addEventListener("click",deleteSelectedColumn);
+    document.getElementById("clear-all").addEventListener("click",()=>{confirm("Are you sure you want to clear the entire sheet?")&&(numRows=50,numCols=26,createGrid(),historyStack=[],historyIndex=-1,saveState())});
+    
+    // --- ALL OTHER JS FUNCTIONS REMAIN (UNCHANGED AND COMPACTED FOR BREVITY) ---
+    settingsBtn.onclick=()=>settingsModal.style.display="flex",closeModalBtn.onclick=()=>settingsModal.style.display="none",window.onclick=e=>{"settings-modal"===e.target.id&&(settingsModal.style.display="none")},darkModeToggle.addEventListener("change",e=>{document.body.classList.toggle("dark-mode",e.target.checked),localStorage.setItem("darkMode",e.target.checked)});function loadPreferences(){const e="true"===localStorage.getItem("darkMode");darkModeToggle.checked=e,document.body.classList.toggle("dark-mode",e)}
     function undo(){historyIndex>0&&(historyIndex--,restoreState(historyStack[historyIndex]))}
     function redo(){historyIndex<historyStack.length-1&&(historyIndex++,restoreState(historyStack[historyIndex]))}
-    document.getElementById("clear-all").addEventListener("click",()=>{confirm("Are you sure you want to clear the entire sheet?")&&(createGrid(),historyStack=[],historyIndex=-1,saveState())}),document.getElementById("add-row").addEventListener("click",()=>{numRows++,createGrid(),saveState()}),document.getElementById("add-col").addEventListener("click",()=>{numCols++,createGrid(),saveState()});
     document.getElementById("download-excel").addEventListener("click",()=>{downloadFile(generateCSV(),"spreadsheet.csv","text/csv;charset=utf-8;")}),document.getElementById("download-txt").addEventListener("click",()=>{const e=generateCSV().replace(/,/g,"\t");downloadFile(e,"spreadsheet.txt","text/plain;charset=utf-8;")}),document.getElementById("download-word").addEventListener("click",()=>{const e=document.getElementById("spreadsheet").outerHTML,t=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export</title></head><body>${e}</body></html>`;downloadFile(t,"spreadsheet.doc","application/msword")});
     tableBody.addEventListener("dblclick",e=>{"TD"===e.target.tagName&&makeCellEditable(e.target)}),tableBody.addEventListener("mousedown",e=>{"TD"===e.target.tagName&&(isSelecting=!0,startCell=e.target,endCell=e.target,clearSelection(),e.target.classList.add("selected"))}),tableBody.addEventListener("mouseover",e=>{isSelecting&&"TD"===e.target.tagName&&(endCell=e.target,selectRange(startCell,endCell))}),window.addEventListener("mouseup",()=>{isSelecting=!1}),tableBody.addEventListener("blur",e=>{e.target.hasAttribute("contenteditable")&&processCellInput(e.target)},!0),document.addEventListener("keydown",e=>{if(e.ctrlKey||e.metaKey)e.key.toLowerCase()==="z"&&(e.preventDefault(),undo()),e.key.toLowerCase()==="y"&&(e.preventDefault(),redo());else if(e.target.hasAttribute("contenteditable")){if("Enter"===e.key&&!e.shiftKey&&(e.preventDefault(),processCellInput(e.target)),"Escape"===e.key){e.target.dataset.formula&&(e.target.textContent=e.target.dataset.formula),e.target.removeAttribute("contenteditable"),e.target.blur()}}}),document.addEventListener("paste",e=>{e.preventDefault();const t=document.querySelector(".selected");if(!t)return;const o=parseInt(t.dataset.row),s=parseInt(t.dataset.col);navigator.clipboard.readText().then(e=>{const t=e.includes("\t")?"\t":",";e.trim().split("\n").forEach((e,r)=>{e.split(t).forEach((e,l)=>{const n=o+r,c=s+l;if(n<numRows&&c<numCols){const t=document.getElementById(getIdFromCoords(n,c));delete t.dataset.formula;const o=e.trim();o.startsWith("=")?t.dataset.formula=o:t.textContent=o}})}),evaluateSheet(),saveState()})});
     function getCoordsFromId(e){const t=e.match(/[A-Z]+/)[0],o=e.match(/\d+/)[0];return{row:parseInt(o)-1,col:t.charCodeAt(0)-65}}
@@ -217,4 +182,4 @@
     loadPreferences();createGrid();saveState();
 </script>
 </body>
-</html>```
+</html>
