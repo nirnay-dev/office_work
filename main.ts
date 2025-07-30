@@ -15,30 +15,21 @@ async function listHtmlFiles(): Promise<string[]> {
   return htmlFiles;
 }
 
-// Map of specific filename bases or extensions to their logo names
+// Map of specific filename bases or extensions to their logo names from the Simple Icons library
 const logoNameMap = new Map<string, string>([
   // Specific filename bases (e.g., 'excel' from 'excel.html')
-  ['excel', 'microsoftexcel'],
-  ['word', 'microsoftword'],
-  ['powerpoint', 'microsoftpowerpoint'],
-  ['deno', 'deno'],
-  ['readme', 'markdown'],
-  ['local_video_player', 'vlcmedia player'],
-  ['pdf_textify', 'adobeacrobatreader'],
-  ['dateformater', 'timeanddate'],
-  ['drinkwater', 'dropwizard'],
+  ['local_video_player', 'vlcmediaplayer'],
+  ['pdf_textify', 'adobeacrobat'],
+  ['dateformater', 'calendar'],
+  ['drinkwater', 'water'],
   ['filespacer', 'folder'],
   ['finance-tracker', 'money'],
-  ['full_page_calendar_task_scheduler', 'calendaralt'],
+  ['full_page_calendar_task_scheduler', 'calendar'],
   ['igrsp_proposal_downloader', 'download'],
   ['material3-website-builder', 'materialdesign'],
   ['online-excel', 'microsoftexcel'],
-  ['pdfrenamerv7', 'adobeacrobatreader'],
+  ['pdfrenamerv7', 'adobeacrobat'],
   ['youtube', 'youtube'],
-
-  // Specific full filenames (e.g., 'main.ts')
-  ['main.ts', 'typescript'],
-  ['index.html', 'googlechrome'],
 
   // Common file extensions
   ['html', 'html5'],
@@ -46,37 +37,29 @@ const logoNameMap = new Map<string, string>([
   ['js', 'javascript'],
   ['ts', 'typescript'],
   ['json', 'json'],
-  ['md', 'markdown']
+  ['md', 'markdown'],
 ]);
 
 // Function to get the correct logo name based on the full filename
 function getFileLogoName(filename: string): string {
   const lowercaseFilename = filename.toLowerCase();
 
-  // 1. Check for specific full filenames (e.g., 'main.ts')
-  if (logoNameMap.has(lowercaseFilename)) {
-    return logoNameMap.get(lowercaseFilename)!;
-  }
-  
-  // 2. Extract filename base (without extension) and check for a match
-  const filenameBaseMatch = lowercaseFilename.match(/^([^.]+)/);
-  if (filenameBaseMatch) {
-    const filenameBase = filenameBaseMatch[1];
-    if (logoNameMap.has(filenameBase)) {
-      return logoNameMap.get(filenameBase)!;
-    }
+  // 1. Extract filename base and check for a match
+  const filenameWithoutExtension = lowercaseFilename.replace(/\.[^/.]+$/, '');
+  if (logoNameMap.has(filenameWithoutExtension)) {
+    return logoNameMap.get(filenameWithoutExtension)!;
   }
 
-  // 3. Fallback to checking for common file extensions
-  const extensionMatch = filename.match(/\.([0-9a-z]+)$/i);
+  // 2. Fallback to checking for common file extensions
+  const extensionMatch = lowercaseFilename.match(/\.([0-9a-z]+)$/i);
   if (extensionMatch) {
-    const extension = extensionMatch[1].toLowerCase();
+    const extension = extensionMatch[1];
     if (logoNameMap.has(extension)) {
       return logoNameMap.get(extension)!;
     }
   }
 
-  // 4. Final fallback to a generic file icon
+  // 3. Final fallback to a generic file icon
   return 'file';
 }
 
@@ -106,9 +89,8 @@ const handler = async (req: Request): Promise<Response> => {
     .map(
       (file) => {
         const logoName = getFileLogoName(file);
-        const theme = 'dark-mode'; // Default to dark mode for initial render
-        const color = theme === 'light-mode' ? 'black' : 'white';
-        const logoSrc = `https://cdn.simpleicons.org/${logoName}/${color}`;
+        // The logo color is determined by the theme via JavaScript after the page loads
+        const logoSrc = `https://cdn.simpleicons.org/${logoName}/white`;
         const altText = `${file} Logo`;
         
         return `
@@ -373,22 +355,33 @@ const handler = async (req: Request): Promise<Response> => {
             listView.classList.remove('hidden');
             viewToggle.textContent = 'Switch to Grid View';
           } else {
-            gridView.classList.remove('hidden');
-            listView.classList.add('hidden');
+            gridView.classList.add('hidden');
+            listView.classList.remove('hidden');
             viewToggle.textContent = 'Switch to List View';
           }
           isGridView = !isGridView;
         });
 
+        // Function to update logo colors
+        function updateLogoColors(color) {
+            const logoImages = document.querySelectorAll('.file-icon img');
+            logoImages.forEach(img => {
+                const parts = img.src.split('/');
+                parts.pop(); // Remove the current color
+                parts.push(color); // Add the new color
+                img.src = parts.join('/');
+            });
+        }
+
+        // Set initial logo color on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const initialColor = body.classList.contains('light-mode') ? 'black' : 'white';
+            updateLogoColors(initialColor);
+        });
+
         themeToggle.addEventListener('change', (event) => {
           const color = event.target.checked ? 'black' : 'white';
-          const logoImages = document.querySelectorAll('.file-icon img');
-          logoImages.forEach(img => {
-            const parts = img.src.split('/');
-            parts.pop(); // Remove the current color
-            parts.push(color); // Add the new color
-            img.src = parts.join('/');
-          });
+          updateLogoColors(color);
           
           if (event.target.checked) {
             body.classList.add('light-mode');
