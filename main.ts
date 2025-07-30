@@ -15,54 +15,6 @@ async function listHtmlFiles(): Promise<string[]> {
   return htmlFiles;
 }
 
-// Map of specific filename bases or extensions to their logo names from the Simple Icons library
-const logoNameMap = new Map<string, string>([
-  // Specific filename bases (e.g., 'excel' from 'excel.html')
-  ['local_video_player', 'vlcmediaplayer'],
-  ['pdf_textify', 'adobeacrobat'],
-  ['dateformater', 'calendar'],
-  ['drinkwater', 'water'],
-  ['filespacer', 'folder'],
-  ['finance-tracker', 'money'],
-  ['full_page_calendar_task_scheduler', 'calendar'],
-  ['igrsp_proposal_downloader', 'download'],
-  ['material3-website-builder', 'materialdesign'],
-  ['online-excel', 'microsoftexcel'],
-  ['pdfrenamerv7', 'adobeacrobat'],
-  ['youtube', 'youtube'],
-
-  // Common file extensions
-  ['html', 'html5'],
-  ['css', 'css3'],
-  ['js', 'javascript'],
-  ['ts', 'typescript'],
-  ['json', 'json'],
-  ['md', 'markdown'],
-]);
-
-// Function to get the correct logo name based on the full filename
-function getFileLogoName(filename: string): string {
-  const lowercaseFilename = filename.toLowerCase();
-
-  // 1. Extract filename base and check for a match
-  const filenameWithoutExtension = lowercaseFilename.replace(/\.[^/.]+$/, '');
-  if (logoNameMap.has(filenameWithoutExtension)) {
-    return logoNameMap.get(filenameWithoutExtension)!;
-  }
-
-  // 2. Fallback to checking for common file extensions
-  const extensionMatch = lowercaseFilename.match(/\.([0-9a-z]+)$/i);
-  if (extensionMatch) {
-    const extension = extensionMatch[1];
-    if (logoNameMap.has(extension)) {
-      return logoNameMap.get(extension)!;
-    }
-  }
-
-  // 3. Final fallback to a generic file icon
-  return 'file';
-}
-
 const handler = async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
 
@@ -88,17 +40,9 @@ const handler = async (req: Request): Promise<Response> => {
   const gridItems = htmlFiles
     .map(
       (file) => {
-        const logoName = getFileLogoName(file);
-        // The logo color is determined by the theme via JavaScript after the page loads
-        const logoSrc = `https://cdn.simpleicons.org/${logoName}/white`;
-        const altText = `${file} Logo`;
-        
         return `
           <div class="grid-item">
             <a href="/${encodeURIComponent(file)}" target="_blank">
-              <div class="file-icon">
-                <img src="${logoSrc}" alt="${altText}" class="html-icon">
-              </div>
               <div class="file-name">${file}</div>
             </a>
           </div>
@@ -224,19 +168,6 @@ const handler = async (req: Request): Promise<Response> => {
           align-items: center;
           padding: 20px;
         }
-        .file-icon {
-          width: 80px;
-          height: 80px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          margin-bottom: 10px;
-        }
-        .html-icon {
-          max-width: 100%;
-          max-height: 100%;
-          object-fit: contain;
-        }
         .file-name {
           font-weight: bold;
           text-align: center;
@@ -355,34 +286,14 @@ const handler = async (req: Request): Promise<Response> => {
             listView.classList.remove('hidden');
             viewToggle.textContent = 'Switch to Grid View';
           } else {
-            gridView.classList.add('hidden');
-            listView.classList.remove('hidden');
+            gridView.classList.remove('hidden');
+            listView.classList.add('hidden');
             viewToggle.textContent = 'Switch to List View';
           }
           isGridView = !isGridView;
         });
 
-        // Function to update logo colors
-        function updateLogoColors(color) {
-            const logoImages = document.querySelectorAll('.file-icon img');
-            logoImages.forEach(img => {
-                const parts = img.src.split('/');
-                parts.pop(); // Remove the current color
-                parts.push(color); // Add the new color
-                img.src = parts.join('/');
-            });
-        }
-
-        // Set initial logo color on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            const initialColor = body.classList.contains('light-mode') ? 'black' : 'white';
-            updateLogoColors(initialColor);
-        });
-
         themeToggle.addEventListener('change', (event) => {
-          const color = event.target.checked ? 'black' : 'white';
-          updateLogoColors(color);
-          
           if (event.target.checked) {
             body.classList.add('light-mode');
             themeText.textContent = 'Light Mode';
