@@ -11,39 +11,42 @@ async function listHtmlFiles(): Promise<string[]> {
     }
   } catch (error) {
     console.error("Error reading directory:", error);
-    // Return empty array or handle error as appropriate
   }
   return htmlFiles;
 }
 
-// HTTP handler
 const handler = async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
 
-  // Serve the requested HTML file if the path matches a file
+  // Serve the requested HTML file
   if (url.pathname !== "/") {
     try {
       const filePath = decodeURIComponent(url.pathname.slice(1));
-      // Basic security check: prevent directory traversal
       if (filePath.includes("..")) {
-         return new Response("Invalid path", { status: 400 });
+        return new Response("Invalid path", { status: 400 });
       }
       const file = await Deno.readFile(filePath);
       const headers = new Headers();
       headers.set("Content-Type", "text/html");
       return new Response(file, { headers });
     } catch (error) {
-       console.error("Error serving file:", error);
-       return new Response("File not found", { status: 404 });
+      console.error("Error serving file:", error);
+      return new Response("File not found", { status: 404 });
     }
   }
 
-  // List all .html files in the directory
+  // Generate the main page with a grid of files
   const htmlFiles = await listHtmlFiles();
-  const links = htmlFiles
+  const gridItems = htmlFiles
     .map(
-      (file) =>
-        `<li><a href="/${encodeURIComponent(file)}" target="_blank">${file}</a></li>`,
+      (file) => `
+        <div class="grid-item">
+          <a href="/${encodeURIComponent(file)}" target="_blank">
+            <div class="file-icon">📄</div>
+            <div class="file-name">${file}</div>
+          </a>
+        </div>
+      `,
     )
     .join("");
 
@@ -60,62 +63,134 @@ const handler = async (req: Request): Promise<Response> => {
           line-height: 1.6;
           margin: 0;
           padding: 20px;
-          background-color: #f4f4f4;
+          background-color: #f0f2f5;
           color: #333;
         }
         .container {
-          max-width: 800px;
+          max-width: 1200px;
           margin: 40px auto;
-          background: #fff;
-          padding: 30px;
-          border-radius: 8px;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         h1 {
-          color: #0056b3;
+          color: #1a237e;
           text-align: center;
-          margin-bottom: 30px;
+          margin-bottom: 20px;
         }
-        ul {
+        .view-controls {
+          text-align: right;
+          margin-bottom: 20px;
+        }
+        .view-toggle {
+          padding: 8px 15px;
+          border: none;
+          background-color: #4CAF50;
+          color: white;
+          border-radius: 5px;
+          cursor: pointer;
+          font-size: 14px;
+        }
+        .view-toggle:hover {
+          background-color: #45a049;
+        }
+        /* Grid View Styling */
+        .grid-container {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 20px;
           list-style: none;
           padding: 0;
         }
-        li {
-          background: #e9e9e9;
+        .grid-item {
+          background: #fff;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          overflow: hidden;
+        }
+        .grid-item:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .grid-item a {
+          text-decoration: none;
+          color: #333;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 20px;
+        }
+        .file-icon {
+          font-size: 50px;
           margin-bottom: 10px;
-          padding: 12px 15px;
+        }
+        .file-name {
+          font-weight: bold;
+          text-align: center;
+          word-break: break-all;
+        }
+        /* List View Styling (for the toggle) */
+        .list-container {
+          list-style: none;
+          padding: 0;
+        }
+        .list-item {
+          background: #fff;
+          border: 1px solid #ddd;
           border-radius: 5px;
+          padding: 15px;
+          margin-bottom: 10px;
           transition: background-color 0.3s ease;
         }
-        li:hover {
-          background-color: #dcdcdc;
+        .list-item:hover {
+          background-color: #f9f9f9;
         }
-        a {
+        .list-item a {
           text-decoration: none;
           color: #007bff;
           font-weight: bold;
-          display: block; /* Make the whole list item clickable via the link */
+          display: block;
         }
-        a:hover {
-          text-decoration: underline;
-          color: #0056b3;
-        }
-        /* Optional: Add a subtle border to list items */
-        li {
-          border-left: 5px solid #007bff;
-        }
-         li:hover {
-          border-left-color: #0056b3;
+        /* Hide a container based on the class */
+        .hidden {
+          display: none;
         }
       </style>
     </head>
     <body>
       <div class="container">
         <h1>Available HTML Files</h1>
-        <ul>
-          ${links.length > 0 ? links : '<li>No HTML files found in the current directory.</li>'}
-        </ul>
+        <div class="view-controls">
+          <button id="viewToggle" class="view-toggle">Switch to List View</button>
+        </div>
+
+        <div id="gridView" class="grid-container">
+          ${htmlFiles.length > 0 ? gridItems : '<p style="text-align: center;">No HTML files found.</p>'}
+        </div>
+        
+        <div id="listView" class="list-container hidden">
+          ${htmlFiles.length > 0 ? htmlFiles.map(file => `<div class="list-item"><a href="/${encodeURIComponent(file)}" target="_blank">${file}</a></div>`).join('') : ''}
+        </div>
       </div>
+
+      <script>
+        const viewToggle = document.getElementById('viewToggle');
+        const gridView = document.getElementById('gridView');
+        const listView = document.getElementById('listView');
+        let isGridView = true;
+
+        viewToggle.addEventListener('click', () => {
+          if (isGridView) {
+            gridView.classList.add('hidden');
+            listView.classList.remove('hidden');
+            viewToggle.textContent = 'Switch to Grid View';
+          } else {
+            gridView.classList.remove('hidden');
+            listView.classList.add('hidden');
+            viewToggle.textContent = 'Switch to List View';
+          }
+          isGridView = !isGridView;
+        });
+      </script>
     </body>
     </html>
   `;
@@ -125,5 +200,4 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 console.log("Server running on http://localhost:8000");
-// Start the server
 serve(handler);
