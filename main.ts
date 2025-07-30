@@ -59,46 +59,54 @@ const handler = async (req: Request): Promise<Response> => {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Available HTML Files</title>
       <style>
-        /* Dark Mode - Default Styles */
+        /* Base styles for dark mode */
         body {
           font-family: 'Arial', sans-serif;
           line-height: 1.6;
           margin: 0;
           padding: 20px;
           background-color: #1a1a1a;
-          color: #4CAF50; /* Green color for default text */
           transition: background-color 0.3s, color 0.3s;
         }
+
         .container {
           max-width: 1200px;
           margin: 40px auto;
         }
+
         h1 {
-          color: #007bff; /* Blue for heading */
           text-align: center;
           margin-bottom: 20px;
         }
+
         .view-controls {
           display: flex;
           justify-content: flex-end;
           align-items: center;
           gap: 15px;
           margin-bottom: 20px;
+          flex-wrap: wrap;
         }
-        .view-toggle {
+
+        .view-toggle, .color-scheme-toggle {
           padding: 8px 15px;
           border: none;
-          background-color: #007bff; /* Blue button */
+          background-color: #333;
           color: white;
           border-radius: 5px;
           cursor: pointer;
           font-size: 14px;
           transition: background-color 0.3s;
         }
-        .view-toggle:hover {
-          background-color: #0056b3; /* Darker blue on hover */
+        .view-toggle:hover, .color-scheme-toggle:hover {
+          background-color: #555;
         }
         
+        .color-scheme-toggle.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
         /* Toggle Switch Styling */
         .theme-toggle-wrapper {
           display: flex;
@@ -115,7 +123,7 @@ const handler = async (req: Request): Promise<Response> => {
           display: block;
           width: 50px;
           height: 26px;
-          background-color: #007bff; /* Blue for the switch track */
+          background-color: #555;
           border-radius: 50px;
           position: relative;
           cursor: pointer;
@@ -133,7 +141,7 @@ const handler = async (req: Request): Promise<Response> => {
           transition: transform 0.3s;
         }
         .toggle-checkbox:checked + .toggle-label {
-          background-color: #4CAF50; /* Green when checked */
+          background-color: #4CAF50;
         }
         .toggle-checkbox:checked + .toggle-label:after {
           transform: translateX(24px);
@@ -164,7 +172,6 @@ const handler = async (req: Request): Promise<Response> => {
         }
         .grid-item a, .list-item a {
           text-decoration: none;
-          color: #4CAF50; /* Green for links in dark mode */
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -179,34 +186,81 @@ const handler = async (req: Request): Promise<Response> => {
           word-break: break-all;
         }
 
-        /* Light Mode - Optional Styles */
+        /* Default Theme (Blue/Green) */
+        body { color: #f4f4f4; }
+        h1 { color: #007bff; }
+        .view-toggle { background-color: #007bff; }
+        .view-toggle:hover { background-color: #0056b3; }
+        .grid-item a, .list-item a { color: #4CAF50; }
+        
         body.light-mode {
           background-color: #f0f2f5;
-          color: #007bff; /* Blue for default text */
+          color: #333;
         }
-        body.light-mode h1 {
-          color: #4CAF50; /* Green for heading */
-        }
-        body.light-mode .view-toggle {
-          background-color: #4CAF50; /* Green button */
-          color: white;
-        }
-        body.light-mode .view-toggle:hover {
-          background-color: #45a049; /* Darker green on hover */
-        }
-        body.light-mode .grid-item, body.light-mode .list-item {
-          background: #fff;
-          border: 1px solid #ddd;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        body.light-mode .grid-item:hover, body.light-mode .list-item:hover {
-          background-color: #f9f9f9;
-          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-        body.light-mode .grid-item a, body.light-mode .list-item a {
-          color: #007bff; /* Blue for links in light mode */
-        }
+        body.light-mode h1 { color: #4CAF50; }
+        body.light-mode .view-toggle { background-color: #4CAF50; }
+        body.light-mode .view-toggle:hover { background-color: #45a049; }
+        body.light-mode .grid-item, body.light-mode .list-item { background: #fff; border: 1px solid #ddd; }
+        body.light-mode .grid-item:hover, body.light-mode .list-item:hover { background-color: #f9f9f9; }
+        body.light-mode .grid-item a, body.light-mode .list-item a { color: #007bff; }
+
+        /* Monochromatic Theme */
+        body.mono-theme { color: #f0f0f0; }
+        body.mono-theme h1 { color: #b0b0b0; }
+        body.mono-theme .view-toggle { background-color: #b0b0b0; }
+        body.mono-theme .view-toggle:hover { background-color: #8c8c8c; }
+        body.mono-theme .grid-item, body.mono-theme .list-item { background: #2a2a2a; border: 1px solid #444; }
+        body.mono-theme .grid-item a, body.mono-theme .list-item a { color: #d0d0d0; }
         
+        body.mono-theme.light-mode {
+            background-color: #f0f2f5;
+            color: #444;
+        }
+        body.mono-theme.light-mode h1 { color: #8c8c8c; }
+        body.mono-theme.light-mode .view-toggle { background-color: #8c8c8c; }
+        body.mono-theme.light-mode .view-toggle:hover { background-color: #666; }
+        body.mono-theme.light-mode .grid-item, body.mono-theme.light-mode .list-item { background: #fff; border: 1px solid #ddd; }
+        body.mono-theme.light-mode .grid-item:hover, body.mono-theme.light-mode .list-item:hover { background-color: #f9f9f9; }
+        body.mono-theme.light-mode .grid-item a, body.mono-theme.light-mode .list-item a { color: #555; }
+
+        /* Analogous Theme (Blue-Green) */
+        body.analogous-theme { color: #e8f5e9; }
+        body.analogous-theme h1 { color: #00897b; }
+        body.analogous-theme .view-toggle { background-color: #00897b; }
+        body.analogous-theme .view-toggle:hover { background-color: #00695c; }
+        body.analogous-theme .grid-item, body.analogous-theme .list-item { background: #1a237e; border: 1px solid #3f51b5; }
+        body.analogous-theme .grid-item a, body.analogous-theme .list-item a { color: #4db6ac; }
+        
+        body.analogous-theme.light-mode {
+            background-color: #e3f2fd;
+            color: #1a237e;
+        }
+        body.analogous-theme.light-mode h1 { color: #00897b; }
+        body.analogous-theme.light-mode .view-toggle { background-color: #00897b; }
+        body.analogous-theme.light-mode .view-toggle:hover { background-color: #00695c; }
+        body.analogous-theme.light-mode .grid-item, body.analogous-theme.light-mode .list-item { background: #fff; border: 1px solid #ddd; }
+        body.analogous-theme.light-mode .grid-item:hover, body.analogous-theme.light-mode .list-item:hover { background-color: #e0f2f1; }
+        body.analogous-theme.light-mode .grid-item a, body.analogous-theme.light-mode .list-item a { color: #00897b; }
+
+        /* Complementary Theme (Blue-Orange) */
+        body.comp-theme { color: #fff3e0; }
+        body.comp-theme h1 { color: #e65100; }
+        body.comp-theme .view-toggle { background-color: #e65100; }
+        body.comp-theme .view-toggle:hover { background-color: #bf360c; }
+        body.comp-theme .grid-item, body.comp-theme .list-item { background: #01579b; border: 1px solid #0277bd; }
+        body.comp-theme .grid-item a, body.comp-theme .list-item a { color: #ffab40; }
+        
+        body.comp-theme.light-mode {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+        }
+        body.comp-theme.light-mode h1 { color: #e65100; }
+        body.comp-theme.light-mode .view-toggle { background-color: #e65100; }
+        body.comp-theme.light-mode .view-toggle:hover { background-color: #bf360c; }
+        body.comp-theme.light-mode .grid-item, body.comp-theme.light-mode .list-item { background: #fff; border: 1px solid #ddd; }
+        body.comp-theme.light-mode .grid-item:hover, body.comp-theme.light-mode .list-mode:hover { background-color: #fff3e0; }
+        body.comp-theme.light-mode .grid-item a, body.comp-theme.light-mode .list-item a { color: #e65100; }
+
         /* List View Specific Styling */
         .list-container {
           list-style: none;
@@ -232,6 +286,12 @@ const handler = async (req: Request): Promise<Response> => {
         <h1>Available HTML Files</h1>
         <div class="view-controls">
           <button id="viewToggle" class="view-toggle">Switch to List View</button>
+          <div class="theme-buttons">
+            <button class="color-scheme-toggle active" data-scheme="default">Default</button>
+            <button class="color-scheme-toggle" data-scheme="mono">Monochromatic</button>
+            <button class="color-scheme-toggle" data-scheme="analogous">Analogous</button>
+            <button class="color-scheme-toggle" data-scheme="comp">Complementary</button>
+          </div>
           <div class="theme-toggle-wrapper">
              <span id="themeText">Dark Mode</span>
              <input type="checkbox" id="themeToggle" class="toggle-checkbox">
@@ -255,16 +315,44 @@ const handler = async (req: Request): Promise<Response> => {
         const gridView = document.getElementById('gridView');
         const listView = document.getElementById('listView');
         const body = document.body;
+        const colorSchemeToggles = document.querySelectorAll('.color-scheme-toggle');
         
         let isGridView = true;
         
+        function applyTheme(theme) {
+            const currentScheme = localStorage.getItem('colorScheme') || 'default';
+            const isLightMode = theme === 'light-mode';
+
+            body.classList.remove('light-mode', 'mono-theme', 'analogous-theme', 'comp-theme');
+            
+            if (isLightMode) {
+                body.classList.add('light-mode');
+            }
+            if (currentScheme !== 'default') {
+                body.classList.add(currentScheme + '-theme');
+            }
+        }
+        
         // Load theme from local storage or default to dark
         const currentTheme = localStorage.getItem('theme');
+        const currentColor = localStorage.getItem('colorScheme');
+
         if (currentTheme === 'light-mode') {
-            body.classList.add('light-mode');
             themeToggle.checked = true;
             themeText.textContent = 'Light Mode';
         }
+        
+        if (currentColor) {
+            colorSchemeToggles.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.scheme === currentColor) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        // Apply initial theme on load
+        applyTheme(currentTheme);
 
         viewToggle.addEventListener('click', () => {
           if (isGridView) {
@@ -281,14 +369,27 @@ const handler = async (req: Request): Promise<Response> => {
 
         themeToggle.addEventListener('change', (event) => {
           if (event.target.checked) {
-            body.classList.add('light-mode');
             themeText.textContent = 'Light Mode';
             localStorage.setItem('theme', 'light-mode');
+            applyTheme('light-mode');
           } else {
-            body.classList.remove('light-mode');
             themeText.textContent = 'Dark Mode';
             localStorage.setItem('theme', 'dark-mode');
+            applyTheme('dark-mode');
           }
+        });
+
+        colorSchemeToggles.forEach(button => {
+            button.addEventListener('click', () => {
+                const scheme = button.dataset.scheme;
+                localStorage.setItem('colorScheme', scheme);
+                
+                colorSchemeToggles.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                const currentTheme = localStorage.getItem('theme') || 'dark-mode';
+                applyTheme(currentTheme);
+            });
         });
       </script>
     </body>
