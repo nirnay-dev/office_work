@@ -43,7 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
         return `
           <div class="grid-item">
             <a href="/${encodeURIComponent(file)}" target="_blank">
-              <div class="file-name">${file}</div>
+              <span class="file-name">${file}</span>
             </a>
           </div>
         `;
@@ -164,7 +164,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
         .grid-item a, .list-item a {
           text-decoration: none;
-          color: #f4f4f4;
+          color: #4CAF50; /* Green theme for links */
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -185,7 +185,7 @@ const handler = async (req: Request): Promise<Response> => {
           color: #333;
         }
         body.light-mode h1 {
-          color: #1a237e;
+          color: #1a237e; /* Blue theme for heading */
         }
         body.light-mode .view-toggle {
           background-color: #4CAF50;
@@ -204,7 +204,7 @@ const handler = async (req: Request): Promise<Response> => {
           box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
         body.light-mode .grid-item a, body.light-mode .list-item a {
-          color: #333;
+          color: #007bff; /* Blue theme for links */
         }
         
         /* List View Specific Styling */
@@ -244,7 +244,7 @@ const handler = async (req: Request): Promise<Response> => {
         </div>
         
         <div id="listView" class="list-container hidden">
-          ${htmlFiles.length > 0 ? htmlFiles.map(file => `<div class="list-item"><a href="/${encodeURIComponent(file)}" target="_blank">${file}</a></div>`).join('') : ''}
+          ${htmlFiles.length > 0 ? htmlFiles.map(file => `<div class="list-item"><a href="/${encodeURIComponent(file)}" target="_blank"><span class="file-name">${file}</span></a></div>`).join('') : ''}
         </div>
       </div>
 
