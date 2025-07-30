@@ -15,29 +15,47 @@ async function listHtmlFiles(): Promise<string[]> {
   return htmlFiles;
 }
 
-// Map of extensions/filenames to their corresponding logo name in the library
+// Map of specific filename bases or extensions to their logo names
 const logoNameMap = new Map<string, string>([
+  // Specific filename bases (e.g., 'excel' from 'excel.html')
+  ['excel', 'microsoftexcel'],
+  ['word', 'microsoftword'],
+  ['powerpoint', 'microsoftpowerpoint'],
+  ['deno', 'deno'],
+  ['readme', 'markdown'],
+
+  // Specific full filenames (e.g., 'main.ts')
+  ['main.ts', 'typescript'],
+  ['index.html', 'googlechrome'],
+
+  // Common file extensions
   ['html', 'html5'],
   ['css', 'css3'],
   ['js', 'javascript'],
   ['ts', 'typescript'],
   ['json', 'json'],
-  ['md', 'markdown'],
-  // Specific filename mappings
-  ['main.ts', 'deno'],
-  ['index.html', 'googlechrome']
+  ['md', 'markdown']
 ]);
 
 // Function to get the correct logo name based on the full filename
 function getFileLogoName(filename: string): string {
   const lowercaseFilename = filename.toLowerCase();
-  
-  // Check for specific filename matches first (e.g., 'main.ts')
+
+  // 1. Check for specific full filenames (e.g., 'main.ts')
   if (logoNameMap.has(lowercaseFilename)) {
     return logoNameMap.get(lowercaseFilename)!;
   }
   
-  // Fallback to checking for common file extensions
+  // 2. Extract filename base (without extension) and check for a match
+  const filenameBaseMatch = filename.match(/^([^.]+)/);
+  if (filenameBaseMatch) {
+    const filenameBase = filenameBaseMatch[1].toLowerCase();
+    if (logoNameMap.has(filenameBase)) {
+      return logoNameMap.get(filenameBase)!;
+    }
+  }
+
+  // 3. Fallback to checking for common file extensions
   const extensionMatch = filename.match(/\.([0-9a-z]+)$/i);
   if (extensionMatch) {
     const extension = extensionMatch[1].toLowerCase();
@@ -46,9 +64,10 @@ function getFileLogoName(filename: string): string {
     }
   }
 
-  // Final fallback to a generic file icon
+  // 4. Final fallback to a generic file icon
   return 'file';
 }
+
 
 const handler = async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
@@ -76,7 +95,6 @@ const handler = async (req: Request): Promise<Response> => {
     .map(
       (file) => {
         const logoName = getFileLogoName(file);
-        // Use a dynamic logo library URL (e.g., from Simple Icons)
         const logoSrc = `https://cdn.simpleicons.org/${logoName}/white`;
         const altText = `${file} Logo`;
         
@@ -328,7 +346,6 @@ const handler = async (req: Request): Promise<Response> => {
 
         let isGridView = true;
         
-        // Load theme from local storage or default to dark
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme === 'light-mode') {
             body.classList.add('light-mode');
