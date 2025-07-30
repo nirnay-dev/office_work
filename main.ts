@@ -17,16 +17,19 @@ async function listHtmlFiles(): Promise<string[]> {
 
 // Map of specific filename bases or extensions to their logo names
 const logoNameMap = new Map<string, string>([
-  // Specific filename bases (e.g., 'excel' from 'excel.html')
-  ['excel', 'microsoftexcel'],
-  ['word', 'microsoftword'],
-  ['powerpoint', 'microsoftpowerpoint'],
-  ['deno', 'deno'],
-  ['readme', 'markdown'],
-
-  // Specific full filenames (e.g., 'main.ts')
-  ['main.ts', 'typescript'],
-  ['index.html', 'googlechrome'],
+  // Specific filename bases
+  ['local_video_player', 'vlcmedia player'], // Assuming a generic video player logo
+  ['pdf_textify', 'adobeacrobatreader'],   // Assuming a PDF related logo
+  ['dateformater', 'timeanddate'],        // Assuming a date/time related logo
+  ['drinkwater', 'dropwizard'],           // Using a generic droplet, adjust if needed
+  ['filespacer', 'folder'],              // Using a generic folder/file icon
+  ['finance-tracker', 'money'],           // Using a generic money/finance icon
+  ['full_page_calendar_task_scheduler', 'calendaralt'], // Using a calendar icon
+  ['igrsp_proposal_downloader', 'download'],   // Using a download icon
+  ['material3-website-builder', 'materialdesign'], // Using Material Design logo
+  ['online-excel', 'microsoftexcel'],    // Excel logo
+  ['pdfrenamerv7', 'adobeacrobatreader'],  // PDF related logo
+  ['youtube', 'youtube'],                 // YouTube logo
 
   // Common file extensions
   ['html', 'html5'],
@@ -34,37 +37,43 @@ const logoNameMap = new Map<string, string>([
   ['js', 'javascript'],
   ['ts', 'typescript'],
   ['json', 'json'],
-  ['md', 'markdown']
+  ['md', 'markdown'],
 ]);
 
 // Function to get the correct logo name based on the full filename
 function getFileLogoName(filename: string): string {
   const lowercaseFilename = filename.toLowerCase();
 
-  // 1. Check for specific full filenames (e.g., 'main.ts')
+  // 1. Check for specific full filenames (without extension)
+  const filenameWithoutExtension = lowercaseFilename.replace(/\.html$/, '');
+  if (logoNameMap.has(filenameWithoutExtension)) {
+    return logoNameMap.get(filenameWithoutExtension)!;
+  }
+
+  // 2. Check for specific full filenames (e.g., 'main.ts')
   if (logoNameMap.has(lowercaseFilename)) {
     return logoNameMap.get(lowercaseFilename)!;
   }
-  
-  // 2. Extract filename base (without extension) and check for a match
+
+  // 3. Extract filename base and check for a match (for non-HTML files, though we are mostly dealing with HTML here)
   const filenameBaseMatch = filename.match(/^([^.]+)/);
   if (filenameBaseMatch) {
-    const filenameBase = filenameBaseMatch[1].toLowerCase();
+    const filenameBase = filenameBaseMatch.toLowerCase();
     if (logoNameMap.has(filenameBase)) {
       return logoNameMap.get(filenameBase)!;
     }
   }
 
-  // 3. Fallback to checking for common file extensions
+  // 4. Fallback to checking for common file extensions (though we've prioritized filename base for .html)
   const extensionMatch = filename.match(/\.([0-9a-z]+)$/i);
   if (extensionMatch) {
-    const extension = extensionMatch[1].toLowerCase();
-    if (logoNameMap.has(extension)) {
-      return logoNameMap.get(extension)!;
+    const extension = extensionMatch as string;
+    if (logoNameMap.has(extension.substring(1).toLowerCase())) {
+      return logoNameMap.get(extension.substring(1).toLowerCase())!;
     }
   }
 
-  // 4. Final fallback to a generic file icon
+  // 5. Final fallback to a generic file icon
   return 'file';
 }
 
@@ -95,9 +104,11 @@ const handler = async (req: Request): Promise<Response> => {
     .map(
       (file) => {
         const logoName = getFileLogoName(file);
-        const logoSrc = `https://cdn.simpleicons.org/${logoName}/white`;
+        const theme = localStorage.getItem('theme');
+        const color = theme === 'light-mode' ? 'black' : 'white';
+        const logoSrc = `https://cdn.simpleicons.org/${logoName}/${color}`;
         const altText = `${file} Logo`;
-        
+
         return `
           <div class="grid-item">
             <a href="/${encodeURIComponent(file)}" target="_blank">
@@ -159,7 +170,7 @@ const handler = async (req: Request): Promise<Response> => {
         .view-toggle:hover {
           background-color: #555;
         }
-        
+
         /* Toggle Switch Styling */
         .theme-toggle-wrapper {
           display: flex;
@@ -275,7 +286,7 @@ const handler = async (req: Request): Promise<Response> => {
         body.light-mode .grid-item a {
           color: #333;
         }
-        
+
         /* List View Styling (for the toggle) */
         .list-container {
           list-style: none;
@@ -308,7 +319,7 @@ const handler = async (req: Request): Promise<Response> => {
         body.light-mode .list-item a {
           color: #007bff;
         }
-        
+
         /* Hide a container based on the class */
         .hidden {
           display: none;
@@ -330,7 +341,7 @@ const handler = async (req: Request): Promise<Response> => {
         <div id="gridView" class="grid-container">
           ${htmlFiles.length > 0 ? gridItems : '<p style="text-align: center;">No HTML files found.</p>'}
         </div>
-        
+
         <div id="listView" class="list-container hidden">
           ${htmlFiles.length > 0 ? htmlFiles.map(file => `<div class="list-item"><a href="/${encodeURIComponent(file)}" target="_blank">${file}</a></div>`).join('') : ''}
         </div>
@@ -345,7 +356,7 @@ const handler = async (req: Request): Promise<Response> => {
         const body = document.body;
 
         let isGridView = true;
-        
+
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme === 'light-mode') {
             body.classList.add('light-mode');
@@ -367,6 +378,15 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
         themeToggle.addEventListener('change', (event) => {
+          const color = event.target.checked ? 'black' : 'white';
+          const logoImages = document.querySelectorAll('.file-icon img');
+          logoImages.forEach(img => {
+            const parts = img.src.split('/');
+            parts.pop(); // Remove the current color
+            parts.push(color); // Add the new color
+            img.src = parts.join('/');
+          });
+
           if (event.target.checked) {
             body.classList.add('light-mode');
             themeText.textContent = 'Light Mode';
@@ -381,10 +401,6 @@ const handler = async (req: Request): Promise<Response> => {
     </body>
     </html>
   `;
-  return new Response(html, {
-    headers: { "Content-Type": "text/html" },
-  });
-};
 
 console.log("Server running on http://localhost:8000");
 serve(handler);
