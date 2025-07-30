@@ -147,26 +147,31 @@ const handler = async (req: Request): Promise<Response> => {
           list-style: none;
           padding: 0;
         }
-        .grid-item {
+        /* Common style for both grid and list items */
+        .grid-item, .list-item {
           background: #2a2a2a;
           border: 1px solid #444;
           border-radius: 8px;
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
           transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s;
           overflow: hidden;
+          text-align: center;
         }
-        .grid-item:hover {
+        .grid-item:hover, .list-item:hover {
           transform: translateY(-5px);
           box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
           background-color: #3a3a3a;
         }
-        .grid-item a {
+        .grid-item a, .list-item a {
           text-decoration: none;
           color: #f4f4f4;
           display: flex;
           flex-direction: column;
           align-items: center;
+          justify-content: center;
           padding: 20px;
+          height: 100%;
+          box-sizing: border-box;
         }
         .file-name {
           font-weight: bold;
@@ -189,50 +194,31 @@ const handler = async (req: Request): Promise<Response> => {
         body.light-mode .view-toggle:hover {
           background-color: #45a049;
         }
-        body.light-mode .grid-item {
+        body.light-mode .grid-item, body.light-mode .list-item {
           background: #fff;
           border: 1px solid #ddd;
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        body.light-mode .grid-item:hover {
+        body.light-mode .grid-item:hover, body.light-mode .list-item:hover {
           background-color: #f9f9f9;
           box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
-        body.light-mode .grid-item a {
+        body.light-mode .grid-item a, body.light-mode .list-item a {
           color: #333;
         }
         
-        /* List View Styling (for the toggle) */
+        /* List View Specific Styling */
         .list-container {
           list-style: none;
           padding: 0;
-        }
-        .list-item {
-          background: #2a2a2a;
-          border: 1px solid #444;
-          border-radius: 5px;
-          padding: 15px;
-          margin-bottom: 10px;
-          transition: background-color 0.3s ease;
-        }
-        .list-item:hover {
-          background-color: #3a3a3a;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
         }
         .list-item a {
-          text-decoration: none;
-          color: #4CAF50;
-          font-weight: bold;
-          display: block;
-        }
-        body.light-mode .list-item {
-          background: #fff;
-          border: 1px solid #ddd;
-        }
-        body.light-mode .list-item:hover {
-          background-color: #f9f9f9;
-        }
-        body.light-mode .list-item a {
-          color: #007bff;
+          flex-direction: row;
+          justify-content: flex-start;
+          padding: 15px;
         }
         
         /* Hide a container based on the class */
