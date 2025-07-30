@@ -15,30 +15,39 @@ async function listHtmlFiles(): Promise<string[]> {
   return htmlFiles;
 }
 
-// Map of file extensions to logo URLs and alt text
+// Map of specific filenames to logo URLs and alt text
 const logoMap = new Map<string, { src: string; alt: string }>([
-  ['.html', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/HTML5_logo_and_wordmark.svg/100px-HTML5_logo_and_wordmark.svg.png', alt: 'HTML Icon' }],
-  ['.css', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/CSS3_logo.svg/100px-CSS3_logo.svg.png', alt: 'CSS Icon' }],
-  ['.js', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/JavaScript-logo.png/100px-JavaScript-logo.png', alt: 'JavaScript Icon' }],
-  ['.ts', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Typescript_logo_2020.svg/100px-Typescript_logo_2020.svg.png', alt: 'TypeScript Icon' }],
-  ['.json', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/JSON_logo.svg/100px-JSON_logo.svg.png', alt: 'JSON Icon' }],
-  ['.md', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/100px-Markdown-mark.svg.png', alt: 'Markdown Icon' }],
-  ['.txt', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Text-x-generic.svg/100px-Text-x-generic.svg.png', alt: 'Text File Icon' }],
+  ['index.html', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/HTML5_logo_and_wordmark.svg/100px-HTML5_logo_and_wordmark.svg.png', alt: 'Index HTML Icon' }],
+  ['main.ts', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Typescript_logo_2020.svg/100px-Typescript_logo_2020.svg.png', alt: 'Main TypeScript Icon' }],
+  ['style.css', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/CSS3_logo.svg/100px-CSS3_logo.svg.png', alt: 'Style CSS Icon' }],
+  ['script.js', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/JavaScript-logo.png/100px-JavaScript-logo.png', alt: 'JavaScript Icon' }],
+  ['deno.json', { src: 'https://deno.land/logo.svg', alt: 'Deno Icon' }],
+  ['readme.md', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/100px-Markdown-mark.svg.png', alt: 'README Markdown Icon' }],
+  ['package.json', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/JSON_logo.svg/100px-JSON_logo.svg.png', alt: 'package.json Icon' }],
+  // Fallback for any other HTML files
+  ['default.html', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/HTML5_logo_and_wordmark.svg/100px-HTML5_logo_and_wordmark.svg.png', alt: 'HTML Icon' }],
+  // Default for any other file
   ['default', { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Text-x-generic-template.svg/100px-Text-x-generic-template.svg.png', alt: 'Generic File Icon' }]
 ]);
 
-// Function to get the correct logo based on file name
+// Function to get the correct logo based on the full filename
 function getFileLogo(filename: string): { src: string; alt: string } {
-  const extensionMatch = filename.match(/\.([0-9a-z]+)(?=[?#])?$/i) || filename.match(/\.([0-9a-z]+)$/i);
-  const extension = extensionMatch ? `.${extensionMatch[1].toLowerCase()}` : 'default';
+  // Check for an exact filename match first
+  if (logoMap.has(filename.toLowerCase())) {
+    return logoMap.get(filename.toLowerCase())!;
+  }
   
+  // As a fallback, check for common file extensions.
+  const extensionMatch = filename.match(/\.([0-9a-z]+)(?=[?#])?$/i) || filename.match(/\.([0-9a-z]+)$/i);
+  const extension = extensionMatch ? `default.${extensionMatch[1].toLowerCase()}` : 'default';
+
   return logoMap.get(extension) || logoMap.get('default')!;
 }
 
 const handler = async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
 
-  // Serve the requested HTML file
+  // Serve the requested file
   if (url.pathname !== "/") {
     try {
       const filePath = decodeURIComponent(url.pathname.slice(1));
