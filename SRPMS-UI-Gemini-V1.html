@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sponsored Research Project Management System (SRPMS)</title>
+    <style>
+        /* General Body Styling */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* --- Login Screen Styling --- */
+        #login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); /* Gradient background */
+        }
+
+        .login-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+
+        .login-container h2 {
+            margin-bottom: 28px;
+            color: #1a1a1a;
+            font-size: 2em;
+            font-weight: 600;
+        }
+
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
+            width: calc(100% - 24px); /* Account for padding */
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .login-container button[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            background-color: #007bff; /* Primary blue */
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .login-container button[type="submit"]:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .login-container a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 18px;
+            display: block;
+            transition: color 0.2s ease;
+        }
+
+        .login-container a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        /* --- Dashboard Layout --- */
+        #dashboard-screen {
+            display: none; /* Hidden by default, shown after login */
+            grid-template-columns: 240px 1fr; /* Sidebar width and main content */
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        /* Sidebar Styling */
+        #sidebar {
+            background-color: #2c3e50; /* Darker blue/grey */
+            color: #ecf0f1;
+            padding: 20px 0; /* Vertical padding only */
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sidebar h3 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #fff;
+            font-size: 1.8em;
+            font-weight: 700;
+            padding: 0 20px;
+        }
+
+        #sidebar nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1; /* Allows nav to take available space */
+        }
+
+        #sidebar nav ul li a {
+            display: block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #ecf0f1;
+            border-radius: 0 50px 50px 0; /* Rounded right corner */
+            margin-bottom: 8px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        #sidebar nav ul li a.active,
+        #sidebar nav ul li a:hover {
+            background-color: #007bff; /* Highlight active/hovered link */
+            color: #fff;
+        }
+
+        /* Main Content Area */
+        #main-content {
+            padding: 30px;
+            overflow-y: auto; /* Enable scrolling for content */
+            background-color: #f8f9fa;
+        }
+
+        #main-content h1 {
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            font-size: 2.5em;
+            font-weight: 700;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 15px;
+        }
+
+        /* Card Component */
+        .card {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Project List Specific Styling */
+        .project-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .project-card {
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .project-card h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #007bff;
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+
+        .project-card p {
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .project-card .progress-bar-container {
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            height: 10px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .project-card .progress-bar {
+            height: 100%;
+            background-color: #28a745; /* Green for progress */
+            border-radius: 5px;
+            text-align: center;
+            color: white;
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* Form Styling for Add Project */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group textarea,
+        .form-group select {
+            width: calc(100% - 22px); /* Account for padding and border */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Buttons */
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .button-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .button-primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+        
+        .button-danger { /* Style for logout button */
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .button-danger:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+        }
+
+        /* --- Modal Styling --- */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto; /* Center vertically and horizontally */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            animation-name: animatetop;
+            animation-duration: 0.4s;
+        }
+
+        @keyframes animatetop {
+            from {top: -300px; opacity: 0}
+            to {top: 0; opacity: 1}
+        }
+        
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 32px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #333;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            #dashboard-screen {
+                grid-template-columns: 1fr; /* Stack sidebar and main content */
+            }
+
+            #sidebar {
+                width: 100%;
+                height: auto;
+                flex-direction: row; /* Horizontal sidebar for mobile */
+                padding: 10px 0;
+                justify-content: center;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+            #sidebar h3 {
+                display: none; /* Hide title on small screens */
+            }
+            #sidebar nav ul {
+                display: flex; /* Display nav items horizontally */
+                flex-wrap: wrap; /* Allow wrapping if many items */
+                justify-content: center;
+            }
+            #sidebar nav ul li a {
+                padding: 10px 15px;
+                border-radius: 5px; /* More standard rounding */
+                margin: 5px;
+            }
+
+            #main-content {
+                padding: 20px;
+            }
+
+            .login-container {
+                padding: 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 20px;
+            }
+            .login-container h2 {
+                font-size: 1.8em;
+            }
+            #main-content h1 {
+                font-size: 2em;
+            }
+            .project-list {
+                grid-template-columns: 1fr; /* Single column for very small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div class="login-container">
+            <h2>SRPMS Login</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <input type="text" id="username" placeholder="Username (e.g., admin, pm, team)" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Password (any for demo)" required>
+                </div>
+                <button type="submit">Login</button>
+                <a href="#">Forgot Password?</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen">
+        <aside id="sidebar">
+            <h3>SRPMS</h3>
+            <nav>
+                <ul>
+                    <li><a href="#" class="nav-link active" data-page="dashboard">Dashboard</a></li>
+                    <li><a href="#" class="nav-link" data-page="projects">Projects</a></li>
+                    <li><a href="#" class="nav-link" data-page="tasks">Tasks</a></li>
+                    <li><a href="#" class="nav-link" data-page="documents">Documents</a></li>
+                    <li><a href="#" class="nav-link" data-page="reports">Reports</a></li>
+                    <li><a href="#" class="nav-link button-danger" data-page="logout">Logout</a></li> <!-- Added Logout Button -->
+                </ul>
+            </nav>
+        </aside>
+        <main id="main-content">
+            <!-- Content will be dynamically loaded here -->
+        </main>
+    </div>
+
+    <!-- Add Project Modal -->
+    <div id="addProjectModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('addProjectModal')">&times;</span>
+            <h3>Add New Project</h3>
+            <form id="addProjectForm">
+                <div class="form-group">
+                    <label for="projectTitle">Project Title</label>
+                    <input type="text" id="projectTitle" placeholder="e.g., Quantum Computing Research" required>
+                </div>
+                <div class="form-group">
+                    <label for="projectDescription">Description</label>
+                    <textarea id="projectDescription" placeholder="Brief description of the project"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="projectManager">Project Manager</label>
+                    <input type="text" id="projectManager" placeholder="Assigned Manager" value="Current User (PM/Admin)" readonly>
+                </div>
+                 <div class="form-group">
+                    <label for="teamMembers">Team Members (comma-separated)</label>
+                    <input type="text" id="teamMembers" placeholder="e.g., Alice, Bob, Charlie">
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="projectCategory">Category</label>
+                    <select id="projectCategory">
+                        <option value="research">Research</option>
+                        <option value="development">Development</option>
+                        <option value="internal">Internal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="projectPriority">Priority</label>
+                    <select id="projectPriority">
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+                <button type="submit" class="button button-primary">Save Project</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Message/Alert Modal -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('messageModal')">&times;</span>
+            <p id="modalMessage"></p>
+        </div>
+    </div>
+
+
+    <script>
+        // Sample data to simulate a database (persists only for current session)
+        let projects = [
+            { id: 1, title: 'Sponsored Research Project Alpha', status: 'In Progress', manager: 'Ankita Patel', progress: 65, category: 'Research', priority: 'High', description: 'Development of advanced algorithms for space communication.', startDate: '2023-01-15', endDate: '2024-12-31', teamMembers: ['Alice', 'Bob'] },
+            { id: 2, title: 'Management System Development', status: 'Completed', manager: 'Abha Chhabra', progress: 100, category: 'Development', priority: 'High', description: 'Internal tool for task and resource allocation.', startDate: '2022-03-01', endDate: '2023-06-30', teamMembers: ['Charlie', 'David'] },
+            { id: 3, title: 'Satellite Data Analysis Tool', status: 'Pending', manager: 'Ankita Patel', progress: 10, category: 'Research', priority: 'Medium', description: 'New software for real-time satellite image processing.', startDate: '2024-05-01', endDate: '2025-04-30', teamMembers: ['Eve'] }
+        ];
+
+        let tasks = [
+            { id: 1, projectId: 1, title: 'Develop Algorithm Module A', assignee: 'Alice', dueDate: '2024-08-30', status: 'In Progress', description: 'Core algorithm development for signal processing.' },
+            { id: 2, projectId: 1, title: 'Data Collection Phase', assignee: 'Bob', dueDate: '2024-09-15', status: 'To-Do', description: 'Gather relevant datasets for testing.' },
+            { id: 3, projectId: 2, title: 'UI Design Review', assignee: 'Charlie', dueDate: '2023-04-10', status: 'Completed', description: 'Final review of user interface designs.' },
+            { id: 4, projectId: 3, title: 'System Architecture Design', assignee: 'Eve', dueDate: '2024-06-30', status: 'Completed', description: 'Initial high-level design for the new tool.' }
+        ];
+
+        let documents = [
+            { id: 1, projectId: 1, name: 'Project Alpha Requirements.pdf', version: 1.2, uploader: 'Ankita Patel', uploadDate: '2023-02-01' },
+            { id: 2, projectId: 1, name: 'Algorithm Spec v1.0.docx', version: 1.0, uploader: 'Alice', uploadDate: '2023-07-10' },
+            { id: 3, projectId: 2, name: 'SRPMS User Manual.pdf', version: 1.0, uploader: 'Abha Chhabra', uploadDate: '2023-07-15' }
+        ];
+
+        const userRoles = {
+            'admin': 'Administrator',
+            'pm': 'Project Manager',
+            'team': 'Team Member'
+        };
+
+        let currentUser = { username: '', role: '' };
+
+        // --- Event Listeners ---
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const usernameInput = document.getElementById('username').value.toLowerCase();
+            const passwordInput = document.getElementById('password').value; // Password is not validated for demo
+
+            if (userRoles[usernameInput]) {
+                currentUser.username = usernameInput;
+                currentUser.role = userRoles[usernameInput];
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard-screen').style.display = 'grid';
+                showPage('dashboard');
+            } else {
+                showMessageModal('Invalid username or password. Please try again.');
+            }
+        });
+
+        // Add event listeners for navigation links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                const page = this.dataset.page;
+                if (page === 'logout') {
+                    handleLogout();
+                    return;
+                }
+                // Remove 'active' class from all links
+                document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
+                // Add 'active' class to the clicked link
+                this.classList.add('active');
+                showPage(page);
+            });
+        });
+
+        document.getElementById('addProjectForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const newProject = {
+                id: projects.length + 1,
+                title: document.getElementById('projectTitle').value,
+                description: document.getElementById('projectDescription').value,
+                manager: document.getElementById('projectManager').value,
+                teamMembers: document.getElementById('teamMembers').value.split(',').map(m => m.trim()),
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                category: document.getElementById('projectCategory').value,
+                priority: document.getElementById('projectPriority').value,
+                status: 'Proposed', // Default status for new projects
+                progress: 0
+            };
+            projects.push(newProject);
+            closeModal('addProjectModal');
+            showMessageModal('Project "' + newProject.title + '" added successfully!');
+            showPage('projects'); // Re-render projects list to show the new one
+        });
+
+        // --- UI Rendering Functions ---
+        function showPage(page) {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = ''; // Clear previous content
+
+            switch (page) {
+                case 'dashboard':
+                    renderDashboard();
+                    break;
+                case 'projects':
+                    renderProjects();
+                    break;
+                case 'tasks':
+                    renderTasks();
+                    break;
+                case 'documents':
+                    renderDocuments();
+                    break;
+                case 'reports':
+                    renderReports();
+                    break;
+            }
+        }
+
+        function renderDashboard() {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `
+                <h1>Dashboard</h1>
+                <div class="card">
+                    <h3>Welcome, ${currentUser.role}! 👋</h3>
+                    <p>This is your personalized dashboard. Here you can see an overview of your projects, tasks, and recent activities.</p>
+                </div>
+                <div class="card">
+                    <h3>Quick Stats</h3>
+                    <p>Total Projects: ${projects.length}</p>
+                    <p>Open Tasks: ${tasks.filter(t => t.status !== 'Completed').length}</p>
+                    <p>Documents Uploaded: ${documents.length}</p>
+                </div>
+            `;
+
+            if (currentUser.role === 'Project Manager') {
+                const managerProjects = projects.filter(p => p.manager === 'Ankita Patel'); // Using static manager name for demo
+                mainContent.innerHTML += `
+                    <div class="card">
+                        <h3>My Managed Projects</h3>
+                        <p>You are managing ${managerProjects.length} projects.</p>
+                        <ul>
+                            ${managerProjects.map(p => `<li>${p.title} (${p.status})</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            } else if (currentUser.role === 'Team Member') {
+                const myTasks = tasks.filter(t => t.assignee === currentUser.username); // Simplified assignee check
+                mainContent.innerHTML += `
+                    <div class="card">
+                        <h3>My Assigned Tasks</h3>
+                        <p>You have ${myTasks.length} tasks assigned.</p>
+                        <ul>
+                            ${myTasks.map(t => `<li>${t.title} (Due: ${t.dueDate}, Status: ${t.status})</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
+        function renderProjects() {
+            const mainContent = document.getElementById('main-content');
+            let projectsHTML = '<h1>Projects</h1>';
+
+            if (currentUser.role === 'Project Manager' || currentUser.role === 'Administrator') {
+                projectsHTML += '<button class="button button-primary" onclick="openModal(\'addProjectModal\')">Add New Project</button>';
+            }
+
+            projectsHTML += '<div class="project-list">';
+            projects.forEach(project => {
+                projectsHTML += `
+                    <div class="card project-card">
+                        <h4>${project.title}</h4>
+                        <p><strong>Manager:</strong> ${project.manager}</p>
+                        <p><strong>Status:</strong> ${project.status}</p>
+                        <p><strong>Category:</strong> ${project.category}</p>
+                        <p><strong>Priority:</strong> ${project.priority}</p>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: ${project.progress}%;"></div>
+                        </div>
+                        <p style="text-align: right; font-size: 0.8em; margin-top: 5px;">${project.progress}% Complete</p>
+                        <button class="button button-primary" style="margin-top: 15px;" onclick="viewProjectDetails(${project.id})">View Details</button>
+                    </div>
+                `;
+            });
+            projectsHTML += '</div>';
+            mainContent.innerHTML = projectsHTML;
+        }
+
+        function viewProjectDetails(projectId) {
+            const project = projects.find(p => p.id === projectId);
+            if (!project) {
+                showMessageModal('Project not found!');
+                return;
+            }
+
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `
+                <h1>Project: ${project.title}</h1>
+                <div class="card">
+                    <h3>Overview</h3>
+                    <p><strong>Description:</strong> ${project.description || 'N/A'}</p>
+                    <p><strong>Manager:</strong> ${project.manager}</p>
+                    <p><strong>Status:</strong> ${project.status}</p>
+                    <p><strong>Category:</strong> ${project.category}</p>
+                    <p><strong>Priority:</strong> ${project.priority}</p>
+                    <p><strong>Start Date:</strong> ${project.startDate}</p>
+                    <p><strong>End Date:</strong> ${project.endDate}</p>
+                    <p><strong>Team Members:</strong> ${project.teamMembers.join(', ') || 'N/A'}</p>
+                    <div class="progress-bar-container" style="height: 15px; margin-top: 20px;">
+                        <div class="progress-bar" style="width: ${project.progress}%;"></div>
+                    </div>
+                    <p style="text-align: right; font-size: 0.9em; margin-top: 5px;">${project.progress}% Complete</p>
+                </div>
+
+                <div class="card">
+                    <h3>Tasks for this Project</h3>
+                    <ul>
+                        ${tasks.filter(t => t.projectId === projectId).map(t => `
+                            <li><strong>${t.title}</strong> (Assignee: ${t.assignee}, Due: ${t.dueDate}, Status: ${t.status})</li>
+                        `).join('') || '<li>No tasks assigned yet.</li>'}
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>Documents</h3>
+                    <ul>
+                        ${documents.filter(d => d.projectId === projectId).map(d => `
+                            <li>${d.name} (v${d.version}) - Uploaded by ${d.uploader} on ${d.uploadDate}</li>
+                        `).join('') || '<li>No documents uploaded yet.</li>'}
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>Communication & Collaboration</h3>
+                    <p>This section would feature messaging or discussion forums.</p>
+                    <textarea placeholder="Type your message here..." style="width: calc(100% - 22px); height: 80px; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></textarea>
+                    <button class="button button-primary" style="margin-top: 10px;">Send Message</button>
+                </div>
+            `;
+        }
+
+        function renderTasks() {
+            const mainContent = document.getElementById('main-content');
+            let tasksHTML = '<h1>Tasks</h1>';
+            tasksHTML += `<div class="card">
+                <h3>Your Assigned Tasks</h3>
+                <p>Viewing tasks for ${currentUser.username} (${currentUser.role}).</p>
+                <ul>
+                    ${tasks.filter(t => t.assignee === currentUser.username || currentUser.role === 'Administrator' || currentUser.role === 'Project Manager') // Simplified filter
+                      .map(t => `
+                        <li>
+                            <strong>${t.title}</strong> (Project ID: ${t.projectId}) <br>
+                            Assignee: ${t.assignee} | Due Date: ${t.dueDate} | Status: ${t.status}<br>
+                            <em>${t.description}</em>
+                        </li>
+                    `).join('') || '<li>No tasks found.</li>'}
+                </ul>
+                </div>`;
+            mainContent.innerHTML = tasksHTML;
+        }
+
+        function renderDocuments() {
+            const mainContent = document.getElementById('main-content');
+            let documentsHTML = '<h1>Documents</h1>';
+            documentsHTML += `<div class="card">
+                <h3>Project Documents</h3>
+                <ul>
+                    ${documents.map(d => `
+                        <li>
+                            <strong>${d.name}</strong> (v${d.version}) <br>
+                            Uploaded by ${d.uploader} on ${d.uploadDate}
+                        </li>
+                    `).join('') || '<li>No documents uploaded.</li>'}
+                </ul>
+                <h4 style="margin-top: 25px;">Upload New Document</h4>
+                <div class="form-group">
+                    <label for="uploadFile">Select File</label>
+                    <input type="file" id="uploadFile">
+                </div>
+                <div class="form-group">
+                    <label for="docProject">Associate with Project</label>
+                    <select id="docProject">
+                        ${projects.map(p => `<option value="${p.id}">${p.title}</option>`).join('')}
+                    </select>
+                </div>
+                <button class="button button-primary">Upload Document</button>
+                </div>`;
+            mainContent.innerHTML = documentsHTML;
+        }
+
+        function renderReports() {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `
+                <h1>Reports & Analytics</h1>
+                <div class="card">
+                    <h3>Project Status Report</h3>
+                    <p>Generate reports on project progress, resource allocation, and overall status.</p>
+                    <button class="button button-primary">Generate Status Report</button>
+                </div>
+                <div class="card">
+                    <h3>Data Visualization</h3>
+                    <p>Placeholder for charts and graphs showing project trends and analytics.</p>
+                    <div style="background-color: #e9ecef; height: 200px; display: flex; justify-content: center; align-items: center; border-radius: 5px;">
+                        <span>[Chart Placeholder]</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Customizable Dashboards</h3>
+                    <p>Design your own dashboards with key metrics relevant to your role.</p>
+                    <button class="button button-primary">Customize Dashboard</button>
+                </div>
+            `;
+        }
+
+        // --- Modal Control Functions ---
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex'; // Use flex to center
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function showMessageModal(message) {
+            document.getElementById('modalMessage').innerText = message;
+            openModal('messageModal');
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        });
+
+        // --- Logout Function ---
+        function handleLogout() {
+            // Reset current user data
+            currentUser = { username: '', role: '' };
+            // Hide dashboard, show login screen
+            document.getElementById('dashboard-screen').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+            // Clear input fields on login form for next login
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            // Reset active state for sidebar links
+            document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
+            document.querySelector('.nav-link[data-page="dashboard"]').classList.add('active'); // Set dashboard as default active
+            showMessageModal('You have been logged out.');
+        }
+    </script>
+</body>
+</html>
