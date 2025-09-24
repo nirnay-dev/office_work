@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Data Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            background-image: linear-gradient(to bottom right, #e0f2fe, #f0f4f8);
+        }
+        .container {
+            max-width: 900px;
+        }
+        table {
+            width: 100%;
+        }
+        th, td {
+            text-align: left;
+            padding: 16px;
+            border: 1px solid #d1d5db;
+            transition: background-color 0.2s ease-in-out;
+        }
+        th {
+            background-color: #e2e8f0;
+            font-weight: 600;
+        }
+        [contenteditable]:hover {
+            background-color: #f0f4f8;
+            cursor: text;
+        }
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .header-cell {
+            background-color: #e2e8f0;
+            font-weight: 600;
+            color: #4b5563;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Main Container -->
+    <div class="container mx-auto bg-white rounded-2xl shadow-2xl p-8 space-y-8 border border-gray-200">
+        <h1 class="text-4xl font-extrabold text-center text-gray-900 drop-shadow-sm">Local Data Editor</h1>
+        <p class="text-center text-gray-600 max-w-lg mx-auto">Load a local CSV file, edit the data directly in the table, and download the updated version to your computer.</p>
+        
+        <!-- File Input and Controls -->
+        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 space-y-4">
+            <h2 class="text-xl font-semibold text-gray-800">1. Select a CSV File</h2>
+            <div class="flex flex-col sm:flex-row gap-4 items-center">
+                <label for="file-input" class="flex-1 text-center bg-indigo-600 text-white font-medium px-6 py-3 rounded-xl shadow-md cursor-pointer hover:bg-indigo-700 transition duration-300 transform hover:scale-105 active:scale-95">
+                    Browse Files
+                </label>
+                <input type="file" id="file-input" class="hidden">
+                <button id="process-btn" class="w-full sm:w-auto bg-gray-300 text-gray-800 font-medium px-6 py-3 rounded-xl shadow-md cursor-not-allowed transition duration-300 disabled:bg-gray-300 disabled:text-gray-800 disabled:cursor-not-allowed">
+                    Display Data
+                </button>
+            </div>
+            <p id="loading-message" class="text-sm text-gray-500 text-center sm:text-left pt-2">No file selected.</p>
+        </div>
+
+        <!-- Data Display and Download Area -->
+        <div id="data-section" class="hidden">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">2. Edit and Download</h2>
+            <!-- Download Button moved to the top of the data section -->
+            <div class="flex justify-end mb-6">
+                 <button id="download-btn" class="bg-green-600 text-white font-medium px-8 py-3 rounded-xl shadow-lg hover:bg-green-700 transition duration-300 transform hover:scale-105 active:scale-95">
+                    Download Updated CSV
+                </button>
+            </div>
+            <div id="data-display" class="bg-white rounded-xl border border-gray-200 overflow-x-auto shadow-inner">
+                <!-- Table will be rendered here by JavaScript -->
+            </div>
+        </div>
+       
+        <!-- Notification Message Box -->
+        <div id="notification-box" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg opacity-0 transition-all duration-300 ease-in-out pointer-events-none z-50">
+            Notification
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const processBtn = document.getElementById('process-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const dataSection = document.getElementById('data-section');
+        const dataDisplay = document.getElementById('data-display');
+        const loadingMessage = document.getElementById('loading-message');
+        const notificationBox = document.getElementById('notification-box');
+        
+        // Function to show a temporary notification
+        const showNotification = (message) => {
+            notificationBox.textContent = message;
+            notificationBox.classList.remove('opacity-0', 'pointer-events-none');
+            notificationBox.classList.add('opacity-100');
+            setTimeout(() => {
+                notificationBox.classList.remove('opacity-100');
+                notificationBox.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        };
+
+        // Enable/disable the process button based on file selection
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                processBtn.disabled = false;
+                processBtn.classList.remove('bg-gray-300', 'text-gray-800', 'cursor-not-allowed');
+                processBtn.classList.add('bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
+                loadingMessage.textContent = `File selected: ${file.name}`;
+                if (!file.name.endsWith('.csv')) {
+                    showNotification("Please select a .csv file.");
+                    processBtn.disabled = true;
+                }
+            } else {
+                processBtn.disabled = true;
+                processBtn.classList.remove('bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
+                processBtn.classList.add('bg-gray-300', 'text-gray-800', 'cursor-not-allowed');
+                loadingMessage.textContent = 'No file selected.';
+                dataSection.classList.add('hidden');
+            }
+        });
+
+        // Function to parse CSV text into a structured array
+        const parseCSV = (text) => {
+            const rows = text.trim().split(/\r?\n/).map(row => row.split(',').map(cell => cell.trim()));
+            if (rows.length === 0) return { headers: [], data: [] };
+            
+            const headers = rows[0];
+            const data = rows.slice(1);
+            
+            const isValid = data.every(row => row.length === headers.length);
+            if (!isValid) {
+                console.error("CSV parsing error: Rows have inconsistent column counts.");
+                return null;
+            }
+
+            return { headers, data };
+        };
+
+        // Function to display the parsed data as an HTML table with editable cells
+        const displayDataAsTable = (parsedData) => {
+            if (!parsedData || parsedData.data.length === 0) {
+                dataDisplay.innerHTML = '<p class="p-6 text-gray-500 text-center">No data found in the file or failed to parse.</p>';
+                return;
+            }
+            
+            const table = document.createElement('table');
+            table.classList.add('min-w-full', 'rounded-lg', 'overflow-hidden');
+
+            const tbody = document.createElement('tbody');
+            
+            // Create the header row, which is now editable
+            const headerRow = tbody.insertRow();
+            parsedData.headers.forEach(headerText => {
+                const td = headerRow.insertCell();
+                td.textContent = headerText;
+                td.classList.add('px-6', 'py-4', 'text-left', 'text-xs', 'font-medium', 'text-gray-600', 'uppercase', 'tracking-wider', 'header-cell');
+                td.setAttribute('contenteditable', 'true');
+            });
+
+            // Create the rest of the table body (also editable)
+            parsedData.data.forEach(rowData => {
+                const tr = tbody.insertRow();
+                rowData.forEach(cellData => {
+                    const td = tr.insertCell();
+                    td.textContent = cellData;
+                    td.classList.add('px-6', 'py-4', 'text-sm', 'text-gray-900', 'border');
+                    td.setAttribute('contenteditable', 'true');
+                });
+            });
+
+            table.appendChild(tbody);
+            dataDisplay.innerHTML = '';
+            dataDisplay.appendChild(table);
+            dataSection.classList.remove('hidden');
+        };
+        
+        // Event listener for the "Display Data" button
+        processBtn.addEventListener('click', () => {
+            const file = fileInput.files[0];
+            if (!file) {
+                showNotification("Please select a file first.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const fileText = e.target.result;
+                    const parsedData = parseCSV(fileText);
+                    if (parsedData) {
+                        displayDataAsTable(parsedData);
+                        showNotification("Data loaded and ready to edit!");
+                    } else {
+                        throw new Error("Invalid CSV format.");
+                    }
+                } catch (error) {
+                    console.error("Error processing file:", error);
+                    dataDisplay.innerHTML = `<p class="p-6 text-red-500 text-center">Error: Failed to process file. Please ensure it's a valid CSV.</p>`;
+                    showNotification("Failed to load data.");
+                }
+            };
+
+            reader.readAsText(file);
+        });
+
+        // Event listener for the "Download" button
+        downloadBtn.addEventListener('click', () => {
+            const table = dataDisplay.querySelector('table');
+            if (!table) {
+                showNotification("No data to download.");
+                return;
+            }
+
+            const rows = table.querySelectorAll('tr');
+            let csvContent = "";
+
+            rows.forEach((row, rowIndex) => {
+                const cells = row.querySelectorAll('td');
+                const rowData = Array.from(cells).map(cell => {
+                    // Get the text content and handle potential commas or quotes
+                    let cellText = cell.textContent;
+                    if (cellText.includes(',') || cellText.includes('"') || cellText.includes('\n')) {
+                        cellText = `"${cellText.replace(/"/g, '""')}"`;
+                    }
+                    return cellText;
+                }).join(',');
+                csvContent += rowData + '\n';
+            });
+            
+            // Create a Blob and download it as a new file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'updated_data.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showNotification("Updated CSV downloaded!");
+        });
+    </script>
+</body>
+</html>
