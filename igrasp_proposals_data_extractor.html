@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISRO Project Data Extractor</title>
+    <style>
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f7fafc; padding: 40px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #2d3748; font-size: 1.5rem; margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px; }
+        .field { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #4a5568; }
+        input { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; }
+        .btn-run { background: #38a169; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; transition: 0.2s; }
+        .btn-run:hover { background: #2f855a; }
+        .btn-run:disabled { background: #a0aec0; cursor: not-allowed; }
+        #log { margin-top: 20px; background: #2d3748; color: #a0aec0; padding: 15px; border-radius: 6px; font-family: monospace; height: 200px; overflow-y: auto; font-size: 0.8rem; }
+        progress { width: 100%; height: 10px; margin-top: 10px; appearance: none; }
+        progress::-webkit-progress-bar { background-color: #edf2f7; border-radius: 10px; }
+        progress::-webkit-progress-value { background-color: #38a169; border-radius: 10px; }
+
+        /* Instructions Section */
+        .how-to { background: #f0fff4; border: 1px solid #c6f6d5; padding: 20px; border-radius: 8px; margin-bottom: 25px; }
+        .how-to h3 { margin-top: 0; color: #276749; font-size: 1rem; }
+        .how-to ul { padding-left: 20px; font-size: 0.9rem; color: #2f855a; }
+        .how-to li { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📊 Project Data Extractor (Excel)</h1>
+    
+    <div class="how-to">
+        <h3>📖 Instructions:</h3>
+        <ul>
+            <li>Ensure you are <strong>logged in</strong> to the iGRASP portal in another tab.</li>
+            <li>Copy the full URL of a project and paste it into "Project URL".</li>
+            <li>Define the numeric range (Start/End) found at the end of the URLs.</li>
+            <li>Click "Generate" – the script will scrape details for <strong>Title, Area, Institute, PI, and Co-PI</strong>.</li>
+            <li>A <code>.csv</code> file will download automatically once complete. You can open this file in <strong>Microsoft Excel</strong>.</li>
+        </ul>
+    </div>
+
+    <div class="field">
+        <label>Project URL:</label>
+        <input type="text" id="url" value="https://igrasp.isro.gov.in/igrasp/res-sac-2025-001-application-joint-source-and-channel-coding-gaganyaan-mission-other-deep-space-7">
+    </div>
+
+    <div style="display:flex; gap:10px;">
+        <div class="field" style="flex:1">
+            <label>Start ID:</label>
+            <input type="number" id="startId" value="15">
+        </div>
+        <div class="field" style="flex:1">
+            <label>End ID:</label>
+            <input type="number" id="endId" value="0">
+        </div>
+    </div>
+
+    <button class="btn-run" id="btn">Generate Excel Summary</button>
+    <progress id="prog" value="0" max="100" style="display:none"></progress>
+    
+    <div id="log">Ready. Standing by for extraction...</div>
+</div>
+
+<script>
+    const btn = document.getElementById('btn');
+    const logBox = document.getElementById('log');
+    const prog = document.getElementById('prog');
+
+    function log(m) {
+        const entry = document.createElement('div');
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${m}`;
+        logBox.appendChild(entry);
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    btn.onclick = async () => {
+        btn.disabled = true;
+        prog.style.display = 'block';
+        logBox.innerHTML = '';
+        const baseUrl = document.getElementById('url').value.replace(/\d+$/, '');
+        const start = parseInt(document.getElementById('startId').value);
+        const end = parseInt(document.getElementById('endId').value);
+        const results = [];
+
+        const direction = start > end ? -1 : 1;
+        const total = Math.abs(start - end) + 1;
+
+        log("Starting data extraction...");
+
+        for (let i = start; (direction === -1 ? i >= end : i <= end); i += direction) {
+            log(`Fetching data for project ${i}...`);
+            try {
+                const res = await fetch(baseUrl + i);
+                if (!res.ok) throw new Error("HTTP error");
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+
+                const data = {
+                    id: i,
+                    title: doc.querySelector('h1.title span')?.innerText.trim().replace(/,/g, ";") || "Unknown",
+                    area: doc.querySelector('.field--name-field-research-area .field__item')?.innerText.trim().replace(/,/g, ";") || "N/A",
+                    institute: doc.querySelector('.field--name-field-proposal-institution .field__item')?.innerText.trim().replace(/,/g, ";") || "N/A",
+                    pi: doc.querySelector('.field--name-field-principal-investigator .field__item')?.innerText.trim().replace(/,/g, ";") || "N/A",
+                    isro_copi: doc.querySelector('.field--name-field-pd-isro-co-pi .field__item')?.innerText.trim().replace(/,/g, ";") || "N/A"
+                };
+                results.push(data);
+                prog.value = (results.length / total) * 100;
+            } catch (e) {
+                log(`Error on ${i}: Access denied or page missing.`);
+            }
+        }
+
+        if (results.length > 0) {
+            const headers = "Project ID,Title,Area,Institution,PI Name,ISRO Co-PI\n";
+            const body = results.map(r => `${r.id},${r.title},${r.area},${r.institute},${r.pi},${r.isro_copi}`).join("\n");
+            const blob = new Blob([headers + body], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ISRO_Project_Summary_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            log("Download triggered: ISRO_Project_Summary.csv");
+        } else {
+            log("Failed: No data collected. Are you logged in?");
+        }
+
+        btn.disabled = false;
+    };
+</script>
+
+</body>
+</html>
