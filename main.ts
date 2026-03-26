@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.187.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 
 // Helper function to list all .html files in the current directory
 async function listHtmlFiles(): Promise<string[]> {
