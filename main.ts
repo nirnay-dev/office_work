@@ -1,5 +1,3 @@
-import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
-
 // Helper function to list all .html files in the current directory
 async function listHtmlFiles(): Promise<string[]> {
   const htmlFiles: string[] = [];
@@ -406,4 +404,4 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 console.log("Server running on http://localhost:8000");
-serve(handler);
+Deno.serve(handler);
