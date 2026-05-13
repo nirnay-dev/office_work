@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hydro - Premium Water Reminder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0ea5e9">
+    <style>
+        :root {
+            --bg-color: #e0f2fe;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --text-color: #0f172a;
+            --text-muted: #475569;
+            --primary: #0ea5e9;
+            --primary-hover: #0284c7;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #22c55e;
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .bg-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+
+        .shape-1 {
+            background: #38bdf8;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            top: -100px;
+            left: -100px;
+        }
+
+        .shape-2 {
+            background: #818cf8;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            bottom: -50px;
+            right: -50px;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 50px) scale(1.1); }
+        }
+
+        /* Glass Container */
+        .app-container {
+            width: 90%;
+            max-width: 450px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        /* Progress Circle */
+        .progress-wrapper {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-svg {
+            transform: rotate(-90deg);
+            width: 150px;
+            height: 150px;
+        }
+
+        .progress-bg {
+            fill: none;
+            stroke: var(--glass-border);
+            stroke-width: 10;
+        }
+
+        .progress-bar {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke-dasharray: 408; /* 2 * PI * r (65) */
+            stroke-dashoffset: 408;
+            transition: stroke-dashoffset 0.8s ease-out;
+        }
+
+        .progress-text {
+            position: absolute;
+            text-align: center;
+        }
+
+        .progress-text h2 {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .progress-text p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Controls */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        input[type="number"] {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-color);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--primary);
+        }
+
+        .toggles {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        /* Countdown */
+        .countdown {
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+            min-height: 1.5rem;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            flex: 1;
+            padding: 0.875rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:active:not(:disabled) {
+            transform: scale(0.96);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .water-animation {
+            animation: ripple 1s cubic-bezier(0, 0.2, 0.8, 1);
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+    </div>
+
+    <div class="app-container" id="app">
+        <header>
+            <h1>💧 Hydro</h1>
+            <button class="theme-toggle" id="themeToggle">🌙</button>
+        </header>
+
+        <div class="progress-wrapper">
+            <svg class="progress-svg">
+                <circle class="progress-bg" cx="75" cy="75" r="65"></circle>
+                <circle class="progress-bar" id="progressBar" cx="75" cy="75" r="65"></circle>
+            </svg>
+            <div class="progress-text">
+                <h2 id="glassCount">0</h2>
+                <p>of <span id="dailyGoalDisplay">8</span> glasses</p>
+            </div>
+        </div>
+
+        <button class="btn-outline" id="addDrinkBtn">+ Add a Glass</button>
+
+        <div class="control-group">
+            <label for="interval">Remind me every (minutes):</label>
+            <input type="number" id="interval" value="60" min="1">
+        </div>
+
+        <div class="control-group">
+            <label for="dailyGoal">Daily Goal (glasses):</label>
+            <input type="number" id="dailyGoal" value="8" min="1">
+        </div>
+
+        <div class="toggles">
+            <label>Voice Alert</label>
+            <label class="switch">
+                <input type="checkbox" id="voiceToggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="toggles">
+            <label>Browser Notifications</label>
+            <label class="switch">
+                <input type="checkbox" id="notifToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="countdown" id="countdown"></div>
+
+        <div class="btn-group">
+            <button class="btn-primary" id="startBtn">Start</button>
+            <button class="btn-danger" id="stopBtn" disabled>Stop</button>
+        </div>
+    </div>
+
+    <script>
+        // State
+        const state = {
+            interval: 60,
+            goal: 8,
+            current: 0,
+            voiceEnabled: true,
+            notifEnabled: false,
+            theme: 'light',
+            timerRemaining: 0,
+            timerId: null,
+            countdownId: null
+        };
+
+        // DOM Elements
+        const DOM = {
+            themeToggle: document.getElementById('themeToggle'),
+            glassCount: document.getElementById('glassCount'),
+            dailyGoalDisplay: document.getElementById('dailyGoalDisplay'),
+            progressBar: document.getElementById('progressBar'),
+            addDrinkBtn: document.getElementById('addDrinkBtn'),
+            intervalInput: document.getElementById('interval'),
+            dailyGoalInput: document.getElementById('dailyGoal'),
+            voiceToggle: document.getElementById('voiceToggle'),
+            notifToggle: document.getElementById('notifToggle'),
+            countdown: document.getElementById('countdown'),
+            startBtn: document.getElementById('startBtn'),
+            stopBtn: document.getElementById('stopBtn'),
+            appContainer: document.getElementById('app')
+        };
+
+        // Initialize
+        function init() {
+            loadState();
+            bindEvents();
+            updateUI();
+            checkNewDay();
+            
+            // Register Service Worker
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('sw.js').then(reg => {
+                        console.log('SW registered!', reg);
+                    }).catch(err => {
+                        console.log('SW registration failed:', err);
+                    });
+                });
+            }
+        }
+
+        // Load state from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('hydroState');
+            if (saved) {
+                Object.assign(state, JSON.parse(saved));
+                // Reset timers
+                state.timerRemaining = 0;
+                state.timerId = null;
+                state.countdownId = null;
+            }
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            const stateToSave = { ...state, timerId: null, countdownId: null };
+            localStorage.setItem('hydroState', JSON.stringify(stateToSave));
+            localStorage.setItem('hydroLastDate', new Date().toDateString());
+        }
+
+        // Reset progress if it's a new day
+        function checkNewDay() {
+            const lastDate = localStorage.getItem('hydroLastDate');
+            const today = new Date().toDateString();
+            if (lastDate !== today) {
+                state.current = 0;
+                saveState();
+                updateUI();
+            }
+        }
+
+        // Bind DOM Events
+        function bindEvents() {
+            DOM.themeToggle.addEventListener('click', toggleTheme);
+            DOM.addDrinkBtn.addEventListener('click', addDrink);
+            DOM.intervalInput.addEventListener('change', (e) => {
+                state.interval = parseInt(e.target.value) || 60;
+                saveState();
+            });
+            DOM.dailyGoalInput.addEventListener('change', (e) => {
+                state.goal = parseInt(e.target.value) || 8;
+                updateUI();
+                saveState();
+            });
+            DOM.voiceToggle.addEventListener('change', (e) => {
+                state.voiceEnabled = e.target.checked;
+                saveState();
+            });
+            DOM.notifToggle.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    requestNotificationPermission();
+                } else {
+                    state.notifEnabled = false;
+                    saveState();
+                }
+            });
+            DOM.startBtn.addEventListener('click', startReminder);
+            DOM.stopBtn.addEventListener('click', stopReminder);
+        }
+
+        // UI Updates
+        function updateUI() {
+            // Theme
+            document.documentElement.setAttribute('data-theme', state.theme);
+            DOM.themeToggle.textContent = state.theme === 'light' ? '🌙' : '☀️';
+
+            // Inputs
+            DOM.intervalInput.value = state.interval;
+            DOM.dailyGoalInput.value = state.goal;
+            DOM.voiceToggle.checked = state.voiceEnabled;
+            DOM.notifToggle.checked = state.notifEnabled;
+
+            // Progress
+            DOM.glassCount.textContent = state.current;
+            DOM.dailyGoalDisplay.textContent = state.goal;
+
+            const progress = Math.min(state.current / state.goal, 1);
+            const circumference = 2 * Math.PI * 65; // r=65
+            const offset = circumference - (progress * circumference);
+            DOM.progressBar.style.strokeDashoffset = offset;
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === 'light' ? 'dark' : 'light';
+            updateUI();
+            saveState();
+        }
+
+        function addDrink() {
+            state.current++;
+            updateUI();
+            saveState();
+            
+            // Animation
+            DOM.appContainer.classList.remove('water-animation');
+            void DOM.appContainer.offsetWidth; // Trigger reflow
+            DOM.appContainer.classList.add('water-animation');
+        }
+
+        // Notifications
+        async function requestNotificationPermission() {
+            if (!("Notification" in window)) {
+                alert("This browser does not support desktop notification");
+                DOM.notifToggle.checked = false;
+                return;
+            }
+
+            const permission = await Notification.requestPermission();
+            if (permission === "granted") {
+                state.notifEnabled = true;
+            } else {
+                state.notifEnabled = false;
+                DOM.notifToggle.checked = false;
+            }
+            saveState();
+        }
+
+        function playVoiceAlert() {
+            if (state.voiceEnabled && 'speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance("Time to drink water! Stay hydrated.");
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function triggerReminder() {
+            // Visual
+            DOM.appContainer.classList.remove('water-animation');
+            void DOM.appContainer.offsetWidth;
+            DOM.appContainer.classList.add('water-animation');
+
+            // Audio
+            playVoiceAlert();
+
+            // Notification
+            if (state.notifEnabled && Notification.permission === "granted") {
+                new Notification("💧 Hydro Reminder", {
+                    body: "Time to drink a glass of water!",
+                    icon: "icon.svg"
+                });
+            }
+
+            // Reset countdown
+            state.timerRemaining = state.interval * 60;
+        }
+
+        function updateCountdown() {
+            if (state.timerRemaining <= 0) {
+                triggerReminder();
+            } else {
+                state.timerRemaining--;
+            }
+
+            const mins = Math.floor(state.timerRemaining / 60);
+            const secs = state.timerRemaining % 60;
+            DOM.countdown.textContent = `Next reminder in: ${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function startReminder() {
+            stopReminder(); // Clear any existing
+
+            if (state.interval <= 0) return;
+
+            state.timerRemaining = state.interval * 60;
+            state.countdownId = setInterval(updateCountdown, 1000);
+            
+            DOM.countdown.textContent = `Next reminder in: ${state.interval}:00`;
+            
+            DOM.startBtn.disabled = true;
+            DOM.stopBtn.disabled = false;
+        }
+
+        function stopReminder() {
+            if (state.countdownId) {
+                clearInterval(state.countdownId);
+                state.countdownId = null;
+            }
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            
+            DOM.countdown.textContent = "Reminder stopped.";
+            DOM.startBtn.disabled = false;
+            DOM.stopBtn.disabled = true;
+        }
+
+        // Boot
+        init();
+    </script>
+</body>
+</html>

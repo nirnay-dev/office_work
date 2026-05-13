@@ -1,47 +1,105 @@
-// Helper function to list all .html files in the current directory
-async function listHtmlFiles(): Promise<string[]> {
-  const htmlFiles: string[] = [];
+import { extname } from "@std/path";
+
+const MIME_TYPES: Record<string, string> = {
+  ".html": "text/html",
+  ".js": "application/javascript",
+  ".css": "text/css",
+  ".json": "application/json",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
+  ".txt": "text/plain",
+};
+
+// Helper function to list all application directories
+async function listAppDirectories(): Promise<string[]> {
+  const dirs: string[] = [];
   try {
     for await (const entry of Deno.readDir(".")) {
-      if (entry.isFile && entry.name.endsWith(".html")) {
-        htmlFiles.push(entry.name);
+      if (entry.isDirectory && !entry.name.startsWith(".")) {
+        // Skip specific non-app directories
+        if (entry.name !== "archive" && entry.name !== "node_modules") {
+           // Verify it contains an index.html file
+           try {
+             const stat = await Deno.stat(`${entry.name}/index.html`);
+             if (stat.isFile) {
+                dirs.push(entry.name);
+             }
+           } catch {
+             // Not a valid app folder, ignore
+           }
+        }
       }
     }
   } catch (error) {
     console.error("Error reading directory:", error);
   }
-  return htmlFiles;
+  return dirs.sort();
 }
 
 const handler = async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
 
-  // Serve the requested file
+  // Serve static files and app folders
   if (url.pathname !== "/") {
     try {
-      const filePath = decodeURIComponent(url.pathname.slice(1));
+      let filePath = decodeURIComponent(url.pathname.slice(1));
+      
+      // Prevent directory traversal
       if (filePath.includes("..")) {
         return new Response("Invalid path", { status: 400 });
       }
+
+      // Automatically append index.html if it's a directory path
+      if (filePath.endsWith("/")) {
+        filePath += "index.html";
+      } else {
+        // If it's a directory without a trailing slash, redirect to add the slash
+        try {
+          const stat = await Deno.stat(filePath);
+          if (stat.isDirectory) {
+             return new Response(null, {
+               status: 301,
+               headers: { Location: `/${filePath}/` }
+             });
+          }
+        } catch {
+          // File might not exist, proceed to readFile which will throw if missing
+        }
+      }
+
       const file = await Deno.readFile(filePath);
+      const ext = extname(filePath).toLowerCase();
+      const contentType = MIME_TYPES[ext] || "application/octet-stream";
+      
       const headers = new Headers();
-      headers.set("Content-Type", "text/html");
+      headers.set("Content-Type", contentType);
       return new Response(file, { headers });
     } catch (error) {
+      if (error instanceof Deno.errors.NotFound) {
+        return new Response("File not found", { status: 404 });
+      }
       console.error("Error serving file:", error);
-      return new Response("File not found", { status: 404 });
+      return new Response("Internal Server Error", { status: 500 });
     }
   }
 
-  // Generate the main page with a grid of files
-  const htmlFiles = await listHtmlFiles();
-  const gridItems = htmlFiles
+  // Generate the main page with a grid of apps
+  const appDirs = await listAppDirectories();
+  const gridItems = appDirs
     .map(
-      (file) => {
+      (dir) => {
+        // Format the name nicely for display (e.g., pdf_textify -> Pdf Textify)
+        const displayName = dir
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+            
         return `
           <div class="grid-item">
-            <a href="/${encodeURIComponent(file)}" target="_blank">
-              <span class="file-name">${file}</span>
+            <a href="/${encodeURIComponent(dir)}/" target="_blank">
+              <span class="file-name">${displayName}</span>
             </a>
           </div>
         `;
@@ -49,13 +107,24 @@ const handler = async (req: Request): Promise<Response> => {
     )
     .join("");
 
+  const listItems = appDirs
+    .map(
+        (dir) => {
+            const displayName = dir
+                .split('_')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+            return `<div class="list-item"><a href="/${encodeURIComponent(dir)}/" target="_blank"><span class="file-name">${displayName}</span></a></div>`;
+        }
+    ).join("");
+
   const html = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Available HTML Files</title>
+      <title>Application Hub</title>
       <style>
         /* Base styles for dark mode */
         body {
@@ -208,7 +277,7 @@ const handler = async (req: Request): Promise<Response> => {
     </head>
     <body class="default-scheme dark-mode">
       <div class="container">
-        <h1>Available HTML Files</h1>
+        <h1>Application Hub</h1>
         <div class="view-controls">
           <button id="viewToggle" class="view-toggle">Switch to List View</button>
           <button id="colorSchemeToggle" class="color-scheme-toggle">Theme: Default</button>
@@ -220,11 +289,11 @@ const handler = async (req: Request): Promise<Response> => {
         </div>
 
         <div id="gridView" class="grid-container">
-          ${htmlFiles.length > 0 ? gridItems : '<p style="text-align: center;">No HTML files found.</p>'}
+          ${appDirs.length > 0 ? gridItems : '<p style="text-align: center;">No applications found.</p>'}
         </div>
         
         <div id="listView" class="list-container hidden">
-          ${htmlFiles.length > 0 ? htmlFiles.map(file => `<div class="list-item"><a href="/${encodeURIComponent(file)}" target="_blank"><span class="file-name">${file}</span></a></div>`).join('') : ''}
+          ${appDirs.length > 0 ? listItems : ''}
         </div>
       </div>
 

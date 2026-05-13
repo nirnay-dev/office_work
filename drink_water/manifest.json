@@ -1,0 +1,17 @@
+{
+  "name": "Hydro - Premium Water Reminder",
+  "short_name": "Hydro",
+  "start_url": "./drinkWater.html",
+  "display": "standalone",
+  "background_color": "#e0f2fe",
+  "theme_color": "#0ea5e9",
+  "description": "A beautiful, premium reminder to stay hydrated.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
