@@ -1,10 +1,10 @@
-# Office Work - Local HTML File Viewer
+# Office Work - Application Hub
 
-A modern, high-performance local file server built with **Deno** that allows you to browse and view all `.html` files in your directory through a beautiful web interface.
+A modern, high-performance local file server built with **Deno** that allows you to browse and run web applications stored in subdirectories through a beautiful Application Hub interface.
 
 ## 🚀 Features
 
-- **Instant Preview**: Automatically scans your directory for HTML files and serves them.
+- **Application Discovery**: Automatically scans your directory for folders containing an `index.html` file and serves them as standalone apps.
 - **Dynamic Views**: Toggle between **Grid View** (for visual browsing) and **List View** (for quick scanning).
 - **Theme System**:
   - **Dark/Light Mode**: Smooth transitions between dark and light aesthetics.
@@ -38,10 +38,11 @@ The server will be available at [http://localhost:8000](http://localhost:8000).
 
 ## 📂 Project Structure
 
-- `main.ts`: The core Deno server logic.
-- `deno.json`: Project configuration and task definitions.
+- `main.ts`: The core Deno server logic that routes and serves the applications.
+- `deno.json`: Project configuration, task definitions, and dependency mapping.
 - `.vscode/settings.json`: Recommended VS Code settings for Deno development.
-- `*.html`: Your local HTML files that will be served.
+- `CHANGELOG.md`: History of notable changes to the repository.
+- `<app_folder>/`: Each application lives in its own folder (e.g., `online_excel/`, `drink_water/`) containing an `index.html` file and its associated assets.
 
 ## 🔧 Permissions
 

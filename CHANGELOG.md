@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Added browser notifications to the Hydro app.
 
 ### Changed
+- Rebuilt the `online_excel` application from scratch to be a highly realistic Excel clone, featuring a Ribbon UI, multi-sheet support, cell formatting, and an advanced formula parser.
 - Restructured the workspace by moving each application into its own dedicated folder.
 - Renamed the main HTML files for each application to `index.html`.
 - Updated `main.ts` to scan subdirectories and serve static files properly.
