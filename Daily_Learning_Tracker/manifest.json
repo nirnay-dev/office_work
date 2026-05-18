@@ -1,0 +1,13 @@
+{
+  "name": "Daily Learning Tracker",
+  "short_name": "LearnTracker",
+  "description": "Track your daily learning and build streaks.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d0d0f",
+  "theme_color": "#f0c040",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

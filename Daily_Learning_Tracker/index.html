@@ -13,6 +13,8 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d0d0f'/%3E%3Cpath d='M7 9a2 2 0 0 1 2-2h5.5v16H9a2 2 0 0 1-2-2V9z' fill='%23e07b39'/%3E%3Cpath d='M17.5 7H23a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5.5V7z' fill='%23f0c040'/%3E%3Crect x='15' y='7' width='2' height='16' rx='1' fill='%230d0d0f' opacity='.6'/%3E%3C/svg%3E">
 <!-- Apple touch icon -->
 <link rel="apple-touch-icon" sizes="512x512" href="icon.png">
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -323,6 +325,34 @@
   .area-bar { height: 100%; border-radius: 100px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
   .area-count { font-size: 13px; color: var(--muted); width: 30px; text-align: right; }
 
+  /* Search bar */
+  .search-wrap { margin-bottom: 16px; position: relative; }
+  .search-wrap input { padding-left: 38px; background: var(--surface); border-color: var(--border); }
+  .search-wrap::before { content: '🔍'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; pointer-events: none; z-index: 1; }
+
+  /* Entry action buttons */
+  .entry-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .entry-actions { display: flex; gap: 6px; opacity: 0; transition: opacity 0.2s; }
+  .entry-card:hover .entry-actions { opacity: 1; }
+  .action-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 4px 8px; font-size: 13px; cursor: pointer; color: var(--muted); transition: all 0.18s; }
+  .action-btn:hover { border-color: var(--accent); color: var(--text); }
+  .action-btn.del:hover { border-color: #e05a5a; color: #e05a5a; }
+
+  /* Goal card */
+  .goal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 22px; margin-bottom: 18px; }
+  .goal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .goal-label { font-size: 13px; font-weight: 600; color: var(--text); }
+  .goal-set-btn { font-size: 11px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 4px 10px; border-radius: 100px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .goal-set-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .goal-nums { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .goal-nums strong { color: var(--text); }
+  .goal-bar-bg { height: 8px; background: var(--surface2); border-radius: 100px; overflow: hidden; }
+  .goal-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 100px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+  .goal-met-msg { margin-top: 10px; font-size: 13px; color: var(--green); font-weight: 600; }
+
+  /* Confetti canvas */
+  #confettiCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 9998; display: none; }
+
   @media (max-width: 600px) {
     .form-grid { grid-template-columns: 1fr; }
     .form-group.full { grid-column: 1; }
@@ -347,6 +377,7 @@
 </style>
 </head>
 <body>
+<canvas id="confettiCanvas"></canvas>
 <div class="container">
   <header>
     <div class="header-inner">
@@ -387,6 +418,15 @@
 
   <!-- LOG PANEL -->
   <div class="panel active" id="panel-log">
+    <!-- Daily Goal Card -->
+    <div class="goal-card" id="goalCard">
+      <div class="goal-header">
+        <div class="goal-label">🎯 Today's Goal</div>
+        <button class="goal-set-btn" onclick="promptGoal()">⚙️ Set Goal</button>
+      </div>
+      <div class="goal-nums"><span>Loading...</span></div>
+      <div class="goal-bar-bg"><div class="goal-bar" id="goalBar" style="width:0%"></div></div>
+    </div>
     <div class="form-card">
       <div class="form-title">What did you learn today? ✨</div>
       <div class="form-grid">
@@ -425,6 +465,7 @@
   <div class="panel" id="panel-history">
     <div class="history-header">
       <div class="history-title">Your Learning History</div>
+      <div class="search-wrap"><input type="text" id="searchInput" placeholder="Search topics, notes..." oninput="renderEntries()"></div>
       <div class="filter-row">
         <button class="filter-chip active" data-filter="All" onclick="setFilter(this)">All</button>
         <button class="filter-chip" data-filter="Science & Technology" onclick="setFilter(this)">🔬 Science</button>
@@ -458,23 +499,37 @@
 <button id="secretSheetBtn" onclick="window.open('https://docs.google.com/spreadsheets/d/1pkQG-BDxQlkDwwyuUVuVwBBiFt6sYrnpT2glLkQqPO4/edit', '_blank')" title="" aria-hidden="true"></button>
 
 <script>
+// ── PWA Service Worker ──────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js', { scope: './' }).catch(() => {});
+}
+
+// ── Constants ───────────────────────────────────────
 const API_URL = "https://script.google.com/macros/s/AKfycbxbLxoSd123d-hB4CK4aXMwUYec3TseNGWQv_i2LvRPYpcpcmn0fIZV5u-xFoZZBnRnPA/exec";
+const CACHE_KEY = 'dlt_entries';
+const GOAL_KEY  = 'dlt_goal';
+const STREAK_MILESTONES = [7, 14, 21, 30, 50, 100];
 
 const AREA_COLORS = {
   "Science & Technology": "#4a9eff",
-  "History & Culture": "#c97b3a",
-  "Personal Skills": "#9b72cf",
-  "Business & Finance": "#4caf82",
-  "Arts & Creativity": "#e05a7a"
+  "History & Culture":    "#c97b3a",
+  "Personal Skills":      "#9b72cf",
+  "Business & Finance":   "#4caf82",
+  "Arts & Creativity":    "#e05a7a"
 };
 
-let allEntries = [];
-let selectedArea = "";
+// ── State ───────────────────────────────────────────
+let allEntries    = [];
+let selectedArea  = "";
 let currentFilter = "All";
+let editingEntry  = null;   // original entry being edited
+let dailyGoal     = parseInt(localStorage.getItem(GOAL_KEY)) || 30;
+let confettiAF    = null;
 
-// Set today's date
+// Init
 document.getElementById('entryDate').valueAsDate = new Date();
 
+// ── Tabs ────────────────────────────────────────────
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t, i) => {
     t.classList.toggle('active', ['log','history','insights'][i] === name);
@@ -482,14 +537,17 @@ function switchTab(name) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   if (name === 'history' || name === 'insights') loadEntries();
+  if (name === 'log') renderGoalCard();
 }
 
+// ── Area chips ──────────────────────────────────────
 function selectArea(el) {
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   selectedArea = el.dataset.area;
 }
 
+// ── Filter ──────────────────────────────────────────
 function setFilter(el) {
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
@@ -497,6 +555,7 @@ function setFilter(el) {
   renderEntries();
 }
 
+// ── Toast ───────────────────────────────────────────
 function showToast(msg, isError = false) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -504,114 +563,275 @@ function showToast(msg, isError = false) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
+// ── Goal ────────────────────────────────────────────
+function promptGoal() {
+  const val = prompt('Set your daily learning goal (minutes):', dailyGoal);
+  if (val && parseInt(val) > 0) {
+    dailyGoal = parseInt(val);
+    localStorage.setItem(GOAL_KEY, dailyGoal);
+    renderGoalCard();
+  }
+}
+
+function renderGoalCard() {
+  const today = new Date().toISOString().split('T')[0];
+  const todayMins = allEntries
+    .filter(e => e.Date === today)
+    .reduce((s, e) => s + (parseInt(e['Time Spent']) || 0), 0);
+  const pct = Math.min(100, Math.round(todayMins / dailyGoal * 100));
+  const wasGoalMet = todayMins >= dailyGoal;
+
+  document.querySelector('#goalCard .goal-nums').innerHTML =
+    `<span>Today: <strong>${todayMins} mins</strong></span><span>Goal: <strong>${dailyGoal} mins</strong></span>`;
+  document.getElementById('goalBar').style.width = pct + '%';
+
+  const existing = document.querySelector('.goal-met-msg');
+  if (existing) existing.remove();
+  if (wasGoalMet) {
+    const msg = document.createElement('div');
+    msg.className = 'goal-met-msg';
+    msg.textContent = '🎉 Daily goal smashed!';
+    document.getElementById('goalCard').appendChild(msg);
+  }
+  return { wasGoalMet, todayMins };
+}
+
+// ── Confetti ────────────────────────────────────────
+function launchConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  const colors = ['#f0c040','#e07b39','#4a9eff','#4caf82','#9b72cf','#e05a7a','#fff'];
+  const particles = Array.from({ length: 140 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height - canvas.height,
+    w: Math.random() * 10 + 5,
+    h: Math.random() * 6 + 3,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    vx: (Math.random() - 0.5) * 3,
+    vy: Math.random() * 4 + 2,
+    rot: Math.random() * 360,
+    rotV: (Math.random() - 0.5) * 8,
+    alpha: 1
+  }));
+  if (confettiAF) cancelAnimationFrame(confettiAF);
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.rot += p.rotV; p.alpha -= 0.007;
+      if (p.alpha <= 0) return;
+      alive = true;
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
+    if (alive) confettiAF = requestAnimationFrame(draw);
+    else { canvas.style.display = 'none'; ctx.clearRect(0, 0, canvas.width, canvas.height); }
+  }
+  draw();
+}
+
+// ── Submit / Update entry ───────────────────────────
 async function submitEntry() {
-  const date = document.getElementById('entryDate').value;
-  const topic = document.getElementById('topic').value.trim();
+  const date      = document.getElementById('entryDate').value;
+  const topic     = document.getElementById('topic').value.trim();
   const timeSpent = document.getElementById('timeSpent').value;
-  const notes = document.getElementById('notes').value.trim();
+  const notes     = document.getElementById('notes').value.trim();
 
   if (!date || !topic || !selectedArea) {
-    showToast('Please fill in date, topic, and area!', true);
-    return;
+    showToast('Please fill in date, topic, and area!', true); return;
   }
 
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
-  btn.textContent = 'Saving...';
-
-  // Calculate streak
-  const streak = calculateStreak(date);
+  btn.textContent = editingEntry ? 'Updating...' : 'Saving...';
 
   try {
-    await fetch(API_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'addEntry', date, topic, area: selectedArea, timeSpent: timeSpent || 0, notes, streak })
-    });
+    if (editingEntry) {
+      // Update locally
+      const idx = allEntries.findIndex(e => e.Date === editingEntry.Date && e.Topic === editingEntry.Topic);
+      if (idx !== -1) {
+        allEntries[idx] = { ...allEntries[idx], Date: date, Topic: topic, Area: selectedArea, 'Time Spent': timeSpent || 0, Notes: notes };
+        localStorage.setItem(CACHE_KEY, JSON.stringify(allEntries));
+      }
+      // Push to Apps Script (needs updateEntry handler on the sheet side)
+      fetch(API_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'updateEntry', originalDate: editingEntry.Date, originalTopic: editingEntry.Topic, date, topic, area: selectedArea, timeSpent: timeSpent || 0, notes })
+      });
+      showToast('✏️ Entry updated!');
+    } else {
+      const streak = calculateStreak(date);
+      await fetch(API_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'addEntry', date, topic, area: selectedArea, timeSpent: timeSpent || 0, notes, streak })
+      });
+      // Optimistic local add
+      allEntries.unshift({ Date: date, Topic: topic, Area: selectedArea, 'Time Spent': timeSpent || 0, Notes: notes, Streak: streak });
+      localStorage.setItem(CACHE_KEY, JSON.stringify(allEntries));
+      showToast('✓ Saved to Google Sheets!');
 
-    showToast('✓ Saved to Google Sheets!');
-    document.getElementById('topic').value = '';
-    document.getElementById('timeSpent').value = '';
-    document.getElementById('notes').value = '';
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-    selectedArea = '';
-    allEntries = [];
-    await loadEntries();
+      // Check streak milestones
+      if (STREAK_MILESTONES.includes(streak)) launchConfetti();
+    }
+
+    clearForm();
+    updateStats();
+    renderEntries();
+    renderHeatmap();
+    renderAreaBreakdown();
+
+    // Check goal hit
+    const { wasGoalMet, todayMins } = renderGoalCard();
+    const prevMins = todayMins - (parseInt(timeSpent) || 0);
+    if (wasGoalMet && prevMins < dailyGoal) launchConfetti();
+
   } catch (err) {
     showToast('Error saving. Check your connection.', true);
   }
 
   btn.disabled = false;
   btn.textContent = 'Save to Google Sheets ✓';
+  editingEntry = null;
 }
 
+function clearForm() {
+  document.getElementById('topic').value = '';
+  document.getElementById('timeSpent').value = '';
+  document.getElementById('notes').value = '';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  selectedArea = '';
+}
+
+// ── Edit entry ──────────────────────────────────────
+function editEntry(i) {
+  const e = getFilteredEntries()[i];
+  if (!e) return;
+  editingEntry = { ...e };
+
+  document.getElementById('entryDate').value = e.Date || '';
+  document.getElementById('topic').value     = e.Topic || '';
+  document.getElementById('timeSpent').value = e['Time Spent'] || '';
+  document.getElementById('notes').value     = e.Notes || '';
+
+  document.querySelectorAll('.chip').forEach(c => {
+    const isMatch = c.dataset.area === e.Area;
+    c.classList.toggle('selected', isMatch);
+    if (isMatch) selectedArea = e.Area;
+  });
+
+  document.getElementById('submitBtn').textContent = '✏️ Update Entry';
+  switchTab('log');
+  document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── Delete entry ────────────────────────────────────
+function deleteEntry(i) {
+  const e = getFilteredEntries()[i];
+  if (!e) return;
+  if (!confirm(`Delete "${e.Topic}"?`)) return;
+
+  const idx = allEntries.findIndex(en => en.Date === e.Date && en.Topic === e.Topic);
+  if (idx !== -1) allEntries.splice(idx, 1);
+  localStorage.setItem(CACHE_KEY, JSON.stringify(allEntries));
+  updateStats(); renderEntries(); renderGoalCard();
+  showToast('🗑️ Entry deleted');
+
+  // Push to Apps Script (needs deleteEntry handler on the sheet side)
+  fetch(API_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'deleteEntry', date: e.Date, topic: e.Topic })
+  }).catch(() => {});
+}
+
+// ── Streak ──────────────────────────────────────────
 function calculateStreak(newDate) {
   if (!allEntries.length) return 1;
   const dates = [...new Set(allEntries.map(e => e.Date).filter(Boolean))].sort().reverse();
   const today = new Date(newDate);
   let streak = 1;
   for (let i = 0; i < dates.length; i++) {
-    const d = new Date(dates[i]);
-    const diff = Math.round((today - d) / 86400000);
+    const diff = Math.round((today - new Date(dates[i])) / 86400000);
     if (diff === streak) streak++;
     else if (diff > streak) break;
   }
   return streak;
 }
 
+// ── Load entries ─────────────────────────────────────
 async function loadEntries() {
+  // Show cached data immediately
+  const cached = localStorage.getItem(CACHE_KEY);
+  if (cached) {
+    try {
+      allEntries = JSON.parse(cached);
+      updateStats(); renderEntries(); renderHeatmap(); renderAreaBreakdown(); renderGoalCard();
+    } catch (_) {}
+  }
+  // Then refresh from API
   try {
-    const res = await fetch(API_URL + '?t=' + Date.now());
+    const res  = await fetch(API_URL + '?t=' + Date.now());
     const json = await res.json();
     if (json.success) {
       allEntries = (json.data || []).filter(e => e.Date || e.Topic).reverse();
-      updateStats();
-      renderEntries();
-      renderHeatmap();
-      renderAreaBreakdown();
+      localStorage.setItem(CACHE_KEY, JSON.stringify(allEntries));
+      updateStats(); renderEntries(); renderHeatmap(); renderAreaBreakdown(); renderGoalCard();
     }
-  } catch (e) {
-    document.getElementById('entriesList').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p>Could not load entries. Check your Apps Script URL.</p></div>';
+  } catch (_) {
+    if (!cached) {
+      document.getElementById('entriesList').innerHTML =
+        '<div class="empty-state"><div class="icon">⚠️</div><p>Could not load entries. Check your Apps Script URL.</p></div>';
+    }
   }
 }
 
+// ── Stats ────────────────────────────────────────────
 function updateStats() {
   document.getElementById('totalEntries').textContent = allEntries.length;
+  const oneWeekAgo = new Date(); oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  document.getElementById('weekEntries').textContent = allEntries.filter(e => new Date(e.Date) >= oneWeekAgo).length;
 
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  const weekCount = allEntries.filter(e => new Date(e.Date) >= oneWeekAgo).length;
-  document.getElementById('weekEntries').textContent = weekCount;
-
-  // Top area
   const areaCounts = {};
   allEntries.forEach(e => { if (e.Area) areaCounts[e.Area] = (areaCounts[e.Area] || 0) + 1; });
-  const topArea = Object.entries(areaCounts).sort((a,b) => b[1]-a[1])[0];
+  const topArea = Object.entries(areaCounts).sort((a, b) => b[1] - a[1])[0];
   const areaEmojis = {"Science & Technology":"🔬","History & Culture":"🏛️","Personal Skills":"🧠","Business & Finance":"💼","Arts & Creativity":"🎨"};
   document.getElementById('topArea').textContent = topArea ? (areaEmojis[topArea[0]] || '') + ' ' + topArea[0].split(' ')[0] : '—';
 
-  // Avg time
   const times = allEntries.map(e => parseInt(e['Time Spent']) || 0).filter(t => t > 0);
-  const avg = times.length ? Math.round(times.reduce((a,b) => a+b, 0) / times.length) : 0;
+  const avg = times.length ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : 0;
   document.getElementById('avgTime').textContent = avg ? avg + 'm' : '—';
 
-  // Streak
-  const streak = allEntries[0] ? (parseInt(allEntries[0].Streak) || 0) : 0;
-  document.getElementById('streakCount').textContent = streak;
+  document.getElementById('streakCount').textContent = allEntries[0] ? (parseInt(allEntries[0].Streak) || 0) : 0;
 }
 
-function renderEntries() {
-  const list = document.getElementById('entriesList');
-  let entries = currentFilter === 'All' ? allEntries : allEntries.filter(e => e.Area === currentFilter);
+// ── Filtered entries (respects search + area filter) ─
+function getFilteredEntries() {
+  const q = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+  return allEntries
+    .filter(e => currentFilter === 'All' || e.Area === currentFilter)
+    .filter(e => !q || (e.Topic || '').toLowerCase().includes(q) || (e.Notes || '').toLowerCase().includes(q));
+}
 
+// ── Render history ───────────────────────────────────
+function renderEntries() {
+  const list    = document.getElementById('entriesList');
+  const entries = getFilteredEntries();
   if (!entries.length) {
-    list.innerHTML = '<div class="empty-state"><div class="icon">📖</div><p>No entries yet. Start logging your first lesson!</p></div>';
+    list.innerHTML = '<div class="empty-state"><div class="icon">📖</div><p>No entries found.</p></div>';
     return;
   }
-
-  list.innerHTML = entries.map(e => {
-    const color = AREA_COLORS[e.Area] || '#7a7a8a';
+  list.innerHTML = entries.map((e, i) => {
+    const color   = AREA_COLORS[e.Area] || '#7a7a8a';
     const dateStr = e.Date ? new Date(e.Date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
     return `
     <div class="entry-card">
@@ -624,54 +844,52 @@ function renderEntries() {
         </div>
         ${e.Notes ? `<div class="entry-notes">${e.Notes}</div>` : ''}
       </div>
-      <div class="entry-date">${dateStr}</div>
+      <div class="entry-right">
+        <div class="entry-date">${dateStr}</div>
+        <div class="entry-actions">
+          <button class="action-btn" onclick="editEntry(${i})" title="Edit">✏️</button>
+          <button class="action-btn del" onclick="deleteEntry(${i})" title="Delete">🗑️</button>
+        </div>
+      </div>
     </div>`;
   }).join('');
 }
 
+// ── Heatmap ──────────────────────────────────────────
 function renderHeatmap() {
   const grid = document.getElementById('heatmapGrid');
   const dateCounts = {};
   allEntries.forEach(e => { if (e.Date) dateCounts[e.Date] = (dateCounts[e.Date] || 0) + 1; });
-
   const days = [];
   const today = new Date();
   for (let i = 89; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
+    const d = new Date(today); d.setDate(d.getDate() - i);
     const key = d.toISOString().split('T')[0];
     days.push({ key, count: dateCounts[key] || 0 });
   }
-
   grid.innerHTML = days.map(d => {
-    let level = 0;
-    if (d.count === 1) level = 2;
-    else if (d.count === 2) level = 3;
-    else if (d.count >= 3) level = 4;
+    let level = d.count === 1 ? 2 : d.count === 2 ? 3 : d.count >= 3 ? 4 : 0;
     return `<div class="heatmap-day ${d.count > 0 ? 'has-entry level-' + level : ''}" title="${d.key}: ${d.count} entr${d.count === 1 ? 'y' : 'ies'}"></div>`;
   }).join('');
 }
 
+// ── Area breakdown ───────────────────────────────────
 function renderAreaBreakdown() {
-  const breakdown = document.getElementById('areaBreakdown');
-  const areaCounts = {};
-  const areas = ["Science & Technology","History & Culture","Personal Skills","Business & Finance","Arts & Creativity"];
-  areas.forEach(a => areaCounts[a] = 0);
+  const breakdown  = document.getElementById('areaBreakdown');
+  const areas      = ["Science & Technology","History & Culture","Personal Skills","Business & Finance","Arts & Creativity"];
+  const areaCounts = {}; areas.forEach(a => areaCounts[a] = 0);
   allEntries.forEach(e => { if (e.Area && areaCounts[e.Area] !== undefined) areaCounts[e.Area]++; });
-  const max = Math.max(...Object.values(areaCounts), 1);
+  const max    = Math.max(...Object.values(areaCounts), 1);
   const emojis = {"Science & Technology":"🔬","History & Culture":"🏛️","Personal Skills":"🧠","Business & Finance":"💼","Arts & Creativity":"🎨"};
-
   breakdown.innerHTML = areas.map(a => `
     <div class="area-row">
-      <div class="area-name" style="font-size:13px;">${emojis[a]} ${a}</div>
-      <div class="area-bar-bg">
-        <div class="area-bar" style="width:${(areaCounts[a]/max*100)}%; background:${AREA_COLORS[a]}"></div>
-      </div>
+      <div class="area-name">${emojis[a]} ${a}</div>
+      <div class="area-bar-bg"><div class="area-bar" style="width:${areaCounts[a]/max*100}%; background:${AREA_COLORS[a]}"></div></div>
       <div class="area-count">${areaCounts[a]}</div>
     </div>`).join('');
 }
 
-// Initial load
+// ── Initial load ─────────────────────────────────────
 loadEntries();
 </script>
 </body>
