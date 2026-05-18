@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Daily Learning Tracker</title>
+<meta name="description" content="Track your daily learning across Science, History, Personal Skills, Business, and Arts. Build streaks and grow every day.">
+<meta name="theme-color" content="#0d0d0f">
+
+<!-- Favicon (PNG) -->
+<link rel="icon" type="image/png" sizes="512x512" href="icon.png">
+<!-- SVG favicon fallback (inline data URI) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d0d0f'/%3E%3Cpath d='M7 9a2 2 0 0 1 2-2h5.5v16H9a2 2 0 0 1-2-2V9z' fill='%23e07b39'/%3E%3Cpath d='M17.5 7H23a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5.5V7z' fill='%23f0c040'/%3E%3Crect x='15' y='7' width='2' height='16' rx='1' fill='%230d0d0f' opacity='.6'/%3E%3C/svg%3E">
+<!-- Apple touch icon -->
+<link rel="apple-touch-icon" sizes="512x512" href="icon.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -52,7 +62,6 @@
     margin-bottom: 36px;
   }
   .header-inner { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; }
-  .logo-block {}
   .logo-eyebrow {
     font-size: 11px;
     letter-spacing: 0.2em;
@@ -320,6 +329,21 @@
     .entry-card { grid-template-columns: auto 1fr; }
     .entry-date { grid-column: 2; }
   }
+
+  /* Secret sheet button — invisible, only I know */
+  #secretSheetBtn {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    cursor: default;
+    z-index: 9999;
+    opacity: 0;
+    outline: none;
+  }
 </style>
 </head>
 <body>
@@ -429,6 +453,9 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Secret button: bottom-left corner, invisible -->
+<button id="secretSheetBtn" onclick="window.open('https://docs.google.com/spreadsheets/d/1pkQG-BDxQlkDwwyuUVuVwBBiFt6sYrnpT2glLkQqPO4/edit', '_blank')" title="" aria-hidden="true"></button>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxbLxoSd123d-hB4CK4aXMwUYec3TseNGWQv_i2LvRPYpcpcmn0fIZV5u-xFoZZBnRnPA/exec";
