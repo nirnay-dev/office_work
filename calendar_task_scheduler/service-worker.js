@@ -4,6 +4,8 @@ const ASSETS_TO_CACHE = [
   './index.html',
   './full_page_calendar_task_scheduler.js',
   './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap'
 ];
 
