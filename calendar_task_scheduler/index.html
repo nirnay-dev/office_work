@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enhanced Task Calendar</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#007bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Task Calendar">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <style>
         /* --- Base Styles --- */
         :root {
@@ -570,7 +576,10 @@
 
         /* Modal Styles */
         .modal {
-            display: none;
+            display: flex;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
             position: fixed;
             z-index: 1000; /* Ensure modal is on top */
             left: 0;
@@ -581,6 +590,7 @@
             background-color: rgba(0, 0, 0, 0.6); /* Darker overlay */
             justify-content: center;
             align-items: center;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
         }
 
         .modal-content {
@@ -1211,10 +1221,6 @@
              .calendar-header { flex-direction: column; align-items: stretch; } /* Stack header items */
              .calendar-header h2 { text-align: center; margin-bottom: 10px;}
              .calendar-header button { width: auto; margin-bottom: 5px; } /* Allow buttons to size naturally */
-             .calendar-header button:not(#prevMonth):not(#prevYear):not(#nextYear):not(#nextMonth) { /* Make control buttons full width */
-                  /* width: 100%; */ /* Optional: make certain buttons full width if desired */
-             }
-
 
              .modal-content { padding: 15px; max-width: 95%; } /* Adjust modal width */
              .edit-task-modal-buttons { grid-template-columns: 1fr; } /* Stack edit buttons */
@@ -1257,9 +1263,206 @@
              white-space: nowrap;
              border-width: 0;
         }
+
+        /* ===== MODAL ANIMATION ===== */
+        .modal.is-open { visibility: visible; opacity: 1; pointer-events: all; }
+        .modal-content { transform: translateY(-16px); transition: transform 0.22s ease; }
+        .modal.is-open .modal-content { transform: translateY(0); }
+
+        /* ===== TOAST NOTIFICATIONS ===== */
+        #toastContainer {
+            position: fixed; top: 18px; right: 18px; z-index: 9999;
+            display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+        }
+        .toast {
+            min-width: 220px; max-width: 340px;
+            padding: 12px 18px; border-radius: 8px;
+            font-size: 0.9rem; font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            pointer-events: all; cursor: pointer;
+            animation: toastIn 0.28s ease forwards;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .toast.removing { animation: toastOut 0.28s ease forwards; }
+        .toast-success { background: #28a745; color: #fff; }
+        .toast-error   { background: #dc3545; color: #fff; }
+        .toast-info    { background: #17a2b8; color: #fff; }
+        .toast-warning { background: #ffc107; color: #333; }
+        @keyframes toastIn  { from { opacity:0; transform:translateX(40px); } to { opacity:1; transform:translateX(0); } }
+        @keyframes toastOut { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(40px); } }
+
+        /* ===== CUSTOM CONFIRM DIALOG ===== */
+        #confirmOverlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55); z-index: 10000;
+            justify-content: center; align-items: center;
+        }
+        #confirmOverlay.is-open { display: flex; }
+        #confirmBox {
+            background: var(--modal-bg-color); color: var(--modal-text-color);
+            border-radius: 12px; padding: 28px 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+            max-width: 380px; width: 90%; text-align: center;
+            animation: toastIn 0.22s ease;
+        }
+        #confirmBox p { margin: 0 0 22px; font-size: 1rem; line-height: 1.5; }
+        #confirmBox .confirm-btns { display: flex; gap: 12px; justify-content: center; }
+        #confirmBox .confirm-btns button { flex: 1; padding: 10px; border-radius: 7px; font-size: 0.95rem; }
+        #confirmOkBtn  { background: var(--delete-button-bg-color); color: var(--delete-button-text-color); border: none; }
+        #confirmCancelBtn { background: var(--modal-input-bg-color); color: var(--modal-text-color); border: 1px solid var(--modal-input-border-color); }
+
+        /* ===== STATS BAR ===== */
+        #statsBar {
+            display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+            padding: 8px 20px; background: var(--app-bg-color);
+            border-radius: 8px; box-shadow: var(--app-shadow); font-size: 0.88rem;
+        }
+        #statsBar .stat-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        #statsBar .stat-value { font-size: 1.25rem; font-weight: 700; color: var(--header-bg-color); }
+        #statsBar .stat-label { opacity: 0.7; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        #statsProgressWrap { flex: 1; min-width: 120px; }
+        #statsProgressBar {
+            height: 6px; border-radius: 3px;
+            background: var(--grid-bg-color); overflow: hidden;
+        }
+        #statsProgressFill {
+            height: 100%; border-radius: 3px;
+            background: linear-gradient(90deg, #28a745, #00c853);
+            transition: width 0.5s ease;
+        }
+        #statsProgressLabel { font-size: 0.78rem; opacity: 0.7; margin-top: 3px; }
+
+        /* ===== CATEGORY COLOR PILLS ===== */
+        .category-pill {
+            display: inline-block; padding: 2px 8px;
+            border-radius: 999px; font-size: 0.75rem;
+            font-weight: 600; color: #fff;
+            margin-left: auto; flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        /* ===== NOTES FIELD ===== */
+        .modal-add-task-form textarea,
+        .edit-task-form-fields textarea {
+            padding: 8px; border-radius: 5px;
+            border: 1px solid var(--modal-input-border-color);
+            font-size: 0.9rem; resize: vertical; min-height: 58px;
+            background: var(--modal-input-bg-color);
+            color: var(--modal-input-text-color); width: 100%; box-sizing: border-box;
+            font-family: inherit;
+        }
+        .task-notes-preview {
+            font-size: 0.8em; opacity: 0.65; margin-left: 4px;
+            font-style: italic; white-space: nowrap; overflow: hidden;
+            text-overflow: ellipsis; max-width: 140px;
+        }
+
+        /* ===== TODAY BUTTON ===== */
+        #todayButton {
+            background: var(--today-border-color);
+            color: #fff; font-size: 0.9rem; padding: 5px 10px;
+            border: none; margin-left: 5px; white-space: nowrap;
+        }
+        #todayButton:hover { opacity: 0.85; }
+
+        /* ===== CATEGORY MANAGEMENT ===== */
+        #manageCategoriesPanel {
+            display: none; padding: 10px 16px;
+            background: var(--app-bg-color); border-radius: 8px;
+            box-shadow: var(--app-shadow); margin-top: 4px;
+            position: absolute; z-index: 200; min-width: 200px;
+        }
+        #manageCategoriesPanel.open { display: block; }
+        #manageCategoriesPanel h4 { margin: 0 0 8px; font-size: 0.9rem; }
+        .cat-manage-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 4px 0; border-bottom: 1px solid var(--modal-list-border-color);
+            font-size: 0.88rem;
+        }
+        .cat-manage-item:last-child { border-bottom: none; }
+        .cat-delete-btn {
+            background: var(--delete-button-bg-color); color: #fff; border: none;
+            border-radius: 4px; padding: 2px 7px; font-size: 0.75rem; cursor: pointer;
+        }
+        .controls-and-search { position: relative; }
+
+        /* ===== GOOGLE SHEETS INTEGRATION PANEL ===== */
+        #sheetsSettingsPanel {
+            display: none; padding: 14px 18px;
+            background: var(--app-bg-color); border-radius: 8px;
+            box-shadow: var(--app-shadow); margin-top: 4px;
+            position: absolute; z-index: 200; width: 310px; right: 0;
+            flex-direction: column; gap: 10px;
+        }
+        #sheetsSettingsPanel.open { display: flex; }
+        #sheetsSettingsPanel h4 { margin: 0; font-size: 0.92rem; font-weight: 700; }
+        #sheetsWebhookUrlInput {
+            width: 100%; padding: 8px; font-size: 0.82rem; border-radius: 6px;
+            border: 1px solid var(--modal-input-border-color);
+            background: var(--modal-input-bg-color); color: var(--modal-text-color);
+            box-sizing: border-box;
+        }
+        #sheetsSettingsPanel .panel-buttons {
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        #sheetsSettingsPanel .panel-buttons-row {
+            display: flex; gap: 8px;
+        }
+        #sheetsSettingsPanel .panel-buttons-row button {
+            flex: 1;
+        }
+        #sheetsSettingsPanel button {
+            padding: 7px 10px; font-size: 0.8rem; border-radius: 5px;
+            cursor: pointer; border: none; font-weight: 600;
+        }
+        #sheetsConnectBtn { background: var(--header-bg-color); color: var(--header-text-color); }
+        #sheetsDisconnectBtn { background: var(--delete-button-bg-color); color: var(--delete-button-text-color); }
+        #sheetsPushBtn, #sheetsPullBtn {
+            background: var(--modal-input-bg-color); color: var(--modal-text-color);
+            border: 1px solid var(--modal-input-border-color) !important;
+        }
+        #sheetsPushBtn:disabled, #sheetsPullBtn:disabled, #sheetsConnectBtn:disabled {
+            opacity: 0.5; cursor: not-allowed;
+        }
+
+        /* ===== SYNC STATUS BADGE ===== */
+        .sync-badge {
+            display: flex; align-items: center; gap: 8px;
+            padding: 4px 10px; border-radius: 20px; font-size: 0.78rem;
+            font-weight: 600; background: var(--grid-bg-color);
+            color: var(--text-color); border: 1px solid var(--modal-input-border-color);
+            transition: all 0.3s ease;
+        }
+        .sync-badge .status-indicator {
+            width: 8px; height: 8px; border-radius: 50%;
+            display: inline-block;
+        }
+        .sync-badge.local .status-indicator { background: #6c757d; }
+        .sync-badge.synced .status-indicator { background: #28a745; box-shadow: 0 0 6px #28a745; }
+        .sync-badge.syncing .status-indicator { background: #ffc107; box-shadow: 0 0 6px #ffc107; animation: pulse-yellow 1.2s infinite alternate; }
+        .sync-badge.offline .status-indicator { background: #dc3545; box-shadow: 0 0 6px #dc3545; }
+
+        @keyframes pulse-yellow {
+            from { opacity: 0.4; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer"></div>
+
+    <!-- CUSTOM CONFIRM OVERLAY -->
+    <div id="confirmOverlay">
+        <div id="confirmBox">
+            <p id="confirmMessage">Are you sure?</p>
+            <div class="confirm-btns">
+                <button id="confirmCancelBtn">Cancel</button>
+                <button id="confirmOkBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
 
     <div class="main-layout">
         <div class="calendar-container">
@@ -1270,7 +1473,9 @@
                  <h2 id="currentMonthYear">Month Year</h2>
                  <button id="nextYear" aria-label="Next Year">&gt;&gt;</button>
                  <button id="nextMonth" aria-label="Next Month">&gt;</button>
+                 <button id="todayButton" aria-label="Go to Today">Today</button>
                  <button id="darkModeToggle" aria-label="Toggle Mode">Light Mode</button>
+                 <button id="installAppBtn" style="display: none; background: #28a745; color: #fff;" aria-label="Install Calendar App">📲 Install App</button>
                  <button id="downloadTasksButton" aria-label="Download Tasks (JSON)">Download JSON</button>
                  <input type="file" id="importFile" accept=".json" style="display: none;">
                  <button id="importTasksButton" aria-label="Import Tasks (JSON)">Import JSON</button>
@@ -1285,16 +1490,51 @@
                       <label for="filterCategory" class="sr-only">Filter by Category</label>
                       <select id="filterCategory" aria-label="Filter by Category">
                           <option value="all">All Categories</option>
-                          </select>
+                      </select>
                       <label for="filterCompletion" class="sr-only">Filter by Completion</label>
                       <select id="filterCompletion" aria-label="Filter by Completion Status">
                           <option value="all">All Status</option>
                           <option value="incomplete">Incomplete</option>
                           <option value="completed">Completed</option>
                       </select>
-                       <label for="hideCompletedToggle" class="sr-only">Hide Completed</label>
-                       <button id="hideCompletedToggle" aria-pressed="false">Hide Completed</button>
+                      <button id="hideCompletedToggle" aria-pressed="false">Hide Completed</button>
+                      <button id="manageCategoriesButton" aria-label="Manage Categories">⚙ Categories</button>
+                      <button id="sheetsSettingsButton" aria-label="Google Sheets Connection">📊 Sheets Sync</button>
                   </div>
+                  <!-- Category Management Panel -->
+                  <div id="manageCategoriesPanel">
+                      <h4>Manage Categories</h4>
+                      <div id="categoryListContainer"></div>
+                  </div>
+                  <!-- Google Sheets Sync Panel -->
+                  <div id="sheetsSettingsPanel">
+                      <h4>Google Sheets Integration</h4>
+                      <input type="url" id="sheetsWebhookUrlInput" placeholder="Enter Apps Script Web App URL..." aria-label="Apps Script URL">
+                      <div class="panel-buttons">
+                          <button id="sheetsConnectBtn">Connect & Sync</button>
+                          <div class="panel-buttons-row">
+                              <button id="sheetsPushBtn" disabled>Push</button>
+                              <button id="sheetsPullBtn" disabled>Pull</button>
+                          </div>
+                          <button id="sheetsDisconnectBtn" style="display:none;">Disconnect</button>
+                      </div>
+                  </div>
+             </div>
+
+             <!-- STATS BAR -->
+             <div id="statsBar">
+                 <div class="stat-item"><span class="stat-value" id="statTotal">0</span><span class="stat-label">Tasks</span></div>
+                 <div class="stat-item"><span class="stat-value" id="statDone">0</span><span class="stat-label">Done</span></div>
+                 <div class="stat-item"><span class="stat-value" id="statPending">0</span><span class="stat-label">Pending</span></div>
+                 <div id="statsProgressWrap">
+                     <div id="statsProgressBar"><div id="statsProgressFill" style="width:0%"></div></div>
+                     <div id="statsProgressLabel">0% complete</div>
+                 </div>
+                 <!-- Sync Status Badge -->
+                 <div id="syncStatusBadge" class="sync-badge local">
+                     <span class="status-indicator"></span>
+                     <span class="status-text">Local Mode</span>
+                 </div>
              </div>
 
              <!-- CALENDAR GRID -->
@@ -1342,6 +1582,10 @@
                      <label for="newTaskDescription">Task Description</label>
                      <input type="text" id="newTaskDescription" placeholder="Add New Task" aria-label="Add New Task Description" required>
                  </div>
+                 <div class="form-field description-field">
+                     <label for="newTaskNotes">Notes (Optional)</label>
+                     <textarea id="newTaskNotes" placeholder="Additional notes..." aria-label="Task Notes" rows="2"></textarea>
+                 </div>
                  <div class="form-field">
                      <label for="newTaskTime">Time (Optional)</label>
                      <input type="time" id="newTaskTime" aria-label="Task Time">
@@ -1369,7 +1613,8 @@
                             <option value="daily">Daily</option>
                             <option value="weekly">Weekly</option>
                             <option value="monthly">Monthly</option>
-                            <!-- <option value="yearly">Yearly</option> --> </select>
+                            <option value="yearly">Yearly</option>
+                        </select>
                    </div>
                    <div class="form-field button-field">
                        <button type="submit" id="addNewTaskButton">Add Task</button>
@@ -1389,6 +1634,10 @@
                  <div class="form-field description-field">
                      <label for="editTaskDescription">Task Description</label>
                      <input type="text" id="editTaskDescription" aria-label="Edit Task Description" required>
+                 </div>
+                 <div class="form-field description-field">
+                     <label for="editTaskNotes">Notes (Optional)</label>
+                     <textarea id="editTaskNotes" placeholder="Additional notes..." aria-label="Task Notes" rows="2"></textarea>
                  </div>
                  <div class="form-field">
                      <label for="editTaskTime">Time</label>
@@ -1413,7 +1662,8 @@
                           <option value="daily">Daily</option>
                           <option value="weekly">Weekly</option>
                           <option value="monthly">Monthly</option>
-                          <!-- <option value="yearly">Yearly</option> --> </select>
+                          <option value="yearly">Yearly</option>
+                      </select>
                  </div>
                   <div class="form-field">
                        <label for="editTaskCompleted">Status</label>
@@ -1434,6 +1684,7 @@
              <input type="hidden" id="editModalDate">
              <input type="hidden" id="editModalTaskIndex">
              <input type="hidden" id="editModalIsRecurringInstance">
+             <input type="hidden" id="editModalInstanceDate">
         </div>
     </div>
 
