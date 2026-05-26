@@ -3,329 +3,427 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Material 3 Website Builder</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <title>Material 3 Website Builder & Studio</title>
+    
+    <!-- Google Fonts & Modern Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    
     <style>
+        /* --- DESIGNER DARK THEME WORKSPACE STYLING --- */
+        :root {
+            --bg-editor: #090a0f;
+            --surface-editor: rgba(22, 24, 30, 0.9);
+            --surface-editor-hover: rgba(35, 38, 48, 0.9);
+            --border-editor: rgba(255, 255, 255, 0.08);
+            --text-editor: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent-editor: #4f46e5;
+            --accent-glow: rgba(79, 70, 229, 0.4);
+            --sidebar-width: 290px;
+            --properties-width: 330px;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
-            background: #f5f5f5;
+            background-color: var(--bg-editor);
+            color: var(--text-editor);
             height: 100vh;
             overflow: hidden;
-        }
-
-        .builder-container {
             display: flex;
-            height: 100vh;
+            flex-direction: column;
         }
 
-        /* Component Panel */
-        .component-panel {
-            width: 280px;
-            background: #ffffff;
-            border-right: 1px solid #e0e0e0;
-            padding: 16px;
-            overflow-y: auto;
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
-        .panel-title {
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 16px;
-            color: #1976d2;
-        }
-
-        .component-category {
-            margin-bottom: 24px;
-        }
-
-        .category-title {
-            font-size: 14px;
-            font-weight: 500;
-            color: #666;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .component-item {
+        /* --- EDITOR LAYOUT --- */
+        .editor-header {
+            height: 64px;
+            background: var(--surface-editor);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-editor);
             display: flex;
             align-items: center;
-            padding: 12px;
-            margin-bottom: 8px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            cursor: grab;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+            color: white;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .brand-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, #d1d5db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            background: rgba(79, 70, 229, 0.2);
+            border: 1px solid rgba(79, 70, 229, 0.4);
+            border-radius: 20px;
+            color: #818cf8;
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Viewport / Device Switcher */
+        .device-switcher {
+            display: flex;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 4px;
+            border-radius: 24px;
+            border: 1px solid var(--border-editor);
+        }
+
+        .device-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            width: 36px;
+            height: 32px;
+            border-radius: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .device-btn:hover {
+            color: var(--text-editor);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .device-btn.active {
+            background: var(--accent-editor);
+            color: white;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.4);
+        }
+
+        /* Theme Engine Picker */
+        .theme-panel-trigger {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-editor);
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-editor);
             transition: all 0.2s ease;
-            border: 2px solid transparent;
+        }
+
+        .theme-panel-trigger:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .theme-preview-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--md-sys-color-primary, #3f8cff);
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Editor Chrome Buttons */
+        .btn-action {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-editor);
+            color: var(--text-editor);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-action:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-action.primary {
+            background: var(--accent-editor);
+            border-color: transparent;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .btn-action.primary:hover {
+            background: #5a52ff;
+            box-shadow: 0 4px 16px rgba(79, 70, 229, 0.6);
+        }
+
+        /* Workspace Wrapper */
+        .workspace-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- SIDEBAR COMPONENTS PANEL --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--surface-editor);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border-editor);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .sidebar-section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            margin-top: 16px;
+        }
+        .sidebar-section-title:first-child { margin-top: 0; }
+
+        .component-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-editor);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .component-item:hover {
-            background: #e3f2fd;
-            border-color: #1976d2;
-            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: scale(1.02);
         }
 
         .component-item:active {
             cursor: grabbing;
         }
 
-        .component-item .material-icons {
-            margin-right: 12px;
-            color: #1976d2;
+        .component-item .material-symbols-outlined {
+            color: #818cf8;
+            font-size: 20px;
         }
 
-        /* Canvas Area */
-        .canvas-area {
+        .component-item-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-editor);
+        }
+
+        /* --- VISUAL CANVAS WORKSPACE --- */
+        .canvas-workspace {
             flex: 1;
+            background-color: #0b0c10;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            overflow-y: auto;
+            padding: 40px 20px;
             display: flex;
             flex-direction: column;
-            background: #fafafa;
-        }
-
-        .canvas-toolbar {
-            height: 60px;
-            background: #ffffff;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
             align-items: center;
-            padding: 0 24px;
-            gap: 16px;
-            overflow-x: auto;
+            scroll-behavior: smooth;
         }
 
-        .toolbar-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 20px;
-            background: #e3f2fd;
-            color: #1976d2;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .toolbar-btn:hover {
-            background: #1976d2;
-            color: white;
-        }
-
-        .canvas {
-            flex: 1;
+        /* Canvas Shell framing */
+        .canvas-shell {
+            width: 100%;
             background: #ffffff;
-            margin: 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            min-height: 700px;
             position: relative;
-            overflow-y: auto;
-            min-height: calc(100vh - 120px);
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        .canvas-content {
-            min-height: 100%;
-            padding: 20px;
+        /* Custom Dark Canvas Preview mode */
+        .dark-preview .canvas-shell {
+            background: #121212 !important;
+        }
+
+        .canvas-header-bar {
+            height: 36px;
+            background: #f1f3f4;
+            border-bottom: 1px solid #e0e2e4;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 11px;
+            color: #5f6368;
+            font-family: monospace;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            user-select: none;
         }
         
-        #canvasContent.is-empty .drop-zone {
-            display: flex;
+        .dark-preview .canvas-header-bar {
+            background: #1e1e1e;
+            border-bottom-color: #2e2e2e;
+            color: #aaa;
         }
 
+        .canvas-bar-dots {
+            display: flex;
+            gap: 6px;
+        }
+        .canvas-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+        .canvas-dot.red { background: #ff5f56; }
+        .canvas-dot.yellow { background: #ffbd2e; }
+        .canvas-dot.green { background: #27c93f; }
+
+        .canvas-container {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            position: relative;
+            background: inherit;
+        }
+
+        /* Spacing layout helpers */
         .drop-zone {
+            border: 2px dashed rgba(79, 70, 229, 0.3);
+            border-radius: 12px;
             min-height: 200px;
-            border: 2px dashed #e0e0e0;
-            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #666;
-            font-size: 16px;
-            transition: all 0.2s ease;
-            display: none;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.01);
             margin-bottom: 16px;
+            padding: 20px;
+            text-align: center;
         }
 
         .drop-zone.drag-over {
-            border-color: #1976d2;
-            background: #f3f8ff;
-            color: #1976d2;
+            border-color: var(--accent-editor);
+            background: rgba(79, 70, 229, 0.08);
+            color: #818cf8;
+            transform: scale(0.99);
         }
 
-        /* Properties Panel */
-        .properties-panel {
-            width: 320px;
-            background: #ffffff;
-            border-left: 1px solid #e0e0e0;
-            padding: 16px;
-            overflow-y: auto;
+        .drop-zone .material-symbols-outlined {
+            font-size: 48px;
+            color: #818cf8;
+            opacity: 0.6;
         }
 
-        /* Material 3 Components */
-        .m3-button {
-            padding: 10px 24px;
-            border: none;
-            border-radius: 20px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin: 8px;
-        }
-
-        .m3-button.filled {
-            background: #1976d2;
-            color: white;
-        }
-
-        .m3-button.outlined {
-            background: transparent;
-            color: #1976d2;
-            border: 1px solid #1976d2;
-        }
-
-        .m3-button.text {
-            background: transparent;
-            color: #1976d2;
-        }
-
-        .m3-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-            padding: 16px;
-            margin: 16px 0;
-            transition: all 0.2s ease;
-        }
-
-        .m3-card:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.16);
-        }
-
-        .m3-text-field {
-            width: 100%;
-            padding: 16px;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 16px;
-            margin: 8px 0;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        .m3-text-field:focus {
-            border-color: #1976d2;
-            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
-        }
-
-        .m3-chip {
-            display: inline-flex;
-            align-items: center;
-            padding: 6px 12px;
-            background: #e0e0e0;
-            border-radius: 16px;
-            font-size: 14px;
-            margin: 4px;
-        }
-
-        .m3-fab {
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            background: #1976d2;
-            color: white;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-        }
-
-        .m3-top-app-bar {
-            height: 64px;
-            background: #1976d2;
-            color: white;
-            display: flex;
-            align-items: center;
-            padding: 0 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .m3-navigation-rail {
-            width: 80px;
-            background: #f5f5f5;
-            padding: 12px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .nav-item {
-            width: 56px;
-            height: 32px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .nav-item:hover {
-            background: #e3f2fd;
-        }
-
+        /* Canvas Element Wrapping & Actions */
         .dropped-component {
             position: relative;
-            margin: 8px 0;
-            min-height: 40px;
+            margin: 12px 0;
             border: 2px solid transparent;
-            border-radius: 4px;
-            transition: border-color 0.2s ease, background-color 0.2s ease; /* Exclude opacity */
-            cursor: pointer;
-        }
-        .dropped-component.dragging {
-            opacity: 0.4;
+            border-radius: 8px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideIn 0.3s ease;
         }
 
-        .drop-placeholder {
-            height: 4px;
-            background-color: #1976d2;
-            border-radius: 2px;
-            margin: 12px 0;
-            transition: all 0.2s ease;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .dropped-component:hover {
-            border-color: #a9cff8;
+            border-color: rgba(79, 70, 229, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         .dropped-component.selected {
-            border-color: #1976d2;
-            background: rgba(25, 118, 210, 0.05);
+            border-color: var(--accent-editor);
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.15);
         }
 
+        /* Overlay floating controls */
         .component-controls {
             position: absolute;
-            top: -28px;
-            right: -2px;
-            background: #1976d2;
-            border-radius: 4px;
-            padding: 4px;
+            top: -34px;
+            right: 0;
+            background: var(--accent-editor);
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            padding: 4px 6px;
             display: none;
+            align-items: center;
             gap: 4px;
-            z-index: 10;
+            z-index: 50;
+            box-shadow: 0 -4px 10px rgba(79, 70, 229, 0.3);
         }
 
         .dropped-component.selected .component-controls {
@@ -333,69 +431,172 @@
         }
 
         .control-btn {
-            background: none;
+            background: transparent;
             border: none;
             color: white;
             cursor: pointer;
-            padding: 4px;
-            border-radius: 2px;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background 0.2s;
         }
 
         .control-btn:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
         }
+
+        .control-btn .material-symbols-outlined {
+            font-size: 16px;
+        }
+
         .drag-handle {
             cursor: move;
         }
 
+        /* Drop indicator line */
+        .drop-placeholder {
+            height: 4px;
+            background-color: var(--accent-editor);
+            border-radius: 2px;
+            margin: 12px 0;
+            box-shadow: 0 0 8px var(--accent-glow);
+            transition: all 0.2s ease;
+        }
+
+        /* --- PROPERTIES INSPECTOR PANEL --- */
+        .properties-panel {
+            width: var(--properties-width);
+            background: var(--surface-editor);
+            backdrop-filter: blur(12px);
+            border-left: 1px solid var(--border-editor);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .properties-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-editor);
+        }
+
+        .properties-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .properties-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-editor);
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .property-tab {
+            flex: 1;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .property-tab:hover {
+            color: var(--text-editor);
+        }
+
+        .property-tab.active {
+            color: #818cf8;
+            border-bottom-color: var(--accent-editor);
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .properties-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
         .property-group {
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .property-label {
             display: block;
-            font-size: 12px;
-            font-weight: 500;
-            color: #666;
-            margin-bottom: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .property-input, .property-select, .property-textarea, .property-number {
+        .property-input, .property-select, .property-textarea {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 14px;
-            background: white;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-editor);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text-editor);
+            font-size: 13px;
+            outline: none;
+            transition: all 0.2s ease;
         }
-        
-        .property-select {
-            cursor: pointer;
+
+        .property-input:focus, .property-select:focus, .property-textarea:focus {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.2);
+        }
+
+        .property-color-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .property-color {
-            width: 100%;
-            height: 40px;
+            width: 44px;
+            height: 38px;
             padding: 0;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
+            border: 1px solid var(--border-editor);
+            border-radius: 8px;
             cursor: pointer;
+            background: transparent;
+        }
+
+        .property-range-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .property-range-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .property-range {
-            width: 100%;
-            margin: 8px 0;
+            flex: 1;
+            accent-color: var(--accent-editor);
+            height: 4px;
+            border-radius: 2px;
+            cursor: pointer;
         }
 
         .range-display {
+            font-family: 'JetBrains Mono', monospace;
             font-size: 12px;
-            color: #666;
-            text-align: center;
-            margin-top: 4px;
+            color: var(--text-muted);
+            width: 40px;
+            text-align: right;
         }
 
         .property-textarea {
@@ -403,560 +604,2323 @@
             resize: vertical;
         }
 
-        .export-code {
+        /* Collapsible group items list inside property editor */
+        .properties-list-editor {
+            border: 1px solid var(--border-editor);
+            border-radius: 8px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        /* --- PRESETS / THEME SWITCHER MODALS --- */
+        .builder-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(5, 6, 10, 0.85);
+            backdrop-filter: blur(8px);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            animation: fadeIn 0.25s ease;
         }
 
-        .export-modal {
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            width: 80%;
-            max-width: 800px;
-            max-height: 80%;
-            overflow-y: auto;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-card {
+            background: #14161f;
+            border: 1px solid var(--border-editor);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 850px;
+            max-height: 85%;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+            transform: scale(0.98);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .export-modal textarea {
-            width: 100%;
-            height: 400px;
-            font-family: 'Courier New', monospace;
+        .builder-modal.active {
+            display: flex;
+        }
+        .builder-modal.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-editor);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-editor);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Templates Grid */
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .template-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-editor);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .template-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #818cf8;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .template-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(79, 70, 229, 0.1);
+            color: #818cf8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .template-card-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .template-card-desc {
             font-size: 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Theme Generator UI */
+        .theme-dialog-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .theme-section-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .theme-select-box {
+            flex: 1;
+            min-width: 250px;
+            background: rgba(0,0,0,0.15);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-editor);
+        }
+
+        .theme-preset-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .theme-preset-chip {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-editor);
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-preset-chip:hover, .theme-preset-chip.active {
+            background: rgba(79, 70, 229, 0.15);
+            border-color: #818cf8;
+        }
+
+        .theme-chip-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .custom-seed-picker {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 16px;
+            background: rgba(255,255,255,0.02);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-editor);
+        }
+
+        /* Code Exporter Playgrounds */
+        .export-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            height: 480px;
+        }
+
+        .export-tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-editor);
+            padding-bottom: 8px;
+        }
+
+        .export-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .export-tab.active {
+            background: rgba(79, 70, 229, 0.15);
+            color: #818cf8;
+        }
+
+        .export-code-wrapper {
+            flex: 1;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-editor);
+        }
+
+        .export-code-area {
+            width: 100%;
+            height: 100%;
+            background: #07080b;
+            color: #cbd5e1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
             padding: 16px;
-            resize: vertical;
+            border: none;
+            outline: none;
+            resize: none;
+            white-space: pre;
+            overflow: auto;
+        }
+
+        /* --- MATERIAL 3 SPECIFIC CSS RULES IN CANVAS PREVIEW --- */
+        /* To isolate styles, we inject these rules inside the compiled canvas preview stylesheet */
+        .m3-compiled-styles {
+            display: none;
+        }
+    </style>
+    
+    <!-- EMBEDDED SYSTEM CSS RULES FOR IN-CANVAS AND EXPORTED COMPONENT RENDER -->
+    <style id="m3-system-rules">
+        :root {
+            --m3-primary: #3f8cff;
+            --m3-primary-rgb: 63, 140, 255;
+            --m3-secondary: #7f5cff;
+            --m3-secondary-rgb: 127, 92, 255;
+            --m3-background: #f8f9fa;
+            --m3-surface: #ffffff;
+            --m3-on-surface: #1f1f1f;
+            --m3-outline: #e0e2e4;
+            --m3-surface-variant: #f0f4f9;
+        }
+
+        .canvas-render-root {
+            color: var(--m3-on-surface);
+            background-color: var(--m3-background);
+            min-height: 100%;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Buttons & Actions */
+        .m3-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 10px 24px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+        }
+        .m3-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .m3-button:active {
+            transform: translateY(0);
+        }
+        .m3-button.filled {
+            background-color: var(--m3-primary);
+            color: white;
+        }
+        .m3-button.filled:hover {
+            box-shadow: 0 4px 12px rgba(var(--m3-primary-rgb), 0.3);
+        }
+        .m3-button.outlined {
+            background-color: transparent;
+            color: var(--m3-primary);
+            border: 1px solid var(--m3-outline);
+        }
+        .m3-button.outlined:hover {
+            background-color: rgba(var(--m3-primary-rgb), 0.05);
+            border-color: var(--m3-primary);
+        }
+        .m3-button.text {
+            background-color: transparent;
+            color: var(--m3-primary);
+            padding: 10px 16px;
+        }
+        .m3-button.text:hover {
+            background-color: rgba(var(--m3-primary-rgb), 0.05);
+        }
+        .m3-button.tonal {
+            background-color: var(--m3-surface-variant);
+            color: var(--m3-on-surface);
+        }
+        .m3-button.tonal:hover {
+            background-color: rgba(var(--m3-primary-rgb), 0.1);
+        }
+
+        .m3-fab {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: var(--m3-primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .m3-fab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(var(--m3-primary-rgb), 0.35);
+        }
+        .m3-fab.regular { width: 56px; height: 56px; border-radius: 16px; }
+        .m3-fab.small { width: 40px; height: 40px; border-radius: 12px; }
+        .m3-fab.large { width: 96px; height: 96px; border-radius: 28px; }
+        .m3-fab.extended { height: 56px; padding: 0 24px; border-radius: 16px; font-weight: 500; font-size: 14px; }
+
+        /* Inputs & Chips */
+        .m3-textfield-wrapper {
+            margin: 8px 0;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .m3-textfield-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--m3-primary);
+            padding-left: 4px;
+        }
+        .m3-textfield {
+            background-color: var(--m3-surface-variant);
+            border: none;
+            border-bottom: 2px solid var(--m3-outline);
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            padding: 12px 16px;
+            font-size: 15px;
+            color: var(--m3-on-surface);
+            outline: none;
+            transition: all 0.2s;
+        }
+        .m3-textfield:focus {
+            border-bottom-color: var(--m3-primary);
+            background-color: rgba(var(--m3-primary-rgb), 0.05);
+        }
+        .m3-textfield.outlined {
+            border: 1px solid var(--m3-outline);
+            border-radius: 8px;
+            background-color: transparent;
+        }
+        .m3-textfield.outlined:focus {
+            border-color: var(--m3-primary);
+            border-width: 2px;
+        }
+        .m3-textfield-helper {
+            font-size: 11px;
+            color: #666;
+            padding-left: 4px;
+        }
+
+        .m3-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background-color: var(--m3-surface);
+            border: 1px solid var(--m3-outline);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--m3-on-surface);
+            margin: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .m3-chip:hover {
+            background-color: var(--m3-surface-variant);
+            border-color: var(--m3-primary);
+        }
+        .m3-chip.active {
+            background-color: rgba(var(--m3-primary-rgb), 0.1);
+            border-color: var(--m3-primary);
+            color: var(--m3-primary);
+        }
+
+        /* Layout & Sections */
+        .m3-card {
+            background-color: var(--m3-surface);
+            border: 1px solid var(--m3-outline);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        .m3-card.elevated {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: none;
+        }
+        .m3-card.elevated:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        .m3-card.filled {
+            background-color: var(--m3-surface-variant);
+            border: none;
+        }
+        .m3-card-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        .m3-card h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .m3-card p {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.8;
+        }
+
+        .m3-top-app-bar {
+            height: 72px;
+            background-color: var(--m3-surface);
+            border-bottom: 1px solid var(--m3-outline);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        .m3-top-app-bar h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .m3-top-app-bar.color-filled {
+            background-color: var(--m3-primary);
+            color: white;
+            border: none;
+        }
+
+        .m3-navigation-rail {
+            width: 80px;
+            background-color: var(--m3-surface-variant);
+            border-right: 1px solid var(--m3-outline);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            gap: 16px;
+        }
+        .m3-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            color: var(--m3-on-surface);
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            width: 100%;
+            padding: 8px 0;
+            transition: all 0.2s;
+        }
+        .m3-nav-icon-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 32px;
+            border-radius: 16px;
+            transition: all 0.2s;
+        }
+        .m3-nav-item:hover .m3-nav-icon-wrapper {
+            background-color: rgba(var(--m3-primary-rgb), 0.1);
+        }
+        .m3-nav-item.active .m3-nav-icon-wrapper {
+            background-color: rgba(var(--m3-primary-rgb), 0.2);
+            color: var(--m3-primary);
+        }
+
+        /* Modern Sections */
+        .m3-hero {
+            padding: 80px 24px;
+            background: linear-gradient(135deg, rgba(var(--m3-primary-rgb), 0.05), rgba(var(--m3-secondary-rgb), 0.05));
+            border-radius: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .m3-hero.left {
+            text-align: left;
+            align-items: flex-start;
+            padding: 80px 48px;
+        }
+        .m3-hero h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 42px;
+            font-weight: 700;
+            line-spacing: -1px;
+            color: var(--m3-on-surface);
+            max-width: 750px;
+        }
+        .m3-hero p {
+            font-size: 17px;
+            line-height: 1.6;
+            max-width: 600px;
+            opacity: 0.85;
+        }
+        .m3-hero-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .m3-features-grid {
+            display: grid;
+            gap: 24px;
+            margin: 24px 0;
+        }
+        .m3-features-grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+        .m3-features-grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+        .m3-features-grid.cols-4 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+        .m3-feature-item {
+            background-color: var(--m3-surface);
+            border: 1px solid var(--m3-outline);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .m3-feature-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            border-color: var(--m3-primary);
+        }
+        .m3-feature-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background-color: rgba(var(--m3-primary-rgb), 0.1);
+            color: var(--m3-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .m3-feature-item h4 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .m3-feature-item p {
+            font-size: 13px;
+            line-height: 1.5;
+            opacity: 0.75;
+        }
+
+        .m3-accordion-item {
+            border: 1px solid var(--m3-outline);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            overflow: hidden;
+            background-color: var(--m3-surface);
+        }
+        .m3-accordion-header {
+            padding: 16px 20px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .m3-accordion-header:hover {
+            background-color: var(--m3-surface-variant);
+        }
+        .m3-accordion-content {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.8;
+        }
+        .m3-accordion-item.active .m3-accordion-content {
+            padding: 16px 20px;
+            max-height: 200px;
+            border-top: 1px solid var(--m3-outline);
+        }
+        .m3-accordion-item.active .m3-accordion-icon {
+            transform: rotate(180deg);
+        }
+        .m3-accordion-icon {
+            transition: transform 0.3s;
+        }
+
+        .m3-footer {
+            padding: 60px 24px 30px;
+            background-color: var(--m3-surface-variant);
+            border-radius: 16px;
+            margin-top: 40px;
+        }
+        .m3-footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        .m3-footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .m3-footer-brand-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--m3-primary);
+        }
+        .m3-footer-brand-desc {
+            font-size: 13px;
+            line-height: 1.5;
+            opacity: 0.75;
+        }
+        .m3-footer-column h5 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .m3-footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            list-style: none;
+        }
+        .m3-footer-links a {
+            font-size: 13px;
+            color: inherit;
+            text-decoration: none;
+            opacity: 0.75;
+            transition: opacity 0.2s, color 0.2s;
+        }
+        .m3-footer-links a:hover {
+            opacity: 1;
+            color: var(--m3-primary);
+        }
+        .m3-footer-bottom {
+            border-top: 1px solid var(--m3-outline);
+            padding-top: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        .m3-footer-socials {
+            display: flex;
+            gap: 16px;
+        }
+        .m3-footer-social-btn {
+            color: inherit;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .m3-footer-social-btn:hover {
+            color: var(--m3-primary);
+        }
+
+        /* Generic Spacing classes */
+        .m3-divider {
+            border: none;
+            border-bottom: 1px solid var(--m3-outline);
+            margin: 16px 0;
+            width: 100%;
         }
     </style>
 </head>
 <body>
-    <div class="builder-container">
-        <!-- Component Panel -->
-        <div class="component-panel">
-            <h2 class="panel-title">Components</h2>
-            
-            <div class="component-category">
-                <div class="category-title">Actions</div>
-                <div class="component-item" draggable="true" data-component="button">
-                    <span class="material-icons">smart_button</span>
-                    Button
-                </div>
-                <div class="component-item" draggable="true" data-component="fab">
-                    <span class="material-icons">add</span>
-                    FAB
-                </div>
-            </div>
 
-            <div class="component-category">
-                <div class="category-title">Input</div>
-                <div class="component-item" draggable="true" data-component="textfield">
-                    <span class="material-icons">input</span>
-                    Text Field
-                </div>
-                <div class="component-item" draggable="true" data-component="chip">
-                    <span class="material-icons">label</span>
-                    Chip
-                </div>
+    <!-- Top Workspace Header -->
+    <header class="editor-header">
+        <div class="brand">
+            <div class="brand-logo">
+                <span class="material-symbols-outlined" style="font-weight: 600; font-size: 22px;">construction</span>
             </div>
-
-            <div class="component-category">
-                <div class="category-title">Layout</div>
-                <div class="component-item" draggable="true" data-component="card">
-                    <span class="material-icons">crop_landscape</span>
-                    Card
-                </div>
-                <div class="component-item" draggable="true" data-component="appbar">
-                    <span class="material-icons">web_asset</span>
-                    App Bar
-                </div>
-                <div class="component-item" draggable="true" data-component="navigation">
-                    <span class="material-icons">menu</span>
-                    Navigation
-                </div>
-            </div>
-
-            <div class="component-category">
-                <div class="category-title">Content</div>
-                <div class="component-item" draggable="true" data-component="text">
-                    <span class="material-icons">text_fields</span>
-                    Text
-                </div>
-                <div class="component-item" draggable="true" data-component="image">
-                    <span class="material-icons">image</span>
-                    Image
-                </div>
-                <div class="component-item" draggable="true" data-component="divider">
-                    <span class="material-icons">horizontal_rule</span>
-                    Divider
-                </div>
-            </div>
+            <h1 class="brand-title">Material 3 Website Studio</h1>
+            <span class="brand-badge">Engine v3.5</span>
         </div>
 
-        <!-- Canvas Area -->
-        <div class="canvas-area">
-            <div class="canvas-toolbar">
-                <button class="toolbar-btn" id="loadBtn">
-                    <span class="material-icons">folder_open</span>
-                    Load
+        <div class="header-actions">
+            <!-- Viewport Switchers -->
+            <div class="device-switcher" title="Viewport Preview Width">
+                <button class="device-btn active" data-device="desktop" title="Desktop view (100% Width)">
+                    <span class="material-symbols-outlined">desktop_windows</span>
                 </button>
-                 <button class="toolbar-btn" id="saveBtn">
-                    <span class="material-icons">save</span>
-                    Save
+                <button class="device-btn" data-device="tablet" title="Tablet view (768px Width)">
+                    <span class="material-symbols-outlined">tablet_mac</span>
                 </button>
-                <button class="toolbar-btn" id="clearBtn">
-                    <span class="material-icons">clear</span>
-                    Clear
-                </button>
-                <button class="toolbar-btn" id="previewBtn">
-                    <span class="material-icons">preview</span>
-                    Preview
-                </button>
-                <button class="toolbar-btn" id="exportBtn">
-                    <span class="material-icons">code</span>
-                    Export Code
+                <button class="device-btn" data-device="mobile" title="Mobile view (375px Width)">
+                    <span class="material-symbols-outlined">smartphone</span>
                 </button>
             </div>
+
+            <!-- Dark / Light Canvas Background Preview Switch -->
+            <button class="btn-action" id="canvasThemeToggle" title="Toggle canvas background Light/Dark mode">
+                <span class="material-symbols-outlined">contrast</span>
+                <span>Canvas Mode</span>
+            </button>
+
+            <!-- Dynamic M3 Palettes Trigger -->
+            <button class="theme-panel-trigger" id="themeEngineTrigger" title="Generate Custom M3 Colors Theme">
+                <div class="theme-preview-dot"></div>
+                <span>M3 Theme Palette</span>
+            </button>
+
+            <button class="btn-action" id="templatesTrigger">
+                <span class="material-symbols-outlined">grid_view</span>
+                Templates
+            </button>
+
+            <button class="btn-action" id="clearBtn">
+                <span class="material-symbols-outlined">delete_sweep</span>
+                Clear
+            </button>
             
-            <div class="canvas" id="canvas">
-                <div class="canvas-content is-empty" id="canvasContent">
-                    <div class="drop-zone" id="dropZone">
-                        Drop components here to start building your website
+            <button class="btn-action" id="saveBtn">
+                <span class="material-symbols-outlined">save</span>
+                Save
+            </button>
+
+            <button class="btn-action" id="loadBtn">
+                <span class="material-symbols-outlined">restore</span>
+                Load
+            </button>
+
+            <button class="btn-action primary" id="exportBtn">
+                <span class="material-symbols-outlined">code</span>
+                Export Code
+            </button>
+        </div>
+    </header>
+
+    <div class="workspace-container">
+        <!-- Sidebar Components Panel -->
+        <aside class="sidebar">
+            <h2 class="sidebar-section-title">Hero & Banners</h2>
+            <div class="component-item" draggable="true" data-component="hero">
+                <span class="material-symbols-outlined">view_carousel</span>
+                <span class="component-item-name">Hero Banner</span>
+            </div>
+
+            <h2 class="sidebar-section-title">Layout & Grids</h2>
+            <div class="component-item" draggable="true" data-component="features">
+                <span class="material-symbols-outlined">grid_on</span>
+                <span class="component-item-name">Features Grid</span>
+            </div>
+            <div class="component-item" draggable="true" data-component="card">
+                <span class="material-symbols-outlined">crop_landscape</span>
+                <span class="component-item-name">Material Card</span>
+            </div>
+            <div class="component-item" draggable="true" data-component="appbar">
+                <span class="material-symbols-outlined">web_asset</span>
+                <span class="component-item-name">Top App Bar</span>
+            </div>
+            <div class="component-item" draggable="true" data-component="navigation">
+                <span class="material-symbols-outlined">menu</span>
+                <span class="component-item-name">Navigation Rail</span>
+            </div>
+
+            <h2 class="sidebar-section-title">Actions & Inputs</h2>
+            <div class="component-item" draggable="true" data-component="button">
+                <span class="material-symbols-outlined">smart_button</span>
+                <span class="component-item-name">M3 Button</span>
+            </div>
+            <div class="component-item" draggable="true" data-component="fab">
+                <span class="material-symbols-outlined">add_circle</span>
+                <span class="component-item-name">FAB Button</span>
+            </div>
+            <div class="component-item" draggable="true" data-component="textfield">
+                <span class="material-symbols-outlined">input</span>
+                <span class="component-item-name">Text Field</span>
+            </div>
+            <div class="component-item" draggable="true" data-component="chip">
+                <span class="material-symbols-outlined">sell</span>
+                <span class="component-item-name">Material Chip</span>
+            </div>
+
+            <h2 class="sidebar-section-title">Content & Widgets</h2>
+            <div class="component-item" draggable="true" data-component="text">
+                <span class="material-symbols-outlined">text_fields</span>
+                <span class="component-item-name">Rich Text Block</span>
+            </div>
+            <div class="component-item" draggable="true" data-component="image">
+                <span class="material-symbols-outlined">image</span>
+                <span class="component-item-name">Custom Image</span>
+            </div>
+            <div class="component-item" draggable="true" data-component="accordion">
+                <span class="material-symbols-outlined">expand_more</span>
+                <span class="component-item-name">Collapsible FAQ</span>
+            </div>
+            <div class="component-item" draggable="true" data-component="divider">
+                <span class="material-symbols-outlined">horizontal_rule</span>
+                <span class="component-item-name">Content Divider</span>
+            </div>
+            <div class="component-item" draggable="true" data-component="footer">
+                <span class="material-symbols-outlined">bottom_sheets</span>
+                <span class="component-item-name">Responsive Footer</span>
+            </div>
+        </aside>
+
+        <!-- Canvas Workspace Area -->
+        <main class="canvas-workspace" id="canvasWorkspace">
+            <!-- Simulated Frame Shell -->
+            <div class="canvas-shell" id="canvasShell" style="width: 100%;">
+                <div class="canvas-header-bar">
+                    <div class="canvas-bar-dots">
+                        <div class="canvas-dot red"></div>
+                        <div class="canvas-dot yellow"></div>
+                        <div class="canvas-dot green"></div>
+                    </div>
+                    <span id="canvasViewportIndicator">Desktop: 100% Width</span>
+                    <span style="opacity: 0.3;">localhost:3000</span>
+                </div>
+                
+                <div class="canvas-container">
+                    <div class="canvas-render-root" id="canvasContent">
+                        <div class="drop-zone" id="dropZone">
+                            <span class="material-symbols-outlined">add_to_photos</span>
+                            <h3>Drag & Drop Components Here</h3>
+                            <p style="font-size: 12px; max-width: 250px;">Choose components from the left panel, or click the Templates trigger to load structural templates!</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
 
-        <!-- Properties Panel -->
-        <div class="properties-panel">
-            <h2 class="panel-title">Properties</h2>
-            <div id="propertiesContent">
-                <p style="color: #666; text-align: center; margin-top: 40px;">
-                    Select a component to edit its properties
-                </p>
+        <!-- Properties Panel Inspector -->
+        <aside class="properties-panel">
+            <div class="properties-header">
+                <h3 class="properties-title">Properties Inspector</h3>
+            </div>
+            
+            <div class="properties-tabs">
+                <button class="property-tab active" data-tab="content">Content</button>
+                <button class="property-tab" data-tab="spacing">Spacing</button>
+                <button class="property-tab" data-tab="style">Styling</button>
+            </div>
+
+            <div class="properties-body" id="propertiesContent">
+                <div style="color: var(--text-muted); text-align: center; margin-top: 40px;">
+                    <span class="material-symbols-outlined" style="font-size: 40px; margin-bottom: 8px;">settings_suggest</span>
+                    <p style="font-size: 13px;">Select a canvas element to configure its properties</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- M3 Themes Configuration Modal -->
+    <div class="builder-modal" id="themeEngineModal">
+        <div class="modal-card" style="max-width: 580px;">
+            <div class="modal-header">
+                <h3 class="modal-title">M3 Color Palette Studio</h3>
+                <button class="control-btn" id="closeThemeModalBtn" style="color: var(--text-editor);">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="theme-dialog-layout">
+                    <div class="theme-select-box">
+                        <h4 style="font-size: 14px; margin-bottom: 12px; font-weight: 600;">Designer Curated Preset Palettes</h4>
+                        <div class="theme-preset-grid">
+                            <div class="theme-preset-chip active" data-theme="cobalt">
+                                <div class="theme-chip-dot" style="background: #3f8cff;"></div>
+                                <span>Indigo Cobalt</span>
+                            </div>
+                            <div class="theme-preset-chip" data-theme="emerald">
+                                <div class="theme-chip-dot" style="background: #00875a;"></div>
+                                <span>Forest Emerald</span>
+                            </div>
+                            <div class="theme-preset-chip" data-theme="crimson">
+                                <div class="theme-chip-dot" style="background: #ff4757;"></div>
+                                <span>Sunset Crimson</span>
+                            </div>
+                            <div class="theme-preset-chip" data-theme="lavender">
+                                <div class="theme-chip-dot" style="background: #8b5cf6;"></div>
+                                <span>Lavender Amethyst</span>
+                            </div>
+                            <div class="theme-preset-chip" data-theme="obsidian">
+                                <div class="theme-chip-dot" style="background: #1a1a1a;"></div>
+                                <span>Midnight Obsidian</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.02); padding: 18px; border-radius: 12px; border: 1px solid var(--border-editor);">
+                        <h4 style="font-size: 14px; margin-bottom: 4px; font-weight: 600;">Dynamic Theme Seed Color</h4>
+                        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Choose a source seed color. The engine will dynamically compute beautifully balanced primary, secondary, container, background, and surface variant tones.</p>
+                        
+                        <div class="custom-seed-picker">
+                            <input type="color" id="themeSeedColorPicker" value="#3f8cff" class="property-color">
+                            <div>
+                                <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase;">Custom Seed Hex</label>
+                                <span style="font-family: monospace; font-size: 13px;" id="themeSeedHexDisplay">#3f8cff</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-action primary" id="applyColorsBtn">Apply Designer Palette</button>
             </div>
         </div>
     </div>
 
-    <!-- Export Modal -->
-    <div class="export-code" id="exportModal">
-        <div class="export-modal">
-            <h3 style="margin-bottom: 16px;">Export HTML Code</h3>
-            <textarea id="exportedCode" readonly></textarea>
-            <div style="margin-top: 16px; text-align: right;">
-                <button class="m3-button outlined" id="copyCodeBtn">Copy Code</button>
-                <button class="m3-button filled" id="closeExportBtn">Close</button>
+    <!-- Templates Configuration Modal -->
+    <div class="builder-modal" id="templatesModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title">Pre-configured Website Templates</h3>
+                <button class="control-btn" id="closeTemplatesModalBtn" style="color: var(--text-editor);">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="templates-grid">
+                    <div class="template-card" data-template="saas">
+                        <div class="template-card-icon">
+                            <span class="material-symbols-outlined">rocket_launch</span>
+                        </div>
+                        <h4 class="template-card-title">SaaS Startup Landing Page</h4>
+                        <p class="template-card-desc">An ultra-modern technology landing page layout. Features a large hero banner with double CTAs, 3-column features details, FAQs accordion, newsletter form, and structured footer.</p>
+                    </div>
+
+                    <div class="template-card" data-template="portfolio">
+                        <div class="template-card-icon">
+                            <span class="material-symbols-outlined">workspace_premium</span>
+                        </div>
+                        <h4 class="template-card-title">Creative Dev Portfolio</h4>
+                        <p class="template-card-desc">Showcase your coding projects in style. A centered minimal header, introducing cards with details, clean chip tags for your skill layers, custom contact forms, and social icons footer.</p>
+                    </div>
+
+                    <div class="template-card" data-template="linktree">
+                        <div class="template-card-icon">
+                            <span class="material-symbols-outlined">account_circle</span>
+                        </div>
+                        <h4 class="template-card-title">Link-in-Bio Social Hub</h4>
+                        <p class="template-card-desc">Elegant mobile-first layout optimized for bio links. Features a profile avatar bio card, full-width high-contrast redirection buttons, custom separators, and tiny social grids.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span style="font-size: 11px; color: var(--text-muted); margin-right: auto; line-height: 2.2;">Loading templates replaces all items on the current canvas.</span>
+                <button class="btn-action" id="closeTemplatesBtn">Cancel</button>
             </div>
         </div>
     </div>
 
+    <!-- Export Modal Playgrounds -->
+    <div class="builder-modal" id="exportModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title">Compiled Standalone Output</h3>
+                <button class="control-btn" id="closeExportModalBtn" style="color: var(--text-editor);">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="export-layout">
+                    <div class="export-tabs">
+                        <button class="export-tab active" data-view="combined">Combined index.html</button>
+                        <button class="export-tab" data-view="html">HTML Structure Only</button>
+                        <button class="export-tab" data-view="css">Material 3 Core CSS Rules</button>
+                    </div>
+                    <div class="export-code-wrapper">
+                        <textarea id="exportedCodeArea" class="export-code-area" readonly></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-action" id="downloadCodeBtn">
+                    <span class="material-symbols-outlined">download</span>
+                    Download HTML File
+                </button>
+                <button class="btn-action primary" id="copyCodeBtn">
+                    <span class="material-symbols-outlined">content_copy</span>
+                    Copy to Clipboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CORE LOGIC SCRIPTS -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-
             let selectedComponentId = null;
             let componentCounter = 0;
-            let websiteComponents = []; // Array to store component data objects
+            let websiteComponents = [];
+            let activePropertyTab = 'content';
+            let currentM3Theme = 'cobalt';
+            let customSeedColor = '#3f8cff';
 
+            // DOM Selectors
             const componentItems = document.querySelectorAll('.component-item');
             const canvasContent = document.getElementById('canvasContent');
+            const dropZone = document.getElementById('dropZone');
             const propertiesContent = document.getElementById('propertiesContent');
+            const propertyTabs = document.querySelectorAll('.property-tab');
+            const canvasShell = document.getElementById('canvasShell');
+            const canvasViewportIndicator = document.getElementById('canvasViewportIndicator');
+            const canvasThemeToggle = document.getElementById('canvasThemeToggle');
+            const themeEngineTrigger = document.getElementById('themeEngineTrigger');
+            const themeEngineModal = document.getElementById('themeEngineModal');
+            const themePresetChips = document.querySelectorAll('.theme-preset-chip');
+            const themeSeedColorPicker = document.getElementById('themeSeedColorPicker');
+            const themeSeedHexDisplay = document.getElementById('themeSeedHexDisplay');
+            const applyColorsBtn = document.getElementById('applyColorsBtn');
+            const closeThemeModalBtn = document.getElementById('closeThemeModalBtn');
+            const templatesTrigger = document.getElementById('templatesTrigger');
+            const templatesModal = document.getElementById('templatesModal');
+            const templateCards = document.querySelectorAll('.template-card');
+            const closeTemplatesModalBtn = document.getElementById('closeTemplatesModalBtn');
+            const closeTemplatesBtn = document.getElementById('closeTemplatesBtn');
+            const exportBtn = document.getElementById('exportBtn');
             const exportModal = document.getElementById('exportModal');
+            const closeExportModalBtn = document.getElementById('closeExportModalBtn');
+            const exportTabs = document.querySelectorAll('.export-tab');
+            const exportedCodeArea = document.getElementById('exportedCodeArea');
+            const copyCodeBtn = document.getElementById('copyCodeBtn');
+            const downloadCodeBtn = document.getElementById('downloadCodeBtn');
 
-            // --- COMPONENT TEMPLATES ---
+            // --- COMPONENT TEMPLATE SPECIFICATIONS ---
             const componentTemplates = {
-                button: {
-                    html: (props) => `<button class="m3-button">${props.text.value}</button>`,
-                    properties: { text: { value: 'Button Text', type: 'text', label: 'Button Text' }, style: { value: 'filled', type: 'select', label: 'Button Style', options: ['filled', 'outlined', 'text'] }, backgroundColor: { value: '#1976d2', type: 'color', label: 'Background Color' }, textColor: { value: '#ffffff', type: 'color', label: 'Text Color' }, borderRadius: { value: 20, type: 'range', label: 'Border Radius', min: 0, max: 50, unit: 'px' }, fontSize: { value: 14, type: 'select', label: 'Font Size', options: [12, 14, 16, 18, 20, 24], unit: 'px' }, fontWeight: { value: 500, type: 'select', label: 'Font Weight', options: [300, 400, 500, 700] }, padding: { value: '10px 24px', type: 'text', label: 'Padding (e.g., 10px 24px)'}, alignment: { value: 'flex-start', type: 'select', label: 'Alignment', options: {'Left': 'flex-start', 'Center': 'center', 'Right': 'flex-end'} } }
+                hero: {
+                    html: (props) => `
+                        <div class="m3-hero ${props.alignment.value}">
+                            <h2>${props.title.value}</h2>
+                            <p>${props.subtitle.value}</p>
+                            <div class="m3-hero-buttons">
+                                <a href="${props.buttonLink.value}" class="m3-button ${props.buttonStyle.value}">${props.buttonText.value}</a>
+                            </div>
+                        </div>
+                    `,
+                    properties: {
+                        title: { value: 'Create Beautiful Experiences', type: 'text', label: 'Title Heading' },
+                        subtitle: { value: 'An elegant, fluid responsive website layout powered by the latest Google Material 3 Design System standards.', type: 'textarea', label: 'Subtitle Description' },
+                        buttonText: { value: 'Get Started Today', type: 'text', label: 'Primary Call-To-Action' },
+                        buttonLink: { value: '#', type: 'text', label: 'Button Redirection Link' },
+                        alignment: { value: 'center', type: 'select', label: 'Hero Content Align', options: { 'Centered': 'center', 'Left Aligned': 'left' } },
+                        buttonStyle: { value: 'filled', type: 'select', label: 'CTA Button Style', options: { 'Filled': 'filled', 'Outlined': 'outlined', 'Tonal Container': 'tonal' } }
+                    }
                 },
-                fab: {
-                    html: (props) => `<button class="m3-fab"><span class="material-icons">${props.icon.value}</span></button>`,
-                    properties: { icon: { value: 'add', type: 'select', label: 'Icon', options: ['add', 'edit', 'favorite', 'home', 'search', 'settings', 'star', 'close', 'menu', 'arrow_back', 'share', 'bookmark', 'check', 'delete'] }, backgroundColor: { value: '#1976d2', type: 'color', label: 'Background Color' }, iconColor: { value: '#ffffff', type: 'color', label: 'Icon Color' }, size: { value: 56, type: 'select', label: 'Size', options: [40, 48, 56, 64], unit: 'px' }, borderRadius: { value: 16, type: 'range', label: 'Border Radius', min: 0, max: 28, unit: 'px' }, elevation: { value: '0 3px 5px rgba(0,0,0,0.2)', type: 'select', label: 'Shadow', options: {'None': 'none', 'Low': '0 1px 3px rgba(0,0,0,0.12)', 'Medium': '0 3px 5px rgba(0,0,0,0.2)', 'High': '0 6px 10px rgba(0,0,0,0.25)'} } }
-                },
-                textfield: {
-                    html: (props) => `<input class="m3-text-field" type="${props.inputType.value}" placeholder="${props.placeholder.value}" />`,
-                    properties: { placeholder: { value: 'Enter text here', type: 'text', label: 'Placeholder Text' }, inputType: { value: 'text', type: 'select', label: 'Input Type', options: ['text', 'email', 'password', 'number', 'tel', 'url', 'search'] }, width: { value: '100%', type: 'select', label: 'Width', options: ['100%', '75%', '50%', '25%'] }, fontSize: { value: 16, type: 'select', label: 'Font Size', options: [12, 14, 16, 18, 20], unit: 'px' }, borderColor: { value: '#e0e0e0', type: 'color', label: 'Border Color' }, backgroundColor: { value: '#ffffff', type: 'color', label: 'Background Color' }, textColor: { value: '#000000', type: 'color', label: 'Text Color' } }
-                },
-                chip: {
-                    html: (props) => `<span class="m3-chip">${props.text.value}</span>`,
-                    properties: { text: { value: 'Chip Text', type: 'text', label: 'Chip Text' }, backgroundColor: { value: '#e0e0e0', type: 'color', label: 'Background Color' }, textColor: { value: '#000000', type: 'color', label: 'Text Color' }, borderRadius: { value: 16, type: 'range', label: 'Border Radius', min: 0, max: 25, unit: 'px' }, fontSize: { value: 14, type: 'select', label: 'Font Size', options: [12, 14, 16], unit: 'px' }, }
+                features: {
+                    html: (props) => {
+                        const cols = props.columns.value;
+                        const count = parseInt(props.itemsCount.value);
+                        let innerCards = '';
+                        for (let i = 1; i <= count; i++) {
+                            const icon = props[`card${i}Icon`]?.value || 'star';
+                            const title = props[`card${i}Title`]?.value || `Feature ${i}`;
+                            const desc = props[`card${i}Text`]?.value || `High-performance modular feature component built dynamically.`;
+                            innerCards += `
+                                <div class="m3-feature-item">
+                                    <div class="m3-feature-icon">
+                                        <span class="material-symbols-outlined">${icon}</span>
+                                    </div>
+                                    <h4>${title}</h4>
+                                    <p>${desc}</p>
+                                </div>
+                            `;
+                        }
+                        return `<div class="m3-features-grid cols-${cols}">${innerCards}</div>`;
+                    },
+                    properties: {
+                        columns: { value: '3', type: 'select', label: 'Responsive Columns Grid', options: ['2', '3', '4'] },
+                        itemsCount: { value: '3', type: 'select', label: 'Feature Items Count', options: ['2', '3', '4'] },
+                        card1Title: { value: 'Dynamic Theme Palettes', type: 'text', label: 'Item 1 Heading' },
+                        card1Icon: { value: 'palette', type: 'text', label: 'Item 1 Icon (Material Symbol Name)' },
+                        card1Text: { value: 'Instant dynamic coloring generation based on HSL color formula calculations.', type: 'text', label: 'Item 1 Body' },
+                        card2Title: { value: 'Responsive Previews', type: 'text', label: 'Item 2 Heading' },
+                        card2Icon: { value: 'devices', type: 'text', label: 'Item 2 Icon' },
+                        card2Text: { value: 'Switch viewports seamlessly between desktop view, tablet framing, and mobile frames.', type: 'text', label: 'Item 2 Body' },
+                        card3Title: { value: 'Standalone Exporting', type: 'text', label: 'Item 3 Heading' },
+                        card3Icon: { value: 'terminal', type: 'text', label: 'Item 3 Icon' },
+                        card3Text: { value: 'One-click compiled output download with embedded core stylesheets included.', type: 'text', label: 'Item 3 Body' },
+                        card4Title: { value: 'Extensible Core Modules', type: 'text', label: 'Item 4 Heading' },
+                        card4Icon: { value: 'extension', type: 'text', label: 'Item 4 Icon' },
+                        card4Text: { value: 'Easily plug-and-play Material elements to build layout frameworks rapidly.', type: 'text', label: 'Item 4 Body' }
+                    }
                 },
                 card: {
-                    html: (props) => `<div class="m3-card"><h3>${props.title.value}</h3><p>${props.content.value}</p></div>`,
-                    properties: { title: { value: 'Card Title', type: 'text', label: 'Card Title' }, content: { value: 'Card content goes here...', type: 'textarea', label: 'Card Content' }, backgroundColor: { value: '#ffffff', type: 'color', label: 'Background Color' }, titleColor: { value: '#000000', type: 'color', label: 'Title Color' }, contentColor: { value: '#666666', type: 'color', label: 'Content Color' }, elevation: { value: '0 1px 3px rgba(0,0,0,0.12)', type: 'select', label: 'Elevation', options: {'None': 'none', 'Low': '0 1px 3px rgba(0,0,0,0.12)', 'Medium': '0 4px 8px rgba(0,0,0,0.16)', 'High': '0 8px 16px rgba(0,0,0,0.2)'} }, borderRadius: { value: 12, type: 'range', label: 'Border Radius', min: 0, max: 30, unit: 'px' }, padding: { value: 16, type: 'select', label: 'Padding', options: [8, 12, 16, 20, 24, 32], unit: 'px' }, width: { value: '100%', type: 'select', label: 'Width', options: ['100%', '75%', '50%', '25%'] } }
-                },
-                text: {
-                    html: (props) => `<div style="padding: 8px 0;">${props.content.value}</div>`,
-                    properties: { content: { value: 'Sample text content. Edit this in the properties panel.', type: 'textarea', label: 'Text Content (HTML allowed)' }, fontSize: { value: 16, type: 'select', label: 'Font Size', options: [10, 12, 14, 16, 18, 20, 24, 28, 32], unit: 'px' }, textColor: { value: '#333333', type: 'color', label: 'Text Color' }, fontWeight: { value: 'normal', type: 'select', label: 'Font Weight', options: ['300', 'normal', '500', '700', 'bold'] }, textAlign: { value: 'left', type: 'select', label: 'Text Alignment', options: ['left', 'center', 'right', 'justify'] }, lineHeight: { value: 1.5, type: 'select', label: 'Line Height', options: [1, 1.2, 1.5, 1.8, 2] }, }
-                },
-                image: {
-                    html: (props) => `<img src="${props.src.value}" alt="${props.alt.value}" />`,
-                    properties: { src: { value: 'https://via.placeholder.com/300x200', type: 'text', label: 'Image URL' }, alt: { value: 'Placeholder', type: 'text', label: 'Alt Text' }, width: { value: '100%', type: 'select', label: 'Width', options: ['25%', '50%', '75%', '100%', 'auto'] }, height: { value: 'auto', type: 'text', label: 'Height (auto, 200px, etc)' }, borderRadius: { value: 8, type: 'range', label: 'Border Radius', min: 0, max: 50, unit: 'px' }, objectFit: { value: 'cover', type: 'select', label: 'Image Fit', options: ['cover', 'contain', 'fill', 'scale-down', 'none'] }, alignment: { value: 'flex-start', type: 'select', label: 'Alignment', options: {'Left': 'flex-start', 'Center': 'center', 'Right': 'flex-end'} } }
-                },
-                divider: {
-                    html: (props) => `<hr />`,
-                    properties: { color: { value: '#e0e0e0', type: 'color', label: 'Color' }, thickness: { value: 1, type: 'select', label: 'Thickness', options: [1, 2, 3, 4, 5], unit: 'px' }, margin: { value: 16, type: 'select', label: 'Vertical Margin', options: [0, 8, 12, 16, 20, 24, 32], unit: 'px' }, width: { value: '100%', type: 'select', label: 'Width', options: ['25%', '50%', '75%', '100%'] } }
+                    html: (props) => {
+                        const img = props.imageSrc.value ? `<img class="m3-card-img" src="${props.imageSrc.value}" alt="card image" />` : '';
+                        return `
+                            <div class="m3-card ${props.type.value}">
+                                ${img}
+                                <h3>${props.title.value}</h3>
+                                <p>${props.content.value}</p>
+                            </div>
+                        `;
+                    },
+                    properties: {
+                        title: { value: 'Modular Cards Framework', type: 'text', label: 'Card Title' },
+                        content: { value: 'Material 3 Cards hold content and actions about a single subject. They are flexible building block nodes.', type: 'textarea', label: 'Card Content Description' },
+                        type: { value: 'elevated', type: 'select', label: 'Visual Accent Style', options: { 'Elevated (Drop Shadow)': 'elevated', 'Filled Surface': 'filled', 'Outlined Border': 'outlined' } },
+                        imageSrc: { value: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60', type: 'text', label: 'Top Media Image URL (Leave blank to hide)' }
+                    }
                 },
                 appbar: {
-                    html: (props) => `<div class="m3-top-app-bar"><h1>${props.title.value}</h1></div>`,
-                    properties: { title: { value: 'App Title', type: 'text', label: 'App Title' }, backgroundColor: { value: '#1976d2', type: 'color', label: 'Background Color' }, textColor: { value: '#ffffff', type: 'color', label: 'Text Color' }, height: { value: 64, type: 'select', label: 'Height', options: [48, 56, 64, 72, 80], unit: 'px' }, fontSize: { value: 20, type: 'select', label: 'Title Size', options: [16, 18, 20, 22, 24], unit: 'px' }, elevation: { value: '0 2px 4px rgba(0,0,0,0.1)', type: 'select', label: 'Shadow', options: {'None': 'none', 'Low': '0 2px 4px rgba(0,0,0,0.1)', 'Medium': '0 4px 5px rgba(0,0,0,0.15)', 'High': '0 8px 10px rgba(0,0,0,0.2)'} } }
+                    html: (props) => `
+                        <div class="m3-top-app-bar ${props.colorFilled.value ? 'color-filled' : ''}">
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <span class="material-symbols-outlined" style="cursor: pointer;">menu</span>
+                                <h1>${props.title.value}</h1>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <span class="material-symbols-outlined" style="cursor: pointer;">search</span>
+                                <span class="material-symbols-outlined" style="cursor: pointer;">settings</span>
+                            </div>
+                        </div>
+                    `,
+                    properties: {
+                        title: { value: 'Material App Title', type: 'text', label: 'Application Header Title' },
+                        colorFilled: { value: false, type: 'select', label: 'Colored Filled Background', options: { 'Transparent Surface': false, 'Filled Primary Accent': true } }
+                    }
                 },
                 navigation: {
-                    html: (props) => `<div class="m3-navigation-rail">${props.items.value.split(',').map(item => `<div class="nav-item"><span class="material-icons">${item.trim()}</span></div>`).join('')}</div>`,
-                    properties: { items: { value: 'home, search, favorite', type: 'text', label: 'Icons (comma-separated)' }, backgroundColor: { value: '#f5f5f5', type: 'color', label: 'Background Color' }, iconColor: { value: '#666666', type: 'color', label: 'Icon Color' }, activeColor: { value: '#1976d2', type: 'color', label: 'Active/Hover Color' }, width: { value: 80, type: 'select', label: 'Width', options: [60, 70, 80, 90, 100], unit: 'px' }, }
+                    html: (props) => {
+                        const items = props.items.value.split(',').map((item, idx) => {
+                            const activeClass = idx === 0 ? 'active' : '';
+                            return `
+                                <div class="m3-nav-item ${activeClass}">
+                                    <div class="m3-nav-icon-wrapper">
+                                        <span class="material-symbols-outlined">${props.iconName.value}</span>
+                                    </div>
+                                    <span>${item.trim()}</span>
+                                </div>
+                            `;
+                        }).join('');
+                        return `<div class="m3-navigation-rail">${items}</div>`;
+                    },
+                    properties: {
+                        items: { value: 'Home, Explore, Settings', type: 'text', label: 'Tab Names (Comma separated)' },
+                        iconName: { value: 'explore', type: 'text', label: 'Uniform Symbol Icon Name' }
+                    }
                 },
+                button: {
+                    html: (props) => `
+                        <div style="display: flex; justify-content: ${props.alignment.value}; width: 100%;">
+                            <button class="m3-button ${props.style.value}">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">${props.iconName.value}</span>
+                                ${props.text.value}
+                            </button>
+                        </div>
+                    `,
+                    properties: {
+                        text: { value: 'Explore Studio', type: 'text', label: 'Button Title Text' },
+                        style: { value: 'filled', type: 'select', label: 'Action Color Style', options: { 'Filled Standard': 'filled', 'Outlined Border': 'outlined', 'Tonal Secondary': 'tonal', 'Text Only': 'text' } },
+                        iconName: { value: 'arrow_forward', type: 'text', label: 'Icon Symbol Name' },
+                        alignment: { value: 'center', type: 'select', label: 'Container Alignment', options: { 'Center Aligned': 'center', 'Left Positioned': 'flex-start', 'Right Positioned': 'flex-end' } }
+                    }
+                },
+                fab: {
+                    html: (props) => `
+                        <div style="display: flex; justify-content: ${props.alignment.value}; width: 100%;">
+                            <button class="m3-fab ${props.style.value}">
+                                <span class="material-symbols-outlined">${props.iconName.value}</span>
+                                ${props.style.value === 'extended' ? `<span>${props.text.value}</span>` : ''}
+                            </button>
+                        </div>
+                    `,
+                    properties: {
+                        iconName: { value: 'edit', type: 'text', label: 'Icon Symbol Name' },
+                        text: { value: 'Compose Mail', type: 'text', label: 'Extended Text (Only for Extended style)' },
+                        style: { value: 'regular', type: 'select', label: 'FAB Shape Size', options: { 'Regular Standard (56px)': 'regular', 'Small Mini (40px)': 'small', 'Large Extended Capsule': 'extended' } },
+                        alignment: { value: 'flex-start', type: 'select', label: 'FAB Alignment', options: { 'Left Positioned': 'flex-start', 'Center Aligned': 'center', 'Right Positioned': 'flex-end' } }
+                    }
+                },
+                textfield: {
+                    html: (props) => `
+                        <div class="m3-textfield-wrapper" style="width: ${props.width.value};">
+                            <span class="m3-textfield-label">${props.label.value}</span>
+                            <input class="m3-textfield ${props.style.value}" type="text" placeholder="${props.placeholder.value}" />
+                            <span class="m3-textfield-helper">${props.helperText.value}</span>
+                        </div>
+                    `,
+                    properties: {
+                        label: { value: 'Contact Email Address', type: 'text', label: 'Top Label' },
+                        placeholder: { value: 'enter your active mail id...', type: 'text', label: 'Helper Placeholder' },
+                        helperText: { value: 'We will never share your personal information.', type: 'text', label: 'Bottom Helper Text' },
+                        style: { value: 'filled', type: 'select', label: 'Visual Accent Style', options: { 'Filled Container': 'filled', 'Outlined Border': 'outlined' } },
+                        width: { value: '100%', type: 'select', label: 'Layout Width', options: ['100%', '75%', '50%', '250px'] }
+                    }
+                },
+                chip: {
+                    html: (props) => `
+                        <div class="m3-chip ${props.active.value ? 'active' : ''}">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">${props.iconName.value}</span>
+                            <span>${props.text.value}</span>
+                        </div>
+                    `,
+                    properties: {
+                        text: { value: 'Designer Studio', type: 'text', label: 'Chip Heading Text' },
+                        iconName: { value: 'brush', type: 'text', label: 'Icon Symbol Name' },
+                        active: { value: false, type: 'select', label: 'Active Colored State', options: { 'Inactive standard': false, 'Active selected': true } }
+                    }
+                },
+                text: {
+                    html: (props) => `
+                        <div style="text-align: ${props.textAlign.value}; line-height: ${props.lineHeight.value};">
+                            ${props.content.value}
+                        </div>
+                    `,
+                    properties: {
+                        content: { value: '<h3 style="font-family: \'Outfit\', sans-serif; font-size: 24px; margin-bottom: 8px;">Studio Rich Typography</h3><p>Configure custom HTML strings directly inside this component module. Supports standard tags like paragraphs, headings, and bold styles easily.</p>', type: 'textarea', label: 'Raw Content (HTML elements allowed)' },
+                        textAlign: { value: 'left', type: 'select', label: 'Typography Alignment', options: { 'Left Aligned': 'left', 'Centered': 'center', 'Right Positioned': 'right' } },
+                        lineHeight: { value: '1.6', type: 'select', label: 'Row Line Height', options: ['1.2', '1.4', '1.6', '1.8', '2.0'] }
+                    }
+                },
+                image: {
+                    html: (props) => `
+                        <div style="display: flex; flex-direction: column; align-items: ${props.alignment.value}; width: 100%;">
+                            <img src="${props.src.value}" alt="${props.alt.value}" style="width: ${props.width.value}; height: ${props.height.value}; object-fit: ${props.objectFit.value}; border-radius: ${props.borderRadius.value}px;" />
+                            ${props.caption.value ? `<span style="font-size: 12px; margin-top: 8px; opacity: 0.7;">${props.caption.value}</span>` : ''}
+                        </div>
+                    `,
+                    properties: {
+                        src: { value: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1000&auto=format&fit=crop&q=80', type: 'text', label: 'Media Source URL' },
+                        alt: { value: 'Designer Illustration', type: 'text', label: 'Alternative Description Text' },
+                        width: { value: '100%', type: 'select', label: 'Layout Width', options: ['100%', '75%', '50%', '300px', '200px'] },
+                        height: { value: '300px', type: 'text', label: 'Layout Height (e.g. 200px, 300px, auto)' },
+                        objectFit: { value: 'cover', type: 'select', label: 'Media Scale Mode', options: ['cover', 'contain', 'fill', 'none'] },
+                        borderRadius: { value: '16', type: 'range', label: 'Corner Border Radius', min: 0, max: 40 },
+                        alignment: { value: 'center', type: 'select', label: 'Horizontal Position', options: { 'Center Aligned': 'center', 'Left Positioned': 'flex-start', 'Right Positioned': 'flex-end' } },
+                        caption: { value: 'Dynamic media block generated inside website canvas.', type: 'text', label: 'Media Label Caption (Leave empty to hide)' }
+                    }
+                },
+                accordion: {
+                    html: (props) => {
+                        const count = parseInt(props.itemsCount.value);
+                        let items = '';
+                        for (let i = 1; i <= count; i++) {
+                            const title = props[`item${i}Title`]?.value || `Collapsible Topic ${i}`;
+                            const text = props[`item${i}Text`]?.value || `Expandable core component item built dynamically inside preview.`;
+                            const activeClass = i === 1 ? 'active' : '';
+                            items += `
+                                <div class="m3-accordion-item ${activeClass}">
+                                    <div class="m3-accordion-header">
+                                        <span>${title}</span>
+                                        <span class="material-symbols-outlined m3-accordion-icon">expand_more</span>
+                                    </div>
+                                    <div class="m3-accordion-content">
+                                        <p>${text}</p>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        return `<div style="width: 100%; margin: 12px 0;">${items}</div>`;
+                    },
+                    properties: {
+                        itemsCount: { value: '3', type: 'select', label: 'Collapsible Topics Count', options: ['2', '3', '4'] },
+                        item1Title: { value: 'How does dynamic M3 coloring operate?', type: 'text', label: 'Topic 1 Heading' },
+                        item1Text: { value: 'The builder captures a primary color, generates balanced color values via standard formulas, and applies CSS custom variables dynamically.', type: 'textarea', label: 'Topic 1 Body' },
+                        item2Title: { value: 'Are the exports fully standard compliant?', type: 'text', label: 'Topic 2 Heading' },
+                        item2Text: { value: 'Yes! The exporter packages structured W3C-compliant elements and links appropriate fonts and design systems in a single self-contained document.', type: 'textarea', label: 'Topic 2 Body' },
+                        item3Title: { value: 'Can I clone layouts dynamically?', type: 'text', label: 'Topic 3 Heading' },
+                        item3Text: { value: 'Of course. Click the clone/copy trigger on the canvas floating overlays to instantly duplicate any component node.', type: 'textarea', label: 'Topic 3 Body' }
+                    }
+                },
+                divider: {
+                    html: (props) => `
+                        <div style="padding: ${props.verticalMargin.value}px 0; width: 100%;">
+                            <hr class="m3-divider" style="border-bottom-width: ${props.thickness.value}px; border-bottom-color: var(--m3-outline);" />
+                        </div>
+                    `,
+                    properties: {
+                        thickness: { value: '1', type: 'select', label: 'Divider Thickness', options: ['1', '2', '3', '5'] },
+                        verticalMargin: { value: '16', type: 'range', label: 'Vertical Clearance Spacing', min: 0, max: 60 }
+                    }
+                },
+                footer: {
+                    html: (props) => `
+                        <footer class="m3-footer">
+                            <div class="m3-footer-grid">
+                                <div class="m3-footer-brand">
+                                    <span class="m3-footer-brand-title">${props.brandName.value}</span>
+                                    <p class="m3-footer-brand-desc">${props.brandDesc.value}</p>
+                                </div>
+                                <div class="m3-footer-column">
+                                    <h5>${props.col1Title.value}</h5>
+                                    <ul class="m3-footer-links">
+                                        <li><a href="#">Launch Engine</a></li>
+                                        <li><a href="#">Themes Hub</a></li>
+                                    </ul>
+                                </div>
+                                <div class="m3-footer-column">
+                                    <h5>${props.col2Title.value}</h5>
+                                    <ul class="m3-footer-links">
+                                        <li><a href="#">Documentation</a></li>
+                                        <li><a href="#">Support Center</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="m3-footer-bottom">
+                                <span>${props.copyright.value}</span>
+                                <div class="m3-footer-socials">
+                                    <span class="material-symbols-outlined m3-footer-social-btn">hub</span>
+                                    <span class="material-symbols-outlined m3-footer-social-btn">globe</span>
+                                    <span class="material-symbols-outlined m3-footer-social-btn">rss_feed</span>
+                                </div>
+                            </div>
+                        </footer>
+                    `,
+                    properties: {
+                        brandName: { value: 'M3 Studio Core', type: 'text', label: 'Brand Logo Title' },
+                        brandDesc: { value: 'Developing robust design structures built on fluid, responsive layouts.', type: 'text', label: 'Brand Subtitle Details' },
+                        col1Title: { value: 'Resources', type: 'text', label: 'Column 1 Title' },
+                        col2Title: { value: 'Solutions', type: 'text', label: 'Column 2 Title' },
+                        copyright: { value: '© 2026 M3 Studio Engine. All rights reserved.', type: 'text', label: 'Copyright Label' }
+                    }
+                }
+            };
+
+            // Spacing Custom Properties (Standard injected for all nodes)
+            const standardSpacingProps = {
+                marginTop: { value: '12', type: 'range', label: 'Top Outer Margin', min: 0, max: 80, unit: 'px' },
+                marginBottom: { value: '12', type: 'range', label: 'Bottom Outer Margin', min: 0, max: 80, unit: 'px' },
+                paddingTop: { value: '0', type: 'range', label: 'Top Inner Padding', min: 0, max: 80, unit: 'px' },
+                paddingBottom: { value: '0', type: 'range', label: 'Bottom Inner Padding', min: 0, max: 80, unit: 'px' }
             };
 
             // --- DRAG & DROP LOGIC ---
-            // Drag from component panel
             componentItems.forEach(item => {
                 item.addEventListener('dragstart', e => {
                     e.dataTransfer.setData('text/plain', item.dataset.component);
                 });
             });
 
-            // Universal dragover for the canvas content area
             canvasContent.addEventListener('dragover', e => {
                 e.preventDefault();
                 const draggingComponent = document.querySelector('.dragging');
-                if (draggingComponent) { // If reordering
-                    const placeholder = document.querySelector('.drop-placeholder');
+                if (draggingComponent) {
+                    const placeholder = document.querySelector('.drop-placeholder') || createDragPlaceholder();
                     const afterElement = getDragAfterElement(canvasContent, e.clientY);
                     if (afterElement == null) {
                         canvasContent.appendChild(placeholder);
                     } else {
                         canvasContent.insertBefore(placeholder, afterElement);
                     }
-                } else { // If dragging a new component from the panel
-                    const dropZone = document.getElementById('dropZone');
-                    if (dropZone) dropZone.classList.add('drag-over');
+                } else {
+                    dropZone.classList.add('drag-over');
                 }
             });
 
-            // Universal dragleave for the canvas content area
             canvasContent.addEventListener('dragleave', () => {
-                const dropZone = document.getElementById('dropZone');
-                if (dropZone) dropZone.classList.remove('drag-over');
+                dropZone.classList.remove('drag-over');
+                const placeholder = document.querySelector('.drop-placeholder');
+                if (placeholder && !document.querySelector('.dragging')) {
+                    placeholder.remove();
+                }
             });
 
-            // Universal drop for the canvas content area
             canvasContent.addEventListener('drop', e => {
                 e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                
                 const newComponentType = e.dataTransfer.getData('text/plain');
                 const movedComponentId = e.dataTransfer.getData('text/component-id');
                 
-                // If we were reordering an existing component
                 if (movedComponentId) {
                     const movedElement = document.getElementById(movedComponentId);
                     const placeholder = document.querySelector('.drop-placeholder');
                     if (placeholder) {
-                        // Insert the moved element before the placeholder
                         placeholder.parentNode.insertBefore(movedElement, placeholder);
+                        placeholder.remove();
                     }
-                    updateDataArrayOrder(); // Sync the data array with the new DOM order
-                } 
-                // If we were dropping a new component from the panel
-                else if (newComponentType && componentTemplates[newComponentType]) {
-                    const dropZone = document.getElementById('dropZone');
-                    if (dropZone) dropZone.classList.remove('drag-over');
-                    addComponentToCanvas(newComponentType);
+                    updateComponentsOrderInArray();
+                } else if (newComponentType && componentTemplates[newComponentType]) {
+                    const placeholder = document.querySelector('.drop-placeholder');
+                    const targetIndex = placeholder ? Array.from(canvasContent.children).indexOf(placeholder) : -1;
+                    if (placeholder) placeholder.remove();
+                    
+                    addComponentToCanvas(newComponentType, null, targetIndex);
                 }
 
-                // Cleanup after any drag operation
-                const placeholder = document.querySelector('.drop-placeholder');
-                if (placeholder) placeholder.remove();
-                
                 const draggingEl = document.querySelector('.dragging');
                 if (draggingEl) draggingEl.classList.remove('dragging');
             });
-            
-            // --- EVENT DELEGATION FOR DRAG HANDLE ---
-            // Listen for drag start on the entire canvas, but only act if it's from a drag handle
-            canvasContent.addEventListener('dragstart', e => {
-                const handle = e.target.closest('.drag-handle');
-                if (handle) {
-                    const component = handle.closest('.dropped-component');
-                    // Add a class to the component being dragged
-                    component.classList.add('dragging');
-                    // Set data to identify the component being moved
-                    e.dataTransfer.setData('text/component-id', component.id);
 
-                    // Create and show the placeholder
-                    const placeholder = document.createElement('div');
-                    placeholder.className = 'drop-placeholder';
-                    document.body.appendChild(placeholder); // Append to body to avoid flicker
-                }
-            });
+            function createDragPlaceholder() {
+                const el = document.createElement('div');
+                el.className = 'drop-placeholder';
+                return el;
+            }
 
-
-            // --- COMPONENT MANAGEMENT ---
-            function addComponentToCanvas(type, data = null) {
-                const id = `comp-${componentCounter++}`;
+            // --- COMPONENT FACTORY SYSTEM ---
+            function addComponentToCanvas(type, loadedData = null, insertIndex = -1) {
+                const id = `m3-node-${componentCounter++}`;
                 const template = componentTemplates[type];
-                const initialProps = data ? data.properties : JSON.parse(JSON.stringify(template.properties));
-                const componentData = { id, type, properties: initialProps };
-                websiteComponents.push(componentData);
+                
+                // Set initial data
+                const initialProps = loadedData ? loadedData.properties : JSON.parse(JSON.stringify(template.properties));
+                const initialSpacing = loadedData ? loadedData.spacing : JSON.parse(JSON.stringify(standardSpacingProps));
+                
+                const componentData = { 
+                    id, 
+                    type, 
+                    properties: initialProps,
+                    spacing: initialSpacing 
+                };
 
+                if (insertIndex > -1 && insertIndex < canvasContent.children.length) {
+                    websiteComponents.splice(insertIndex, 0, componentData);
+                } else {
+                    websiteComponents.push(componentData);
+                }
+
+                // Render Shell
                 const wrapper = document.createElement('div');
                 wrapper.className = 'dropped-component';
                 wrapper.id = id;
                 wrapper.dataset.type = type;
 
+                // Floating Action Overlay Controls
                 const controls = document.createElement('div');
                 controls.className = 'component-controls';
-                // The draggable="true" attribute is correctly placed on the button itself
                 controls.innerHTML = `
-                    <button class="control-btn drag-handle" draggable="true" title="Move">
-                        <span class="material-icons" style="font-size: 18px;">drag_indicator</span>
+                    <button class="control-btn drag-handle" draggable="true" title="Drag Reorder">
+                        <span class="material-symbols-outlined">drag_indicator</span>
                     </button>
-                    <button class="control-btn delete-btn" title="Delete">
-                        <span class="material-icons" style="font-size: 18px;">delete</span>
+                    <button class="control-btn move-up-btn" title="Move Up">
+                        <span class="material-symbols-outlined">arrow_upward</span>
+                    </button>
+                    <button class="control-btn move-down-btn" title="Move Down">
+                        <span class="material-symbols-outlined">arrow_downward</span>
+                    </button>
+                    <button class="control-btn clone-btn" title="Clone / Duplicate">
+                        <span class="material-symbols-outlined">content_copy</span>
+                    </button>
+                    <button class="control-btn delete-btn" title="Remove Element" style="background: #dc2626;">
+                        <span class="material-symbols-outlined">delete</span>
                     </button>
                 `;
                 wrapper.appendChild(controls);
 
-                const element = document.createElement('div');
-                element.className = 'component-render';
-                wrapper.appendChild(element);
+                // Inside Render Component wrapper
+                const elementRender = document.createElement('div');
+                elementRender.className = 'component-render';
+                wrapper.appendChild(elementRender);
+
+                // Insert into Canvas Node
+                if (insertIndex > -1 && insertIndex < canvasContent.children.length) {
+                    canvasContent.insertBefore(wrapper, canvasContent.children[insertIndex]);
+                } else {
+                    canvasContent.insertBefore(wrapper, dropZone);
+                }
+
+                // Setup internal event triggers
+                setupComponentNodeEvents(wrapper, id);
                 
-                const dropZone = document.getElementById('dropZone');
-                canvasContent.insertBefore(wrapper, dropZone);
-                
-                updateComponentElement(id);
-                selectComponent(id);
-                checkCanvasEmpty();
+                // Recompile & Highlight
+                updateComponentVisualRender(id);
+                selectComponentNode(id);
+                checkCanvasEmptyState();
             }
 
-            function updateComponentElement(id) {
-                const componentData = websiteComponents.find(c => c.id === id);
+            function setupComponentNodeEvents(wrapper, id) {
+                // Select Component
+                wrapper.addEventListener('click', e => {
+                    if (e.target.closest('.control-btn')) return;
+                    e.stopPropagation();
+                    selectComponentNode(id);
+                });
+
+                // Drag handle setup
+                const dragHandle = wrapper.querySelector('.drag-handle');
+                dragHandle.addEventListener('dragstart', e => {
+                    wrapper.classList.add('dragging');
+                    e.dataTransfer.setData('text/component-id', id);
+                });
+                dragHandle.addEventListener('dragend', () => {
+                    wrapper.classList.remove('dragging');
+                    const placeholder = document.querySelector('.drop-placeholder');
+                    if (placeholder) placeholder.remove();
+                });
+
+                // Overrides inside Preview Canvas for Actions
+                // Accordion triggers
+                wrapper.addEventListener('click', e => {
+                    const accordionHeader = e.target.closest('.m3-accordion-header');
+                    if (accordionHeader) {
+                        const accordionItem = accordionHeader.closest('.m3-accordion-item');
+                        accordionItem.classList.toggle('active');
+                    }
+                });
+
+                // Control Action Buttons
+                wrapper.querySelector('.delete-btn').addEventListener('click', e => {
+                    e.stopPropagation();
+                    removeComponentNode(id);
+                });
+
+                wrapper.querySelector('.clone-btn').addEventListener('click', e => {
+                    e.stopPropagation();
+                    duplicateComponentNode(id);
+                });
+
+                wrapper.querySelector('.move-up-btn').addEventListener('click', e => {
+                    e.stopPropagation();
+                    shiftComponentPosition(id, -1);
+                });
+
+                wrapper.querySelector('.move-down-btn').addEventListener('click', e => {
+                    e.stopPropagation();
+                    shiftComponentPosition(id, 1);
+                });
+            }
+
+            function updateComponentVisualRender(id) {
+                const data = websiteComponents.find(c => c.id === id);
                 const wrapper = document.getElementById(id);
-                if (!componentData || !wrapper) return;
+                if (!data || !wrapper) return;
 
-                const renderDiv = wrapper.querySelector('.component-render');
-                const template = componentTemplates[componentData.type];
-                renderDiv.innerHTML = template.html(componentData.properties);
+                const renderWrapper = wrapper.querySelector('.component-render');
+                const template = componentTemplates[data.type];
+                
+                // Render HTML content
+                renderWrapper.innerHTML = template.html(data.properties);
 
-                const element = renderDiv.firstElementChild;
-                const props = componentData.properties;
-                let styles = {};
-                wrapper.style.display = '';
-                wrapper.style.justifyContent = '';
-
-                switch (componentData.type) {
-                    case 'button':
-                        element.textContent = props.text.value;
-                        element.className = 'm3-button';
-                        element.classList.add(props.style.value);
-                        styles = { backgroundColor: props.style.value === 'filled' ? props.backgroundColor.value : 'transparent', color: props.style.value !== 'filled' ? props.backgroundColor.value : props.textColor.value, borderColor: props.style.value === 'outlined' ? props.backgroundColor.value : 'transparent', borderRadius: `${props.borderRadius.value}px`, fontSize: `${props.fontSize.value}px`, fontWeight: props.fontWeight.value, padding: props.padding.value };
-                        wrapper.style.display = 'flex';
-                        wrapper.style.justifyContent = props.alignment.value;
-                        break;
-                    case 'fab':
-                        element.querySelector('.material-icons').textContent = props.icon.value;
-                        styles = { backgroundColor: props.backgroundColor.value, color: props.iconColor.value, width: `${props.size.value}px`, height: `${props.size.value}px`, borderRadius: `${props.borderRadius.value}px`, boxShadow: props.elevation.value };
-                        break;
-                    case 'textfield':
-                        element.placeholder = props.placeholder.value;
-                        element.type = props.inputType.value;
-                        styles = { width: props.width.value, fontSize: `${props.fontSize.value}px`, borderColor: props.borderColor.value, backgroundColor: props.backgroundColor.value, color: props.textColor.value };
-                        break;
-                    case 'chip':
-                        element.textContent = props.text.value;
-                        styles = { backgroundColor: props.backgroundColor.value, color: props.textColor.value, borderRadius: `${props.borderRadius.value}px`, fontSize: `${props.fontSize.value}px` };
-                        break;
-                    case 'card':
-                        element.querySelector('h3').textContent = props.title.value;
-                        element.querySelector('p').innerHTML = props.content.value.replace(/\n/g, '<br>');
-                        styles = { width: props.width.value, backgroundColor: props.backgroundColor.value, boxShadow: props.elevation.value, borderRadius: `${props.borderRadius.value}px`, padding: `${props.padding.value}px` };
-                        element.querySelector('h3').style.color = props.titleColor.value;
-                        element.querySelector('p').style.color = props.contentColor.value;
-                        break;
-                    case 'text':
-                        element.innerHTML = props.content.value;
-                        styles = { fontSize: `${props.fontSize.value}px`, color: props.textColor.value, fontWeight: props.fontWeight.value, textAlign: props.textAlign.value, lineHeight: props.lineHeight.value };
-                        break;
-                    case 'image':
-                        element.src = props.src.value;
-                        element.alt = props.alt.value;
-                        styles = { width: props.width.value, height: props.height.value, borderRadius: `${props.borderRadius.value}px`, objectFit: props.objectFit.value };
-                        wrapper.style.display = 'flex';
-                        wrapper.style.justifyContent = props.alignment.value;
-                        break;
-                    case 'divider':
-                        styles = { border: 'none', height: `${props.thickness.value}px`, backgroundColor: props.color.value, margin: `${props.margin.value}px 0`, width: props.width.value };
-                        break;
-                    case 'appbar':
-                        element.querySelector('h1').textContent = props.title.value;
-                        styles = { backgroundColor: props.backgroundColor.value, color: props.textColor.value, height: `${props.height.value}px`, boxShadow: props.elevation.value };
-                        element.querySelector('h1').style.fontSize = `${props.fontSize.value}px`;
-                        break;
-                    case 'navigation':
-                        styles = { backgroundColor: props.backgroundColor.value, width: `${props.width.value}px`, };
-                        element.querySelectorAll('.nav-item span').forEach(item => { item.style.color = props.iconColor.value; });
-                        element.querySelectorAll('.nav-item').forEach(item => {
-                            item.onmouseover = () => item.style.backgroundColor = props.activeColor.value + '20';
-                            item.onmouseout = () => item.style.backgroundColor = 'transparent';
-                        });
-                        break;
-                }
-                Object.assign(element.style, styles);
-            }
-            
-            function deleteComponent(id) {
-                const index = websiteComponents.findIndex(c => c.id === id);
-                if (index > -1) { websiteComponents.splice(index, 1); }
-                document.getElementById(id)?.remove();
-                if (id === selectedComponentId) {
-                    clearPropertiesPanel();
-                    selectedComponentId = null;
-                }
-                checkCanvasEmpty();
+                // Apply Spacing properties inline on the wrapper
+                wrapper.style.marginTop = `${data.spacing.marginTop.value}px`;
+                wrapper.style.marginBottom = `${data.spacing.marginBottom.value}px`;
+                wrapper.style.paddingTop = `${data.spacing.paddingTop.value}px`;
+                wrapper.style.paddingBottom = `${data.spacing.paddingBottom.value}px`;
             }
 
-            function selectComponent(id) {
-                if (selectedComponentId) { document.getElementById(selectedComponentId)?.classList.remove('selected'); }
+            function selectComponentNode(id) {
+                if (selectedComponentId) {
+                    const prev = document.getElementById(selectedComponentId);
+                    if (prev) prev.classList.remove('selected');
+                }
                 selectedComponentId = id;
-                document.getElementById(id).classList.add('selected');
-                renderPropertiesPanel(id);
+                const activeWrapper = document.getElementById(id);
+                if (activeWrapper) {
+                    activeWrapper.classList.add('selected');
+                }
+                renderPropertiesInspector();
             }
 
-            function renderPropertiesPanel(id) {
-                const componentData = websiteComponents.find(c => c.id === id);
-                if (!componentData) { clearPropertiesPanel(); return; }
+            function removeComponentNode(id) {
+                const wrapper = document.getElementById(id);
+                if (wrapper) {
+                    wrapper.style.transform = 'scale(0.9) opacity(0)';
+                    wrapper.style.transition = 'all 0.25s ease';
+                    setTimeout(() => {
+                        wrapper.remove();
+                        const idx = websiteComponents.findIndex(c => c.id === id);
+                        if (idx > -1) websiteComponents.splice(idx, 1);
+                        if (selectedComponentId === id) {
+                            selectedComponentId = null;
+                            clearPropertiesPanel();
+                        }
+                        checkCanvasEmptyState();
+                    }, 250);
+                }
+            }
+
+            function duplicateComponentNode(id) {
+                const data = websiteComponents.find(c => c.id === id);
+                const wrapper = document.getElementById(id);
+                if (!data || !wrapper) return;
+
+                // Deep clone data
+                const clonedData = JSON.parse(JSON.stringify(data));
+                const wrapperIndex = Array.from(canvasContent.children).indexOf(wrapper);
+                
+                addComponentToCanvas(clonedData.type, clonedData, wrapperIndex + 1);
+            }
+
+            function shiftComponentPosition(id, direction) {
+                const wrapper = document.getElementById(id);
+                if (!wrapper) return;
+
+                if (direction === -1) {
+                    // Move Up
+                    const prevEl = wrapper.previousElementSibling;
+                    if (prevEl && prevEl.classList.contains('dropped-component')) {
+                        canvasContent.insertBefore(wrapper, prevEl);
+                    }
+                } else if (direction === 1) {
+                    // Move Down
+                    const nextEl = wrapper.nextElementSibling;
+                    if (nextEl && nextEl.classList.contains('dropped-component')) {
+                        canvasContent.insertBefore(nextEl, wrapper);
+                    }
+                }
+                updateComponentsOrderInArray();
+                selectComponentNode(id);
+            }
+
+            function updateComponentsOrderInArray() {
+                const orderedIds = [...canvasContent.querySelectorAll('.dropped-component')].map(el => el.id);
+                websiteComponents.sort((a, b) => orderedIds.indexOf(a.id) - orderedIds.indexOf(b.id));
+            }
+
+            function checkCanvasEmptyState() {
+                const totalComponents = websiteComponents.length;
+                if (totalComponents === 0) {
+                    canvasContent.appendChild(dropZone);
+                    dropZone.style.display = 'flex';
+                } else {
+                    if (canvasContent.contains(dropZone)) {
+                        dropZone.style.display = 'none';
+                    }
+                }
+            }
+
+            // --- PROPERTIES INSPECTOR RENDER ENGINE ---
+            function renderPropertiesInspector() {
+                const data = websiteComponents.find(c => c.id === selectedComponentId);
+                if (!data) {
+                    clearPropertiesPanel();
+                    return;
+                }
+
                 propertiesContent.innerHTML = '';
-                const props = componentData.properties;
-                for (const key in props) {
-                    const prop = props[key];
-                    const group = document.createElement('div'); group.className = 'property-group';
-                    const label = document.createElement('label'); label.className = 'property-label'; label.textContent = prop.label; group.appendChild(label);
+                
+                // Show standard groups depending on Active properties tabs
+                if (activePropertyTab === 'content') {
+                    renderPropertiesList(data.properties, 'properties');
+                } else if (activePropertyTab === 'spacing') {
+                    renderPropertiesList(data.spacing, 'spacing');
+                } else if (activePropertyTab === 'style') {
+                    // Inject basic style modifiers
+                    propertiesContent.innerHTML = `
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-editor); padding: 16px; border-radius: 12px;">
+                            <h4 style="font-size: 13px; margin-bottom: 8px; font-weight: 600;">Theme Integration</h4>
+                            <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">This component is wired into the dynamic M3 Color Palette Studio. Change colors in the header tool above to recolor the entire page layout instantly.</p>
+                            <button class="btn-action primary" id="styleTabThemeTrigger" style="width: 100%; justify-content: center;">
+                                <span class="material-symbols-outlined">palette</span>
+                                Open Studio Themes
+                            </button>
+                        </div>
+                    `;
+                    document.getElementById('styleTabThemeTrigger').addEventListener('click', () => {
+                        themeEngineModal.classList.add('active');
+                    });
+                }
+            }
+
+            function renderPropertiesList(propsObj, categoryKey) {
+                for (const key in propsObj) {
+                    const prop = propsObj[key];
+                    const group = document.createElement('div');
+                    group.className = 'property-group';
+
+                    const label = document.createElement('label');
+                    label.className = 'property-label';
+                    label.textContent = prop.label;
+                    group.appendChild(label);
+
                     let input;
                     switch (prop.type) {
-                        case 'text': input = document.createElement('input'); input.type = 'text'; input.className = 'property-input'; input.value = prop.value; input.oninput = (e) => updateProperty(id, key, e.target.value); break;
-                        case 'textarea': input = document.createElement('textarea'); input.className = 'property-textarea'; input.value = prop.value; input.oninput = (e) => updateProperty(id, key, e.target.value); break;
+                        case 'text':
+                            input = document.createElement('input');
+                            input.type = 'text';
+                            input.className = 'property-input';
+                            input.value = prop.value;
+                            input.addEventListener('input', e => updatePropertyVal(selectedComponentId, categoryKey, key, e.target.value));
+                            break;
+                        case 'textarea':
+                            input = document.createElement('textarea');
+                            input.className = 'property-textarea';
+                            input.value = prop.value;
+                            input.addEventListener('input', e => updatePropertyVal(selectedComponentId, categoryKey, key, e.target.value));
+                            break;
                         case 'select':
-                            input = document.createElement('select'); input.className = 'property-select';
-                            const options = Array.isArray(prop.options) ? prop.options : Object.keys(prop.options);
-                            options.forEach(opt => { const optionEl = document.createElement('option'); const value = Array.isArray(prop.options) ? opt : prop.options[opt]; optionEl.value = value; optionEl.textContent = opt; if (value == prop.value) optionEl.selected = true; input.appendChild(optionEl); });
-                            input.onchange = (e) => updateProperty(id, key, e.target.value); break;
-                        case 'color': input = document.createElement('input'); input.type = 'color'; input.className = 'property-color'; input.value = prop.value; input.oninput = (e) => updateProperty(id, key, e.target.value); break;
+                            input = document.createElement('select');
+                            input.className = 'property-select';
+                            const optionsList = Array.isArray(prop.options) ? prop.options : Object.keys(prop.options);
+                            optionsList.forEach(opt => {
+                                const option = document.createElement('option');
+                                const val = Array.isArray(prop.options) ? opt : prop.options[opt];
+                                option.value = val;
+                                option.textContent = opt;
+                                if (val === prop.value) option.selected = true;
+                                input.appendChild(option);
+                            });
+                            input.addEventListener('change', e => updatePropertyVal(selectedComponentId, categoryKey, key, e.target.value === 'true' ? true : e.target.value === 'false' ? false : e.target.value));
+                            break;
                         case 'range':
-                            group.innerHTML += `<input type="range" class="property-range" min="${prop.min}" max="${prop.max}" value="${prop.value}"><div class="range-display">${prop.value}${prop.unit || ''}</div>`;
-                            input = group.querySelector('.property-range');
-                            input.oninput = (e) => { group.querySelector('.range-display').textContent = `${e.target.value}${prop.unit || ''}`; updateProperty(id, key, e.target.value); }; break;
+                            const row = document.createElement('div');
+                            row.className = 'property-range-row';
+                            
+                            const range = document.createElement('input');
+                            range.type = 'range';
+                            range.className = 'property-range';
+                            range.min = prop.min;
+                            range.max = prop.max;
+                            range.value = prop.value;
+                            
+                            const display = document.createElement('div');
+                            display.className = 'range-display';
+                            display.textContent = `${prop.value}${prop.unit || ''}`;
+
+                            range.addEventListener('input', e => {
+                                display.textContent = `${e.target.value}${prop.unit || ''}`;
+                                updatePropertyVal(selectedComponentId, categoryKey, key, e.target.value);
+                            });
+
+                            row.appendChild(range);
+                            row.appendChild(display);
+                            group.appendChild(row);
+                            break;
                     }
                     if (input) group.appendChild(input);
                     propertiesContent.appendChild(group);
                 }
             }
-            
-            function updateProperty(id, key, value) {
-                const componentData = websiteComponents.find(c => c.id === id);
-                if (componentData) {
-                    componentData.properties[key].value = value;
-                    updateComponentElement(id);
+
+            function updatePropertyVal(id, category, key, val) {
+                const data = websiteComponents.find(c => c.id === id);
+                if (data) {
+                    data[category][key].value = val;
+                    updateComponentVisualRender(id);
                 }
             }
 
             function clearPropertiesPanel() {
-                propertiesContent.innerHTML = `<p style="color: #666; text-align: center; margin-top: 40px;">Select a component to edit its properties</p>`;
+                propertiesContent.innerHTML = `
+                    <div style="color: var(--text-muted); text-align: center; margin-top: 40px;">
+                        <span class="material-symbols-outlined" style="font-size: 40px; margin-bottom: 8px;">settings_suggest</span>
+                        <p style="font-size: 13px;">Select a canvas element to configure its properties</p>
+                    </div>
+                `;
             }
 
-            function checkCanvasEmpty() {
-                if (websiteComponents.length === 0) { canvasContent.classList.add('is-empty'); } else { canvasContent.classList.remove('is-empty'); }
-            }
-
-            // --- UI EVENT LISTENERS ---
-            canvas.addEventListener('click', e => {
-                const clickedComponent = e.target.closest('.dropped-component');
-                if (e.target.closest('.delete-btn')) { deleteComponent(clickedComponent.id); return; }
-                if (clickedComponent) { selectComponent(clickedComponent.id); } 
-                else if (!e.target.closest('.properties-panel')) {
-                    if (selectedComponentId) { document.getElementById(selectedComponentId)?.classList.remove('selected'); selectedComponentId = null; clearPropertiesPanel(); }
-                }
-            });
-
-            document.getElementById('clearBtn').addEventListener('click', () => {
-                if (confirm('Are you sure you want to clear the entire canvas?')) {
-                    websiteComponents = [];
-                    // Remove all component elements but keep the dropzone
-                    const componentsToRemove = canvasContent.querySelectorAll('.dropped-component');
-                    componentsToRemove.forEach(c => c.remove());
-                    checkCanvasEmpty();
-                    clearPropertiesPanel();
-                }
-            });
-            
-            document.getElementById('previewBtn').addEventListener('click', () => {
-                const previewHtml = generateExportHtml(true);
-                const previewWindow = window.open('', '_blank');
-                previewWindow.document.write(previewHtml);
-                previewWindow.document.close();
-            });
-            
-            document.getElementById('exportBtn').addEventListener('click', () => {
-                document.getElementById('exportedCode').value = generateExportHtml(false);
-                exportModal.style.display = 'flex';
-            });
-            
-            document.getElementById('saveBtn').addEventListener('click', () => {
-                updateDataArrayOrder();
-                localStorage.setItem('m3BuilderSave', JSON.stringify(websiteComponents));
-                alert('Layout saved to your browser\'s local storage!');
-            });
-            
-            document.getElementById('loadBtn').addEventListener('click', () => {
-                const savedData = localStorage.getItem('m3BuilderSave');
-                if (savedData) {
-                    if (confirm('This will replace your current layout. Are you sure?')) {
-                        // Clear current canvas
-                        const componentsToRemove = canvasContent.querySelectorAll('.dropped-component');
-                        componentsToRemove.forEach(c => c.remove());
-                        websiteComponents = [];
-
-                        const loadedComponents = JSON.parse(savedData);
-                        loadedComponents.forEach(compData => { addComponentToCanvas(compData.type, compData); });
-                        checkCanvasEmpty();
-                        clearPropertiesPanel();
-                    }
-                } else { alert('No saved layout found.'); }
-            });
-
-            document.getElementById('closeExportBtn').addEventListener('click', () => exportModal.style.display = 'none');
-            document.getElementById('copyCodeBtn').addEventListener('click', () => {
-                const code = document.getElementById('exportedCode');
-                code.select();
-                navigator.clipboard.writeText(code.value).then(() => { alert('Code copied to clipboard!'); });
-            });
-            
-            // --- HELPER FUNCTIONS ---
-            function generateExportHtml(forPreview) {
-                updateDataArrayOrder(); // Ensure data array matches DOM before export
-                let bodyContent = '';
-                websiteComponents.forEach(comp => {
-                    const wrapperOnCanvas = document.getElementById(comp.id);
-                    if (!wrapperOnCanvas) return;
-                    const renderedElement = wrapperOnCanvas.querySelector('.component-render').firstElementChild;
-                    if (!renderedElement) return;
-                    let finalHtml = renderedElement.outerHTML;
-                    const alignment = comp.properties.alignment?.value;
-                    if (alignment && alignment !== 'flex-start') {
-                        finalHtml = `<div style="display: flex; justify-content: ${alignment};">${finalHtml}</div>`;
-                    }
-                    bodyContent += finalHtml + '\n\n';
+            // Tab toggler inside property panel
+            propertyTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    propertyTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    activePropertyTab = tab.dataset.tab;
+                    renderPropertiesInspector();
                 });
-                if (!forPreview) { return bodyContent.replace(/(\n\n\n)/g, '\n\n').trim(); }
-                return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Preview</title><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"><style>body { font-family: 'Roboto', sans-serif; margin: 0; padding: 20px; background-color: #f8f9fa; } * { box-sizing: border-box; } .m3-button { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s ease; } .m3-fab { display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; } .m3-card { margin: 16px 0; } .m3-card h3 { margin-top: 0; } .m3-top-app-bar { display: flex; align-items: center; } .m3-navigation-rail { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 12px 0; } .nav-item { display:flex; align-items:center; justify-content:center; }</style></head><body>${bodyContent}</body></html>`;
+            });
+
+
+            // --- DYNAMIC M3 PALETTES GENERATION SYSTEM ---
+            function applyDynamicTheme() {
+                let primary = '#3f8cff';
+                let secondary = '#7f5cff';
+                let bg = '#f8f9fa';
+                let surface = '#ffffff';
+                let text = '#1f1f1f';
+                let outline = '#e0e2e4';
+                let surfaceVar = '#f0f4f9';
+
+                if (currentM3Theme === 'emerald') {
+                    primary = '#00875a'; secondary = '#28c76f'; bg = '#f4fbf7'; text = '#111d17'; outline = '#c2e0d1'; surfaceVar = '#e8f5e9';
+                } else if (currentM3Theme === 'crimson') {
+                    primary = '#ff4757'; secondary = '#ff7f50'; bg = '#fff9f9'; text = '#20080b'; outline = '#f5c2c2'; surfaceVar = '#ffe8e8';
+                } else if (currentM3Theme === 'lavender') {
+                    primary = '#8b5cf6'; secondary = '#d946ef'; bg = '#faf9ff'; text = '#1e1b4b'; outline = '#ddd6fe'; surfaceVar = '#f5f3ff';
+                } else if (currentM3Theme === 'obsidian') {
+                    primary = '#1e293b'; secondary = '#64748b'; bg = '#f8fafc'; text = '#0f172a'; outline = '#cbd5e1'; surfaceVar = '#f1f5f9';
+                } else if (currentM3Theme === 'custom') {
+                    const hsl = hexToHsl(customSeedColor);
+                    if (hsl) {
+                        primary = customSeedColor;
+                        secondary = hslToHex((hsl.h + 35) % 360, Math.max(30, hsl.s - 15), Math.min(75, hsl.l + 10));
+                        bg = hslToHex(hsl.h, 15, 98);
+                        text = hslToHex(hsl.h, 30, 15);
+                        outline = hslToHex(hsl.h, 20, 88);
+                        surfaceVar = hslToHex(hsl.h, 20, 95);
+                    }
+                }
+
+                const styleSheet = document.getElementById('m3-system-rules');
+                styleSheet.innerHTML = `
+                    :root {
+                        --m3-primary: ${primary};
+                        --m3-primary-rgb: ${hexToRgb(primary)};
+                        --m3-secondary: ${secondary};
+                        --m3-secondary-rgb: ${hexToRgb(secondary)};
+                        --m3-background: ${bg};
+                        --m3-surface: ${surface};
+                        --m3-on-surface: ${text};
+                        --m3-outline: ${outline};
+                        --m3-surface-variant: ${surfaceVar};
+                    }
+                    ${styleSheet.innerHTML.substring(styleSheet.innerHTML.indexOf('.canvas-render-root'))}
+                `;
+
+                // Update UI triggers feedback
+                document.querySelector('.theme-preview-dot').style.backgroundColor = primary;
             }
 
+            themePresetChips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    themePresetChips.forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    currentM3Theme = chip.dataset.theme;
+                    
+                    if (currentM3Theme !== 'custom') {
+                        let presetHex = '#3f8cff';
+                        if (currentM3Theme === 'emerald') presetHex = '#00875a';
+                        if (currentM3Theme === 'crimson') presetHex = '#ff4757';
+                        if (currentM3Theme === 'lavender') presetHex = '#8b5cf6';
+                        if (currentM3Theme === 'obsidian') presetHex = '#1e293b';
+                        themeSeedColorPicker.value = presetHex;
+                        themeSeedHexDisplay.textContent = presetHex;
+                    }
+                });
+            });
+
+            themeSeedColorPicker.addEventListener('input', e => {
+                themePresetChips.forEach(c => c.classList.remove('active'));
+                const customChip = document.querySelector('[data-theme="custom"]');
+                if (customChip) customChip.classList.add('active');
+                
+                currentM3Theme = 'custom';
+                customSeedColor = e.target.value;
+                themeSeedHexDisplay.textContent = customSeedColor;
+            });
+
+            // Dialog controllers
+            themeEngineTrigger.addEventListener('click', () => themeEngineModal.classList.add('active'));
+            closeThemeModalBtn.addEventListener('click', () => themeEngineModal.classList.remove('active'));
+            applyColorsBtn.addEventListener('click', () => {
+                applyDynamicTheme();
+                themeEngineModal.classList.remove('active');
+            });
+
+
+            // --- PRESET TEMPLATES ENGINE ---
+            templatesTrigger.addEventListener('click', () => templatesModal.classList.add('active'));
+            closeTemplatesModalBtn.addEventListener('click', () => templatesModal.classList.remove('active'));
+            closeTemplatesBtn.addEventListener('click', () => templatesModal.classList.remove('active'));
+
+            templateCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const tempType = card.dataset.template;
+                    loadPresetTemplate(tempType);
+                    templatesModal.classList.remove('active');
+                });
+            });
+
+            function loadPresetTemplate(type) {
+                // Clear Canvas
+                const components = canvasContent.querySelectorAll('.dropped-component');
+                components.forEach(c => c.remove());
+                websiteComponents = [];
+                componentCounter = 0;
+                selectedComponentId = null;
+                clearPropertiesPanel();
+
+                if (type === 'saas') {
+                    currentM3Theme = 'cobalt';
+                    applyDynamicTheme();
+
+                    addComponentToCanvas('appbar', {
+                        properties: { title: { value: 'Horizon SaaS Studio' }, colorFilled: { value: true } },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                    addComponentToCanvas('hero', {
+                        properties: {
+                            title: { value: 'Scale Developer Productivity Instantly' },
+                            subtitle: { value: 'Deploy dynamic Material 3 frameworks. Clean, cohesive, responsive layouts ready for high-fidelity client handoffs.' },
+                            buttonText: { value: 'Launch Console', type: 'text' },
+                            buttonLink: { value: '#', type: 'text' },
+                            alignment: { value: 'center' },
+                            buttonStyle: { value: 'filled' }
+                        },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                    addComponentToCanvas('features', {
+                        properties: {
+                            columns: { value: '3' },
+                            itemsCount: { value: '3' },
+                            card1Title: { value: 'Fluid Grids' },
+                            card1Icon: { value: 'grid_view' },
+                            card1Text: { value: 'Perfect reflow scaling across desktop, tablet, and mobile devices.' },
+                            card2Title: { value: 'M3 Styling Engine' },
+                            card2Icon: { value: 'style' },
+                            card2Text: { value: 'Curated typography hierarchies and dynamically computed color palettes.' },
+                            card3Title: { value: 'Zero Overheads' },
+                            card3Icon: { value: 'bolt' },
+                            card3Text: { value: 'Pre-packaged clean static markup ready to deploy immediately.' }
+                        },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                    addComponentToCanvas('accordion', {
+                        properties: {
+                            itemsCount: { value: '3' },
+                            item1Title: { value: 'How is visual responsiveness configured?' },
+                            item1Text: { value: 'Standard fluid grid systems scale column widths dynamically based on screen viewport queries.' },
+                            item2Title: { value: 'Can I include background images?' },
+                            item2Text: { value: 'Yes, card and custom image properties support fully responsive graphic assets.' },
+                            item3Title: { value: 'How clean is the compiled code?' },
+                            item3Text: { value: 'W3C valid clean HTML tags with beautifully separated semantic styles.' }
+                        },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                    addComponentToCanvas('footer', {
+                        properties: {
+                            brandName: { value: 'Horizon Platform' },
+                            brandDesc: { value: 'Building solid designs built on Google Material specifications.' },
+                            col1Title: { value: 'Products' },
+                            col2Title: { value: 'Company' },
+                            copyright: { value: '© 2026 Horizon SaaS Inc. All rights reserved.' }
+                        },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                } else if (type === 'portfolio') {
+                    currentM3Theme = 'emerald';
+                    applyDynamicTheme();
+
+                    addComponentToCanvas('appbar', {
+                        properties: { title: { value: 'Nirnay // Creative Studio' }, colorFilled: { value: false } },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                    addComponentToCanvas('hero', {
+                        properties: {
+                            title: { value: 'Designing Interfaces That Feel Alive.' },
+                            subtitle: { value: 'I am a creative full-stack engineer developing interactive interfaces, PWAs, and developer tools using sleek, modern aesthetics.' },
+                            buttonText: { value: 'View Repository', type: 'text' },
+                            buttonLink: { value: '#', type: 'text' },
+                            alignment: { value: 'left' },
+                            buttonStyle: { value: 'outlined' }
+                        },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                    addComponentToCanvas('features', {
+                        properties: {
+                            columns: { value: '2' },
+                            itemsCount: { value: '2' },
+                            card1Title: { value: 'Interactive UI Design' },
+                            card1Icon: { value: 'brush' },
+                            card1Text: { value: 'Focusing on robust layouts, harmonized typography, and slick micro-interactions.' },
+                            card2Title: { value: 'Full-Stack Architecture' },
+                            card2Icon: { value: 'developer_mode' },
+                            card2Text: { value: 'Building highly optimized systems on modern Deno, Java, and browser environments.' }
+                        },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                    addComponentToCanvas('divider', {
+                        properties: { thickness: { value: '2' }, verticalMargin: { value: 24 } },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                    addComponentToCanvas('card', {
+                        properties: {
+                            title: { value: 'Sponsored Research Management' },
+                            content: { value: 'Stabilized and optimized Java-based project management dashboard supporting dynamic notifications and visual reports.', type: 'textarea' },
+                            type: { value: 'elevated' },
+                            imageSrc: { value: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&auto=format&fit=crop&q=60' }
+                        },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                    addComponentToCanvas('footer', {
+                        properties: {
+                            brandName: { value: 'Nirnay Studio' },
+                            brandDesc: { value: 'Crafting pixel perfect web experiences and robust server layers.' },
+                            col1Title: { value: 'Socials' },
+                            col2Title: { value: 'Contact' },
+                            copyright: { value: '© 2026 Nirnay. Crafted with premium Material design.' }
+                        },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                } else if (type === 'linktree') {
+                    currentM3Theme = 'lavender';
+                    applyDynamicTheme();
+
+                    addComponentToCanvas('card', {
+                        properties: {
+                            title: { value: 'Nirnay.dev' },
+                            content: { value: 'Full-stack Developer // Crafting modern interactive browser tools. Check my active nodes below.', type: 'textarea' },
+                            type: { value: 'filled' },
+                            imageSrc: { value: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80' }
+                        },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                    addComponentToCanvas('button', {
+                        properties: {
+                            text: { value: '🚀 Sponsored Research Project System' },
+                            style: { value: 'filled' },
+                            iconName: { value: 'rocket' },
+                            alignment: { value: 'center' }
+                        },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                    addComponentToCanvas('button', {
+                        properties: {
+                            text: { value: '🎨 Deno Application Hub' },
+                            style: { value: 'tonal' },
+                            iconName: { value: 'dashboard' },
+                            alignment: { value: 'center' }
+                        },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                    addComponentToCanvas('button', {
+                        properties: {
+                            text: { value: '📝 Daily Learning & Streak PWA' },
+                            style: { value: 'outlined' },
+                            iconName: { value: 'auto_stories' },
+                            alignment: { value: 'center' }
+                        },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                    addComponentToCanvas('divider', {
+                        properties: { thickness: { value: '1' }, verticalMargin: { value: 16 } },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+
+                    addComponentToCanvas('footer', {
+                        properties: {
+                            brandName: { value: 'Nirnay Core' },
+                            brandDesc: { value: 'Explore developer profiles, projects, and learning workflows.' },
+                            col1Title: { value: 'Navigation' },
+                            col2Title: { value: 'Networks' },
+                            copyright: { value: '© 2026 Connect Hub. All rights.' }
+                        },
+                        spacing: JSON.parse(JSON.stringify(standardSpacingProps))
+                    });
+                }
+            }
+
+
+            // --- DEVICE VIEWPORT SWITCHING CONTROLLERS ---
+            const switcherButtons = document.querySelectorAll('.device-btn');
+            switcherButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switcherButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const device = btn.dataset.device;
+                    if (device === 'desktop') {
+                        canvasShell.style.width = '100%';
+                        canvasViewportIndicator.textContent = 'Desktop: 100% Width';
+                    } else if (device === 'tablet') {
+                        canvasShell.style.width = '768px';
+                        canvasViewportIndicator.textContent = 'Tablet Preview: 768px Width';
+                    } else if (device === 'mobile') {
+                        canvasShell.style.width = '375px';
+                        canvasViewportIndicator.textContent = 'Mobile Preview: 375px Width';
+                    }
+                });
+            });
+
+            // Light/Dark Canvas background switch
+            canvasThemeToggle.addEventListener('click', () => {
+                document.getElementById('canvasWorkspace').classList.toggle('dark-preview');
+            });
+
+
+            // --- STANDALONE EXPORTS & DOWNLOAD SYSTEM ---
+            let activeExportTab = 'combined';
+
+            exportBtn.addEventListener('click', () => {
+                exportModal.classList.add('active');
+                updateExportCodeArea();
+            });
+
+            closeExportModalBtn.addEventListener('click', () => exportModal.removeEventListener('click', null) || exportModal.classList.remove('active'));
+
+            exportTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    exportTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    activeExportTab = tab.dataset.view;
+                    updateExportCodeArea();
+                });
+            });
+
+            function compileHtmlMarkupOnly() {
+                updateComponentsOrderInArray();
+                let output = '';
+                websiteComponents.forEach(comp => {
+                    const wrapper = document.getElementById(comp.id);
+                    if (!wrapper) return;
+                    
+                    const renderDiv = wrapper.querySelector('.component-render').cloneNode(true);
+                    
+                    // Remove dynamic canvas visual modifications if any inside elements
+                    const actualElement = renderDiv.firstElementChild;
+                    if (!actualElement) return;
+
+                    // Add inline Margins & Paddings for layout safety in structural tags
+                    actualElement.style.marginTop = `${comp.spacing.marginTop.value}px`;
+                    actualElement.style.marginBottom = `${comp.spacing.marginBottom.value}px`;
+                    actualElement.style.paddingTop = `${comp.spacing.paddingTop.value}px`;
+                    actualElement.style.paddingBottom = `${comp.spacing.paddingBottom.value}px`;
+
+                    output += actualElement.outerHTML + '\n';
+                });
+                return output.trim();
+            }
+
+            function compileCssSheetOnly() {
+                const systemStyles = document.getElementById('m3-system-rules').innerHTML;
+                return systemStyles.trim();
+            }
+
+            function updateExportCodeArea() {
+                if (activeExportTab === 'combined') {
+                    const bodyHtml = compileHtmlMarkupOnly();
+                    const cssSheet = compileCssSheetOnly();
+                    const combined = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Material 3 Generated Site</title>
+    <!-- Fonts & Modern Icon Sets -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--m3-background);
+            color: var(--m3-on-surface);
+            padding: 24px 16px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        ${cssSheet}
+    </style>
+</head>
+<body>
+    <div class="container">
+        ${bodyHtml}
+    </div>
+    <script>
+        // Collapsible Accordion logic in compiled page
+        document.querySelectorAll('.m3-accordion-header').forEach(header => {
+            header.addEventListener('click', () => {
+                header.closest('.m3-accordion-item').classList.toggle('active');
+            });
+        });
+    <\/script>
+</body>
+</html>`;
+                    exportedCodeArea.value = combined;
+                } else if (activeExportTab === 'html') {
+                    exportedCodeArea.value = compileHtmlMarkupOnly();
+                } else if (activeExportTab === 'css') {
+                    exportedCodeArea.value = compileCssSheetOnly();
+                }
+            }
+
+            // Copy Trigger
+            copyCodeBtn.addEventListener('click', () => {
+                exportedCodeArea.select();
+                navigator.clipboard.writeText(exportedCodeArea.value).then(() => {
+                    alert('Output copied to clipboard!');
+                });
+            });
+
+            // Standalone Downloader
+            downloadCodeBtn.addEventListener('click', () => {
+                updateExportCodeArea();
+                const codeBlob = new Blob([exportedCodeArea.value], { type: 'text/html' });
+                const downloadLink = document.createElement('a');
+                downloadLink.href = URL.createObjectURL(codeBlob);
+                downloadLink.download = 'm3_builder_project.html';
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            });
+
+
+            // --- CANVAS RESET & STORAGE SAVES ---
+            document.getElementById('clearBtn').addEventListener('click', () => {
+                if (confirm('Clear entire layout workspace? This deletes all active canvas nodes.')) {
+                    const components = canvasContent.querySelectorAll('.dropped-component');
+                    components.forEach(c => c.remove());
+                    websiteComponents = [];
+                    componentCounter = 0;
+                    selectedComponentId = null;
+                    clearPropertiesPanel();
+                    checkCanvasEmptyState();
+                }
+            });
+
+            document.getElementById('saveBtn').addEventListener('click', () => {
+                updateComponentsOrderInArray();
+                const dataToSave = {
+                    theme: currentM3Theme,
+                    seedColor: customSeedColor,
+                    components: websiteComponents
+                };
+                localStorage.setItem('m3StudioProjectSave', JSON.stringify(dataToSave));
+                alert('Success: Project layout and M3 studio themes saved in browser cache!');
+            });
+
+            document.getElementById('loadBtn').addEventListener('click', () => {
+                const rawSave = localStorage.getItem('m3StudioProjectSave');
+                if (rawSave) {
+                    if (confirm('Restore saved project state? This overrides active canvas items.')) {
+                        // Clear active
+                        const components = canvasContent.querySelectorAll('.dropped-component');
+                        components.forEach(c => c.remove());
+                        websiteComponents = [];
+                        componentCounter = 0;
+                        selectedComponentId = null;
+                        clearPropertiesPanel();
+
+                        const savedData = JSON.parse(rawSave);
+                        currentM3Theme = savedData.theme || 'cobalt';
+                        customSeedColor = savedData.seedColor || '#3f8cff';
+                        
+                        // Set pickers
+                        themeSeedColorPicker.value = customSeedColor;
+                        themeSeedHexDisplay.textContent = customSeedColor;
+                        themePresetChips.forEach(chip => {
+                            chip.classList.remove('active');
+                            if (chip.dataset.theme === currentM3Theme) chip.classList.add('active');
+                        });
+                        
+                        applyDynamicTheme();
+
+                        // Add saved components
+                        if (savedData.components && Array.isArray(savedData.components)) {
+                            savedData.components.forEach(comp => {
+                                addComponentToCanvas(comp.type, comp);
+                            });
+                        }
+                        
+                        checkCanvasEmptyState();
+                    }
+                } else {
+                    alert('No active studio cache save found in browser.');
+                }
+            });
+
+
+            // Helper Drag & Reordering Functions
             function getDragAfterElement(container, y) {
                 const draggableElements = [...container.querySelectorAll('.dropped-component:not(.dragging)')];
                 return draggableElements.reduce((closest, child) => {
@@ -969,14 +2933,63 @@
                     }
                 }, { offset: Number.NEGATIVE_INFINITY }).element;
             }
-            
-            function updateDataArrayOrder() {
-                const orderedIds = [...canvasContent.querySelectorAll('.dropped-component')].map(el => el.id);
-                websiteComponents.sort((a, b) => orderedIds.indexOf(a.id) - orderedIds.indexOf(b.id));
+
+            // HSL Conversion Helpers for custom Theme generation
+            function hexToHsl(hex) {
+                hex = hex.replace(/^#/, '');
+                let r = parseInt(hex.substring(0, 2), 16) / 255;
+                let g = parseInt(hex.substring(2, 4), 16) / 255;
+                let b = parseInt(hex.substring(4, 6), 16) / 255;
+                let max = Math.max(r, g, b), min = Math.min(r, g, b);
+                let h, s, l = (max + min) / 2;
+                if (max === min) {
+                    h = s = 0;
+                } else {
+                    let d = max - min;
+                    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                    switch (max) {
+                        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                        case g: h = (b - r) / d + 2; break;
+                        case b: h = (r - g) / d + 4; break;
+                    }
+                    h /= 6;
+                }
+                return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
             }
 
-            // Initial state check
-            checkCanvasEmpty();
+            function hslToHex(h, s, l) {
+                s /= 100;
+                l /= 100;
+                let c = (1 - Math.abs(2 * l - 1)) * s;
+                let x = c * (1 - Math.abs((h / 60) % 2 - 1));
+                let m = l - c / 2;
+                let r = 0, g = 0, b = 0;
+                if (0 <= h && h < 60) { r = c; g = x; b = 0; }
+                else if (60 <= h && h < 120) { r = x; g = c; b = 0; }
+                else if (120 <= h && h < 180) { r = 0; g = c; b = x; }
+                else if (180 <= h && h < 240) { r = 0; g = x; b = c; }
+                else if (240 <= h && h < 300) { r = x; g = 0; b = c; }
+                else if (300 <= h && h < 360) { r = c; g = 0; b = x; }
+                let rHex = Math.round((r + m) * 255).toString(16).padStart(2, '0');
+                let gHex = Math.round((g + m) * 255).toString(16).padStart(2, '0');
+                let bHex = Math.round((b + m) * 255).toString(16).padStart(2, '0');
+                return `#${rHex}${gHex}${bHex}`;
+            }
+
+            function hexToRgb(hex) {
+                hex = hex.replace(/^#/, '');
+                let r = parseInt(hex.substring(0, 2), 16);
+                let g = parseInt(hex.substring(2, 4), 16);
+                let b = parseInt(hex.substring(4, 6), 16);
+                return `${r}, ${g}, ${b}`;
+            }
+
+            // Initial State setups
+            applyDynamicTheme();
+            checkCanvasEmptyState();
+            
+            // Load Default Preset SaaS template automatically to make the app feel alive and stunning immediately!
+            loadPresetTemplate('saas');
         });
     </script>
 </body>
