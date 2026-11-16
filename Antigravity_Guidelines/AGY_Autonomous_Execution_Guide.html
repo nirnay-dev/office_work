@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity CLI: Autonomous Execution & Auto-Approval Playbook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #090d16;
+      --bg-secondary: #0f172a;
+      --bg-card: rgba(30, 41, 59, 0.65);
+      --bg-card-hover: rgba(51, 65, 85, 0.75);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(56, 189, 248, 0.35);
+      --accent-cyan: #38bdf8;
+      --accent-indigo: #818cf8;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --code-bg: rgba(15, 23, 42, 0.85);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.6;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(129, 140, 248, 0.07) 0%, transparent 45%);
+      background-attachment: fixed;
+      padding-bottom: 80px;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header & Navigation */
+    header {
+      padding: 48px 0 32px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 40px;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 9999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 16px;
+    }
+
+    .header-badge::before {
+      content: '';
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-cyan);
+    }
+
+    h1 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 40%, var(--accent-cyan) 85%, var(--accent-indigo) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 820px;
+    }
+
+    /* Quick Copy Strip */
+    .quick-strip {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-md);
+      padding: 24px 28px;
+      margin-bottom: 48px;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+    }
+
+    .quick-strip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .quick-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .tag-danger { background: rgba(244, 63, 94, 0.18); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.3); }
+    .tag-success { background: rgba(16, 185, 129, 0.18); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .tag-info { background: rgba(56, 189, 248, 0.18); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.3); }
+
+    /* Grid Sections */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 28px;
+      position: relative;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .card h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+
+    /* Code Block Styling */
+    .code-container {
+      position: relative;
+      margin: 12px 0 16px;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.88rem;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
+
+    code {
+      font-family: 'Fira Code', monospace;
+    }
+
+    .inline-code {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: var(--accent-cyan);
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-main);
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .copy-btn:hover {
+      background: var(--accent-cyan);
+      color: #000;
+      border-color: var(--accent-cyan);
+    }
+
+    /* Deep Dive Sections */
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 48px 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #ffffff;
+    }
+
+    .section-title span {
+      color: var(--accent-cyan);
+    }
+
+    .table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-bottom: 32px;
+      backdrop-filter: blur(12px);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.92rem;
+    }
+
+    th {
+      background: rgba(15, 23, 42, 0.9);
+      padding: 14px 20px;
+      font-weight: 600;
+      color: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-main);
+    }
+
+    /* Callout Boxes */
+    .callout {
+      border-radius: var(--radius-sm);
+      padding: 18px 22px;
+      margin: 20px 0;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      font-size: 0.92rem;
+    }
+
+    .callout-warning {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: #fde68a;
+    }
+
+    .callout-danger {
+      background: rgba(244, 63, 94, 0.08);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      color: #fecdd3;
+    }
+
+    .callout-tip {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #a7f3d0;
+    }
+
+    .callout-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 64px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent-emerald);
+      color: #000000;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.88rem;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.2s ease;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 2.1rem; }
+      .grid { grid-template-columns: 1fr; }
+      .quick-strip { padding: 18px; }
+      pre { font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="header-badge">Google Antigravity CLI (agy) Reference</div>
+      <h1>Autonomous Execution & Auto-Approval Playbook</h1>
+      <p class="subtitle">Complete guide for granting continuous approval ("all yes") to let the agent run tasks end-to-end without stopping for confirmation prompts.</p>
+    </header>
+
+    <!-- Quick Strip / Golden Command -->
+    <div class="quick-strip">
+      <div class="quick-strip-header">
+        <div class="quick-title">
+          <span>⚡ The "Run Until Done" Golden Command</span>
+          <span class="tag tag-danger">Full Bypass</span>
+        </div>
+        <span class="tag tag-info">CLI Flag</span>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 8px;">
+        To launch or resume an Antigravity CLI session with blanket auto-approval across all tools, terminal commands, and file edits:
+      </p>
+      <div class="code-container">
+        <button class="copy-btn" onclick="copyText('agy -c --dangerously-skip-permissions')">Copy</button>
+        <pre><code># Resume latest session in 100% autonomous auto-approval mode
+agy -c --dangerously-skip-permissions
+
+# Or launch a brand new autonomous session
+agy --dangerously-skip-permissions</code></pre>
+      </div>
+    </div>
+
+    <!-- 3 Core Methods Grid -->
+    <div class="grid">
+      <!-- Method 1 -->
+      <div class="card">
+        <div class="card-icon" style="color: var(--accent-rose); border-color: rgba(244, 63, 94, 0.3);">🚀</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <h2>Method 1: Launch Flags</h2>
+          <span class="tag tag-danger">YOLO Mode</span>
+        </div>
+        <p>Bypasses the permission gate at CLI initialization. Ideal for daily workflows, long builds, batch installs, and automated scripts.</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyText('agy --dangerously-skip-permissions')">Copy</button>
+          <pre><code># New session
+agy --dangerously-skip-permissions
+
+# Non-interactive headless run
+agy --dangerously-skip-permissions -p "Fix build errors"</code></pre>
+        </div>
+        <div style="font-size: 0.82rem; color: var(--text-muted);">
+          Scope: Applies to all tool actions for the entire lifetime of the process.
+        </div>
+      </div>
+
+      <!-- Method 2 -->
+      <div class="card">
+        <div class="card-icon" style="color: var(--accent-cyan); border-color: rgba(56, 189, 248, 0.3);">⌨️</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <h2>Method 2: Mid-Session Hotkeys</h2>
+          <span class="tag tag-info">Interactive TUI</span>
+        </div>
+        <p>Toggle execution modes inside an active CLI chat without closing your current conversation or restarting.</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyText('Shift + Tab')">Copy</button>
+          <pre><code># In the prompt box, press:
+Shift + Tab   # Cycle modes: plan -> accept-edits -> auto
+
+# Or type slash command:
+/mode auto</code></pre>
+        </div>
+        <div style="font-size: 0.82rem; color: var(--text-muted);">
+          Tip: On tool prompt dialogs, hit <strong>[a]</strong> to select <em>"Always allow"</em> for that session.
+        </div>
+      </div>
+
+      <!-- Method 3 -->
+      <div class="card">
+        <div class="card-icon" style="color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">🎯</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <h2>Method 3: /goal Slash Command</h2>
+          <span class="tag tag-success">Agentic Loop</span>
+        </div>
+        <p>Directs the planner to continuously loop through code modifications, command execution, and verification tests until the objective is verified.</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyText('/goal ')">Copy</button>
+          <pre><code># In active chat prompt:
+/goal Implement database connection pool and run test suite</code></pre>
+        </div>
+        <div style="font-size: 0.82rem; color: var(--text-muted);">
+          Behavior: Forces the model to diagnose errors and retry autonomously instead of pausing.
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparative Table -->
+    <h2 class="section-title"><span>01</span> Comparison of Permission Modes</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Mode / Mechanism</th>
+            <th>File Edits</th>
+            <th>Shell Commands</th>
+            <th>Subagent Creation</th>
+            <th>When to Use</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong><code>--dangerously-skip-permissions</code></strong></td>
+            <td><span class="tag tag-success">Auto-Approved</span></td>
+            <td><span class="tag tag-success">Auto-Approved</span></td>
+            <td><span class="tag tag-success">Auto-Approved</span></td>
+            <td>Autonomous tasks, long scripts, CI/CD, or trusted local codebases.</td>
+          </tr>
+          <tr>
+            <td><strong><code>--mode auto</code></strong></td>
+            <td><span class="tag tag-success">Auto-Approved</span></td>
+            <td><span class="tag tag-info">Safe/Sandbox Auto</span></td>
+            <td><span class="tag tag-info">Prompted</span></td>
+            <td>Normal coding flow; allows file updates without asking for every save.</td>
+          </tr>
+          <tr>
+            <td><strong><code>--mode accept-edits</code></strong></td>
+            <td><span class="tag tag-success">Auto-Approved</span></td>
+            <td><span class="tag tag-danger">Prompts Every Time</span></td>
+            <td><span class="tag tag-danger">Prompts Every Time</span></td>
+            <td>High-security environments where shell commands require manual review.</td>
+          </tr>
+          <tr>
+            <td><strong><code>--mode plan</code></strong></td>
+            <td><span class="tag tag-danger">Read-Only</span></td>
+            <td><span class="tag tag-danger">Blocked</span></td>
+            <td><span class="tag tag-danger">Blocked</span></td>
+            <td>Design analysis, code reviews, and initial planning without making changes.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Shell Profile Convenience Setup -->
+    <h2 class="section-title"><span>02</span> Shell Profile Convenience Setup (Aliases)</h2>
+    <p style="color: var(--text-muted); margin-bottom: 16px;">
+      To launch autonomous sessions quickly without typing the full flag every time, add persistent aliases or wrapper functions to your shell profile:
+    </p>
+
+    <div class="grid" style="margin-bottom: 32px;">
+      <div class="code-container" style="margin: 0;">
+        <button class="copy-btn" onclick="copyText('alias agy-yolo=&quot;agy --dangerously-skip-permissions&quot;\nalias agy-c=&quot;agy -c --dangerously-skip-permissions&quot;')">Copy</button>
+        <pre><code># macOS / Linux (~/.bashrc or ~/.zshrc)
+alias agy-yolo="agy --dangerously-skip-permissions"
+alias agy-c="agy -c --dangerously-skip-permissions"
+
+# Reload profile:
+source ~/.zshrc  # or ~/.bashrc</code></pre>
+      </div>
+
+      <div class="code-container" style="margin: 0;">
+        <button class="copy-btn" onclick="copyText('function agy-yolo { agy --dangerously-skip-permissions $args }\nfunction agy-c { agy -c --dangerously-skip-permissions $args }')">Copy</button>
+        <pre><code># Windows PowerShell ($PROFILE)
+function agy-yolo { agy --dangerously-skip-permissions $args }
+function agy-c { agy -c --dangerously-skip-permissions $args }
+
+# Reload profile:
+. $PROFILE</code></pre>
+      </div>
+    </div>
+
+    <!-- Safety & Operational Governance -->
+    <h2 class="section-title"><span>03</span> Safety Boundaries & Best Practices</h2>
+    <div class="callout callout-warning">
+      <div class="callout-icon">⚠️</div>
+      <div>
+        <strong>Security Notice for <code>--dangerously-skip-permissions</code>:</strong>
+        <p style="margin-top: 4px;">
+          This flag allows the agent to run terminal commands (such as <code>rm</code>, package installations, database migrations, or network requests) without asking for manual confirmation.
+          Only execute this flag in workspaces with version control (Git) or isolated environments (containers/VMs) so you can easily review or revert changes if necessary.
+        </p>
+      </div>
+    </div>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div>
+        <strong>Persistent Context & Guardrails:</strong>
+        <p style="margin-top: 4px;">
+          Pair autonomous execution with a repository-level instruction file (such as <code>AGENTS.md</code> or <code>CLAUDE.md</code>) to define architectural boundaries, forbidden commands, and testing requirements. When resuming work via <code>agy -c --dangerously-skip-permissions</code>, the agent automatically respects those codified rules while executing end-to-end.
+        </p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <strong>Antigravity CLI Developer Workflow</strong> · Autonomous Execution Reference
+      </div>
+      <div>
+        Best Practices & Command Cheat Sheet
+      </div>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast">Command copied to clipboard!</div>
+
+  <script>
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const toast = document.getElementById('toast');
+        toast.innerText = `Copied to clipboard!`;
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 2200);
+      });
+    }
+  </script>
+</body>
+</html>
