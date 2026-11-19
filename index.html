@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#10131c" />
+    <title>Office Work · App Hub</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #10131c;
+        color: #eef1f8;
+        font-synthesis: none;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse at top, #202943 0, #10131c 55%); }
+      main { width: min(1100px, calc(100% - 32px)); margin: 0 auto; padding: 64px 0; }
+      header { margin-bottom: 32px; }
+      .eyebrow { color: #91a7ff; font-size: .78rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+      h1 { margin: 10px 0; font-size: clamp(2rem, 5vw, 3.25rem); letter-spacing: -.04em; }
+      .intro { max-width: 650px; color: #aab3c7; line-height: 1.65; }
+      .toolbar { display: flex; gap: 12px; margin: 28px 0 20px; }
+      input { width: 100%; padding: 12px 14px; border: 1px solid #343c50; border-radius: 10px; outline: none; background: #171c29; color: inherit; font: inherit; }
+      input:focus { border-color: #91a7ff; box-shadow: 0 0 0 3px #91a7ff22; }
+      #status { min-height: 24px; color: #aab3c7; font-size: .92rem; }
+      #apps { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+      .app { display: block; min-height: 120px; padding: 20px; border: 1px solid #30384b; border-radius: 14px; background: #191f2e; color: inherit; text-decoration: none; transition: transform .16s ease, border-color .16s ease, background .16s ease; }
+      .app:hover, .app:focus-visible { transform: translateY(-3px); border-color: #91a7ff; background: #20283a; outline: none; }
+      .app strong { display: block; margin-bottom: 8px; font-size: 1.05rem; }
+      .app span { color: #aab3c7; font-size: .88rem; }
+      .message { grid-column: 1 / -1; padding: 18px; border: 1px solid #30384b; border-radius: 12px; color: #aab3c7; background: #191f2e; line-height: 1.6; }
+      .message a { color: #b6c4ff; }
+      footer { margin-top: 40px; color: #758099; font-size: .82rem; }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="eyebrow">Office Work</div>
+        <h1>Application Hub</h1>
+        <p class="intro">Apps are discovered from this repository automatically. Any top-level folder containing an <code>index.html</code> file appears here and opens at its folder URL.</p>
+      </header>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Filter applications…" aria-label="Filter applications" />
+      </div>
+      <div id="status" role="status" aria-live="polite">Finding applications…</div>
+      <section id="apps" aria-label="Applications"></section>
+      <footer>Application list is loaded from the repository’s tracked files.</footer>
+    </main>
+    <script>
+      // A recursive Git tree request lets the page discover apps without hard-coding
+      // a list or making a separate API request for every folder.
+      const OWNER = "nirnay-dev";
+      const REPO = "office_work";
+      const BRANCH = "main";
+      const EXCLUDED_FOLDERS = new Set(["archive", "node_modules"]);
+      const appContainer = document.getElementById("apps");
+      const status = document.getElementById("status");
+      const search = document.getElementById("search");
+      let applications = [];
+
+      function displayName(folder) {
+        return folder
+          .split(/[_-]+/)
+          .filter(Boolean)
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+      }
+
+      function render() {
+        const query = search.value.trim().toLowerCase();
+        const filtered = applications.filter((app) => app.name.toLowerCase().includes(query));
+        appContainer.replaceChildren();
+
+        if (filtered.length === 0) {
+          const message = document.createElement("div");
+          message.className = "message";
+          message.textContent = applications.length
+            ? "No applications match your search."
+            : "No top-level app folders with an index.html file were found.";
+          appContainer.append(message);
+          return;
+        }
+
+        for (const app of filtered) {
+          const link = document.createElement("a");
+          link.className = "app";
+          link.href = `/${encodeURIComponent(app.folder)}/`;
+          const title = document.createElement("strong");
+          title.textContent = app.name;
+          const entry = document.createElement("span");
+          entry.textContent = `${app.folder}/index.html`;
+          link.append(title, entry);
+          appContainer.append(link);
+        }
+      }
+
+      async function loadApplications() {
+        const endpoint = `https://api.github.com/repos/${OWNER}/${REPO}/git/trees/${encodeURIComponent(BRANCH)}?recursive=1`;
+        try {
+          const response = await fetch(endpoint, {
+            headers: { Accept: "application/vnd.github+json" },
+          });
+          if (!response.ok) {
+            throw new Error(`GitHub returned ${response.status}${response.status === 403 ? " (API rate limit may have been reached)" : ""}.`);
+          }
+          const data = await response.json();
+          if (!Array.isArray(data.tree)) throw new Error("The repository file listing was not available.");
+
+          const folders = new Set();
+          for (const item of data.tree) {
+            if (item.type !== "blob") continue;
+            const match = item.path.match(/^([^/]+)\/index\.html$/i);
+            if (!match) continue;
+            const folder = match[1];
+            if (folder.startsWith(".") || EXCLUDED_FOLDERS.has(folder)) continue;
+            folders.add(folder);
+          }
+
+          applications = [...folders]
+            .sort((a, b) => a.localeCompare(b))
+            .map((folder) => ({ folder, name: displayName(folder) }));
+          status.textContent = `${applications.length} application${applications.length === 1 ? "" : "s"} found.`;
+          render();
+        } catch (error) {
+          status.textContent = "Could not load the application list.";
+          appContainer.replaceChildren();
+          const message = document.createElement("div");
+          message.className = "message";
+          message.append("The list could not be fetched from GitHub. Check your connection or try again later. ");
+          const source = document.createElement("a");
+          source.href = `https://github.com/${OWNER}/${REPO}`;
+          source.textContent = "Open the repository";
+          message.append(source, document.createTextNode(`. ${error.message}`));
+          appContainer.append(message);
+        }
+      }
+
+      search.addEventListener("input", render);
+      loadApplications();
+    </script>
+  </body>
+</html>
